@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">VKFindMe</string>
+    <string name="title_activity_main">Find Me</string>
+    <string name="text_tab_profile">Profile</string>
+    <string name="text_tab_map">Map</string>
+    <string name="text_tab_settings">Settings</string>
+    <string name="error_title">Error!</string>
+    <string name="on_visibility_server_error_message">Server is not available. Can not change visibility state.</string>
+    <string name="off_visibility_server_error_message">Server is not available. You will not send a new coordinates, but friends will see your last position, which was sent.</string>
+    <string name="visibility_true_message">Now you are visible</string>
+    <string name="visibility_false_message">Now you are invisible</string>
+    <string name="gps_service_on_message">You are visible for your friends</string>
+    <string name="ok">Ok</string>
+</resources>

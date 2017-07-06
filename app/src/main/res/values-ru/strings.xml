@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Потеряшка</string>
+    <string name="title_activity_main">Find Me</string>
+    <string name="text_tab_profile">Профиль</string>
+    <string name="text_tab_map">Карта</string>
+    <string name="text_tab_settings">Настройки</string>
+    <string name="error_title">Ошибка!</string>
+    <string name="on_visibility_server_error_message">Сервер не доступен. Нет возможности сменить видимость.</string>
+    <string name="off_visibility_server_error_message">Сервер не доступен. Вы не будете посылать свои новые координаты, но друзья будут видеть Вашу последнюю посланную позицию.</string>
+    <string name="visibility_true_message">Видимость включена</string>
+    <string name="visibility_false_message">Видимость выключена</string>
+    <string name="gps_service_on_message">Видимость включена</string>
+    <string name="ok">Понятно</string>
+</resources>

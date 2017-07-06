@@ -1,0 +1,86 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/alarm_target"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:elevation="10dp"
+                android:alpha="0"
+                android:layout_centerInParent="true"
+                android:background="@drawable/alarm_target"/>
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/map"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/horizontalScrollLayout"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:background="#000">
+
+            <HorizontalScrollView
+                android:id="@+id/pictureHorizontalScroll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/friends_list_bg"
+                android:layout_margin="3dp">
+
+                <LinearLayout
+                    android:id="@+id/pictureLinear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="2dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal">
+
+        <ImageButton
+            android:id="@+id/refreshBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/refresh_selector" />
+
+        <ToggleButton
+            android:id="@+id/visibleBtn"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:cursorVisible="false"
+            android:background="@drawable/visible_selector"
+            android:layout_margin="5dp"/>
+
+        <ImageButton
+            android:id="@+id/alarmBtn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/alarm_selector"/>
+
+    </LinearLayout>
+</RelativeLayout>
