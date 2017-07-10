@@ -11,4 +11,15 @@
     <string name="visibility_false_message">Now you are invisible</string>
     <string name="gps_service_on_message">You are visible for your friends</string>
     <string name="ok">Ok</string>
+    <string name="alarm_users_title">Alarm participants</string>
+    <string name="alarm_accepted">The alarm has been accepted</string>
+    <string name="alarm_canceled">The alarm has been canceled</string>
+    <string name="alarm_must_select_users_message">You must select alarm participants</string>
+    <string name="set_alarm_pos">Set an alarm position</string>
+    <string name="set_alarm_radius">Set an alarm radius</string>
+    <string name="me_in_alarm">You are the participant of the alarm</string>
+    <string name="alarm">Alarm (click for settings)</string>
+    <string name="reach_alarm">You have reached the alarm</string>
+    <string name="needs_authorization">Authorization is needed</string>
+    <integer name="com_vk_sdk_AppId">6108914</integer>
 </resources>

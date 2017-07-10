@@ -8,24 +8,33 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
+import com.nesmelov.alexey.vkfindme.storage.DataBaseHelper;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
+import com.vk.sdk.VKSdk;
 
 public class FindMeApp extends Application {
+    public static final String USERS_DATABASE_NAME = "USERS_DATABASE";
+
     private static HTTPManager sHTTPManager;
     private static Storage sStorage;
     private static NotificationManager sNotificationManager;
+    private static DataBaseHelper sDataBaseHelper;
 
     @Override
     public void onCreate() {
         super.onCreate();
         sHTTPManager = new HTTPManager(this);
+        sDataBaseHelper = new DataBaseHelper(this, USERS_DATABASE_NAME, null);
         sStorage = new Storage(this);
         sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        VKSdk.initialize(this);
     }
 
     public static HTTPManager getHTTPManager() {
@@ -34,6 +43,10 @@ public class FindMeApp extends Application {
 
     public static Storage getStorage() {
         return sStorage;
+    }
+
+    public static DataBaseHelper getDataBaseHelper() {
+        return sDataBaseHelper;
     }
 
     public static void showPopUp(final Context context, final String title, final String message) {
@@ -70,5 +83,23 @@ public class FindMeApp extends Application {
 
     public static void cancelNotification(final int id) {
         sNotificationManager.cancel(id);
+    }
+
+    public static void displayAlarmRingNotification(final int id, final Context context,
+                                           final String ticket, final String message, final Class<?> pendingClass) {
+        final Intent intent = new Intent(context, pendingClass);
+        final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        final Notification notification = new NotificationCompat.Builder(context)
+                .setContentTitle(ticket)
+                .setContentText(message)
+                .setSmallIcon(R.drawable.notification)
+                .setTicker(ticket)
+                .setAutoCancel(true)
+                .setContentIntent(contentIntent)
+                .setVibrate(new long[] {500,500, 500, 500, 500})
+                .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
+                .setLights(0xff00ff00, 300, 100)
+                .build();
+        sNotificationManager.notify(id, notification);
     }
 }

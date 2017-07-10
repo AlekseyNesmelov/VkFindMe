@@ -31,6 +31,8 @@
 
         <activity
             android:name=".activities.MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"
@@ -39,7 +41,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.TabHostActivity" />
+        <activity android:name=".activities.AlarmUsersActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".activities.TabHostActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name="com.vk.sdk.VKServiceActivity" android:label="ServiceActivity"
+            android:theme="@style/VK.Transparent" />
 
         <service android:name=".services.GpsService" />
 

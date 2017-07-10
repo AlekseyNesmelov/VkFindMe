@@ -17,6 +17,8 @@ import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.pages.MapFragment;
 import com.nesmelov.alexey.vkfindme.pages.ProfileFragment;
 import com.nesmelov.alexey.vkfindme.pages.SettingsFragment;
+import com.vk.sdk.VKAccessToken;
+import com.vk.sdk.VKAccessTokenTracker;
 
 public class TabHostActivity extends FragmentActivity {
     private static final String TAG_PROFILE = "tagProfile";
@@ -32,6 +34,15 @@ public class TabHostActivity extends FragmentActivity {
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private TabHost mTabHost;
+
+    final VKAccessTokenTracker mVkAccessTokenTracker = new VKAccessTokenTracker() {
+        @Override
+        public void onVKAccessTokenChanged(VKAccessToken oldToken, VKAccessToken newToken) {
+            if (newToken == null) {
+                //TODO: finish activity, start MainActivity and show toast. Add certain string to string.xml
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -113,6 +124,8 @@ public class TabHostActivity extends FragmentActivity {
 
         mViewPager.setCurrentItem(PAGE_NUMBER_MAP);
         mTabHost.setCurrentTabByTag(TAG_MAP);
+
+        mVkAccessTokenTracker.startTracking();
     }
 
     private void setupTab(final String tag, final String name) {

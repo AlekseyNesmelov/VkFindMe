@@ -19,15 +19,25 @@ import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
+import com.nesmelov.alexey.vkfindme.structures.Alarm;
 
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public class GpsService extends Service implements LocationListener, OnUpdateListener{
-    public static final int NOTIFICATION_ID = 111;
+    public static final int VISIBLE_NOTIFICATION_ID = 111;
+    public static final int ME_IN_ALARM_NOTIFICATION_ID = 222;
+    public static final int RING_ALARM_NOTIFICATION_ID = 333;
 
     private LocationManager mLocationManager;
     private Storage mStorage;
     private HTTPManager mHTTPManager;
+
+    private Object mLock = new Object();
+    private List<Alarm> mAlarmsForMe = new ArrayList<>();
 
     @Nullable
     @Override
@@ -40,8 +50,17 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
         Log.d("GpsService", "onCreate");
         super.onCreate();
         mStorage = FindMeApp.getStorage();
-        if (shouldStart()) {
-            mHTTPManager = FindMeApp.getHTTPManager();
+        mHTTPManager = FindMeApp.getHTTPManager();
+    }
+
+    public int onStartCommand(final Intent intent, final int flags, final int startId) {
+        Log.d("GpsService", "onStartCommand");
+        if (isVisible() || isMeInAlarm()) {
+
+            synchronized (mLock) {
+                mAlarmsForMe = mStorage.getAlarmsForMe();
+            }
+
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
 
@@ -52,38 +71,75 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
                 mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                         mStorage.getGPSMinDelay(), mStorage.getGPSMinDistance(), this);
 
-                FindMeApp.displayNotification(NOTIFICATION_ID, this, getString(R.string.app_name),
-                        getString(R.string.gps_service_on_message), MainActivity.class);
+                if (isVisible()) {
+                    FindMeApp.displayNotification(VISIBLE_NOTIFICATION_ID, this, getString(R.string.app_name),
+                            getString(R.string.gps_service_on_message), MainActivity.class);
+                } else {
+                    FindMeApp.cancelNotification(VISIBLE_NOTIFICATION_ID);
+                }
+                if (isMeInAlarm()) {
+                    FindMeApp.displayNotification(ME_IN_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
+                            getString(R.string.me_in_alarm), MainActivity.class);
+                } else {
+                    FindMeApp.cancelNotification(ME_IN_ALARM_NOTIFICATION_ID);
+                }
             }
         } else {
             stopSelf();
         }
-    }
-
-    public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        Log.d("GpsService", "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
     public void onDestroy() {
         Log.d("GpsService", "onDestroy");
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 mLocationManager != null) {
             mLocationManager.removeUpdates(this);
             mLocationManager = null;
         }
-        FindMeApp.cancelNotification(NOTIFICATION_ID);
+        FindMeApp.cancelNotification(VISIBLE_NOTIFICATION_ID);
+        FindMeApp.cancelNotification(ME_IN_ALARM_NOTIFICATION_ID);
         super.onDestroy();
     }
 
     @Override
     public void onLocationChanged(final Location location) {
         Log.d("GpsService", "onLocationChanged");
-        if (mHTTPManager != null && location != null) {
-            mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_POSITION, HTTPManager.REQUEST_IDLE, this,
-                    String.valueOf(mStorage.getUser()),
-                    String.valueOf(location.getLatitude()),
-                    String.valueOf(location.getLongitude()));
+        if (location != null) {
+            if (mHTTPManager != null && isVisible()) {
+                mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_POSITION, HTTPManager.REQUEST_IDLE, this,
+                        String.valueOf(mStorage.getUserVkId()),
+                        String.valueOf(location.getLatitude()),
+                        String.valueOf(location.getLongitude()));
+            }
+
+            synchronized (mLock) {
+                Alarm removedAlarm = null;
+                for (final Alarm alarm : mAlarmsForMe) {
+                    float results[] = new float[1];
+                    Location.distanceBetween(
+                            alarm.getLat(),
+                            alarm.getLon(),
+                            location.getLatitude(),
+                            location.getLongitude(),
+                            results);
+                    if (results[0] < alarm.getRadius()) {
+                        mStorage.removeAlarm(alarm.getAlarmId());
+                        removedAlarm = alarm;
+                        Log.d("ANESMELOV", "ALLLARRRM!!!");
+                        break;
+                    }
+                }
+                if (removedAlarm != null) {
+                    FindMeApp.displayAlarmRingNotification(RING_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
+                            getString(R.string.reach_alarm), MainActivity.class);
+                    mAlarmsForMe.remove(removedAlarm);
+                    if (!isVisible() && !isMeInAlarm()) {
+                        stopSelf();
+                    }
+                }
+            }
         }
     }
 
@@ -112,8 +168,12 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
 
     }
 
-    private boolean shouldStart() {
+    private boolean isVisible() {
         return mStorage.getVisibility();
+    }
+
+    private boolean isMeInAlarm() {
+        return mStorage.isMeInAlarm();
     }
 }
 
