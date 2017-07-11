@@ -90,16 +90,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mStorage = FindMeApp.getStorage();
         mStorage.addAlarmRemovedListener(this);
 
-        mHTTPManager.executeRequest(HTTPManager.REQUEST_ADD_USER,
-                HTTPManager.REQUEST_IDLE,
-                MapFragment.this, mStorage.getUserVkId().toString());
-
-        mStorage.addUser(mStorage.getUserVkId(), mStorage.getUserName(), mStorage.getUserSurname(),
-                Const.BAD_LAT, Const.BAD_LON, "");
-
-
         getActivity().startService(new Intent(getContext(), GpsService.class));
-
     }
 
     @Override

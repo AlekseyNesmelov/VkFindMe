@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
+import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.storage.DataBaseHelper;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.vk.sdk.VKSdk;
@@ -26,6 +27,7 @@ public class FindMeApp extends Application {
     private static Storage sStorage;
     private static NotificationManager sNotificationManager;
     private static DataBaseHelper sDataBaseHelper;
+    private static VKManager sVKManager;
 
     @Override
     public void onCreate() {
@@ -34,7 +36,12 @@ public class FindMeApp extends Application {
         sDataBaseHelper = new DataBaseHelper(this, USERS_DATABASE_NAME, null);
         sStorage = new Storage(this);
         sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        sVKManager = new VKManager();
         VKSdk.initialize(this);
+    }
+
+    public static VKManager getVKManager() {
+        return sVKManager;
     }
 
     public static HTTPManager getHTTPManager() {
@@ -58,6 +65,16 @@ public class FindMeApp extends Application {
                     public void onClick(DialogInterface dialog, int which) {
                     }
                 })
+                .create();
+        adb.show();
+    }
+
+    public static void showPopUp(final Context context, final String title, final String message,
+                                 final DialogInterface.OnClickListener listener) {
+        final AlertDialog adb = new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(R.string.ok, listener)
                 .create();
         adb.show();
     }

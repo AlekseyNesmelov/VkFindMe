@@ -76,9 +76,9 @@ public class Storage {
         return  mSharedPrefs.getFloat(ALARM_RADIUS, MIN_ALARM_RADIUS);
     }
 
-    public void setUserVkId(final String userVkId) {
+    public void setUserVkId(final Integer userVkId) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
-        ed.putString(USER_VK_ID, userVkId);
+        ed.putInt(USER_VK_ID, userVkId);
         ed.commit();
     }
 
