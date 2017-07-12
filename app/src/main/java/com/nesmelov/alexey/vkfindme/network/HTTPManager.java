@@ -1,17 +1,23 @@
 package com.nesmelov.alexey.vkfindme.network;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
+import com.nesmelov.alexey.vkfindme.utils.Utils;
 
 import org.json.JSONObject;
 
 public class HTTPManager {
+    public static final int CACHE_SIZE = 10;
     public static final int PARSE_ERROR_CODE = 0;
     public static final int SERVER_ERROR_CODE = 1;
 
@@ -32,8 +38,44 @@ public class HTTPManager {
     private JsonRequest mSetVisibilityFalseRequest = null;
     private JsonRequest mSetPositionRequest = null;
 
+    private ImageLoader mImageLoader;
+    private ImageLoader mCircleImageLoader;
+
     public HTTPManager(final Context context) {
         mQueue = Volley.newRequestQueue(context);
+        mImageLoader = new ImageLoader(mQueue, new ImageLoader.ImageCache() {
+            private final LruCache<String, Bitmap> mCache = new LruCache<>(CACHE_SIZE);
+            @Override
+            public void putBitmap(final String url, final Bitmap bitmap) {
+                mCache.put(url, bitmap);
+            }
+
+            @Override
+            public Bitmap getBitmap(final String url) {
+                return mCache.get(url);
+            }
+        });
+        mCircleImageLoader = new ImageLoader(mQueue, new ImageLoader.ImageCache() {
+            private final LruCache<String, Bitmap> mCache = new LruCache<>(CACHE_SIZE);
+            @Override
+            public void putBitmap(final String url, final Bitmap bitmap) {
+                final Bitmap circleBitmap = Utils.getCroppedBitmap(bitmap);
+                mCache.put(url, circleBitmap);
+            }
+
+            @Override
+            public Bitmap getBitmap(final String url) {
+                return mCache.get(url);
+            }
+        });
+    }
+
+    public ImageLoader getImageLoader() {
+        return mImageLoader;
+    }
+
+    public ImageLoader getCircleImageLoader() {
+        return mCircleImageLoader;
     }
 
     public synchronized void executeRequest(final int request, final int requestToCancel, final OnUpdateListener listener,

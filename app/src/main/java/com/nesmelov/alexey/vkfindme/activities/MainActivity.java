@@ -87,10 +87,14 @@ public class MainActivity extends Activity implements OnUpdateListener{
             }
         };
 
-        if (VKSdk.wakeUpSession(this)) {
-            mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+        if ( Build.VERSION.SDK_INT < 23 || ContextCompat.checkSelfPermission(
+                MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION )
+                == PackageManager.PERMISSION_GRANTED) {
+            login();
         } else {
-            VKSdk.login(this, VKScope.FRIENDS, VKScope.PHOTOS);
+            ActivityCompat.requestPermissions(
+                    MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_REQUEST_CODE);
         }
     }
 
@@ -117,24 +121,12 @@ public class MainActivity extends Activity implements OnUpdateListener{
         switch (requestCode) {
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    start();
+                    login();
                 } else {
                     finish();
                 }
                 break;
             }
-        }
-    }
-
-    private void checkPermissionsAndStart() {
-        if ( Build.VERSION.SDK_INT < 23 || ContextCompat.checkSelfPermission(
-                MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION )
-                == PackageManager.PERMISSION_GRANTED) {
-            start();
-        } else {
-            ActivityCompat.requestPermissions(
-                    MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_REQUEST_CODE);
         }
     }
 
@@ -144,18 +136,26 @@ public class MainActivity extends Activity implements OnUpdateListener{
         finish();
     }
 
-    @Override
-    public void onUpdate(int request, JSONObject update) {
-        checkPermissionsAndStart();
+    private void login() {
+        if (VKSdk.wakeUpSession(this)) {
+            mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+        } else {
+            VKSdk.login(this, VKScope.FRIENDS, VKScope.PHOTOS);
+        }
     }
 
     @Override
-    public void onError(int request, int errorCode) {
+    public void onUpdate(final int request, final JSONObject update) {
+        start();
+    }
+
+    @Override
+    public void onError(final int request, final int errorCode) {
         FindMeApp.showPopUp(this, getString(R.string.error_title), getString(R.string.server_is_not_accessible),
                 new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+                    public void onClick(final DialogInterface dialog, final int which) {
+                        finish();
                     }
                 });
     }
