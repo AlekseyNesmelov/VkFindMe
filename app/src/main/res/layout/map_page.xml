@@ -93,6 +93,8 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:cursorVisible="false"
+            android:textOff=""
+            android:textOn=""
             android:background="@drawable/visible_selector"
             android:layout_margin="5dp"/>
 

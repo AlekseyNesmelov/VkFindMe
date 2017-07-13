@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/VKFindMe.iml" filepath="$PROJECT_DIR$/VKFindMe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/VkFindMe.iml" filepath="$PROJECT_DIR$/VkFindMe.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

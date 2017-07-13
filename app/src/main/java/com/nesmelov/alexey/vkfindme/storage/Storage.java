@@ -25,6 +25,8 @@ public class Storage {
     public static final String GPS_MIN_DELAY = "gps_min_delay";
     public static final String GPS_MIN_DISTANCE = "gps_min_distance";
     public static final String ALARM_RADIUS = "alarm_radius";
+    public static final String USER_LAT = "user_lat";
+    public static final String USER_LON = "user_lon";
 
     private SharedPreferences mSharedPrefs;
     private DataBaseHelper mDataBaseHelper;
@@ -44,12 +46,20 @@ public class Storage {
         mAlarmRemovedListeners.remove(listener);
     }
 
+    public double getUserLat() {
+        return mSharedPrefs.getFloat(USER_LAT, 0);
+    }
+
+    public double getUserLon() {
+        return mSharedPrefs.getFloat(USER_LON, 0);
+    }
+
     public String getUserName() {
-        return mSharedPrefs.getString(USER_NAME, "Алексей");
+        return mSharedPrefs.getString(USER_NAME, "");
     }
 
     public String getUserSurname() {
-        return mSharedPrefs.getString(USER_SURNAME, "Евгеньевич");
+        return mSharedPrefs.getString(USER_SURNAME, "");
     }
 
     public String getUserIconUrl() {
@@ -85,6 +95,18 @@ public class Storage {
     public void setUserName(final String userName) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(USER_NAME, userName);
+        ed.commit();
+    }
+
+    public void setUserLat(final double lat) {
+        final SharedPreferences.Editor ed = mSharedPrefs.edit();
+        ed.putFloat(USER_LAT, (float)lat);
+        ed.commit();
+    }
+
+    public void setUserLon(final double lon) {
+        final SharedPreferences.Editor ed = mSharedPrefs.edit();
+        ed.putFloat(USER_LON, (float)lon);
         ed.commit();
     }
 

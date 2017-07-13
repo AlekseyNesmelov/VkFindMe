@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nesmelov.alexey.vkfindme.R;
+import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.structures.User;
 
 import java.util.List;
@@ -20,15 +22,17 @@ public class UserListAdapter extends ArrayAdapter<User> {
 
     private final List<User> mUsers;
     private final Activity mContext;
+    private final HTTPManager mHTTPManager;
 
     public UserListAdapter(final Activity context, final List<User> users) {
         super(context, R.layout.user_list_row, users);
         mUsers = users;
         mContext = context;
+        mHTTPManager = FindMeApp.getHTTPManager();
     }
 
     static class ViewHolder {
-        protected ImageView iconView;
+        protected CircleNetworkImageView iconView;
         protected TextView nameView;
         protected CheckBox checkBox;
     }
@@ -40,14 +44,15 @@ public class UserListAdapter extends ArrayAdapter<User> {
             final LayoutInflater inflater = mContext.getLayoutInflater();
             convertView = inflater.inflate(R.layout.user_list_row, null);
             viewHolder = new ViewHolder();
-            viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
+            viewHolder.iconView = (CircleNetworkImageView) convertView.findViewById(R.id.icon);
+            viewHolder.iconView.setImageUrl(mUsers.get(position).getIconUrl(), mHTTPManager.getImageLoader());
             viewHolder.nameView = (TextView) convertView.findViewById(R.id.name);
             viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.check_box);
             viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    int getPosition = (Integer) buttonView.getTag();  // Here we get the position that we have set for the checkbox using setTag.
-                    mUsers.get(getPosition).setChecked(buttonView.isChecked()); // Set the value of checkbox to maintain its state.
+                    int getPosition = (Integer) buttonView.getTag();
+                    mUsers.get(getPosition).setChecked(buttonView.isChecked());
                 }
             });
             convertView.setTag(viewHolder);
@@ -56,7 +61,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        viewHolder.checkBox.setTag(position); // This line is important.
+        viewHolder.checkBox.setTag(position);
 
         viewHolder.nameView.setText(mUsers.get(position).getName() + " " + mUsers.get(position).getSurname());
         viewHolder.checkBox.setChecked(mUsers.get(position).getChecked());

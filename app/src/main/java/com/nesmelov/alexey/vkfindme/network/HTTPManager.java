@@ -39,7 +39,6 @@ public class HTTPManager {
     private JsonRequest mSetPositionRequest = null;
 
     private ImageLoader mImageLoader;
-    private ImageLoader mCircleImageLoader;
 
     public HTTPManager(final Context context) {
         mQueue = Volley.newRequestQueue(context);
@@ -55,27 +54,10 @@ public class HTTPManager {
                 return mCache.get(url);
             }
         });
-        mCircleImageLoader = new ImageLoader(mQueue, new ImageLoader.ImageCache() {
-            private final LruCache<String, Bitmap> mCache = new LruCache<>(CACHE_SIZE);
-            @Override
-            public void putBitmap(final String url, final Bitmap bitmap) {
-                final Bitmap circleBitmap = Utils.getCroppedBitmap(bitmap);
-                mCache.put(url, circleBitmap);
-            }
-
-            @Override
-            public Bitmap getBitmap(final String url) {
-                return mCache.get(url);
-            }
-        });
     }
 
     public ImageLoader getImageLoader() {
         return mImageLoader;
-    }
-
-    public ImageLoader getCircleImageLoader() {
-        return mCircleImageLoader;
     }
 
     public synchronized void executeRequest(final int request, final int requestToCancel, final OnUpdateListener listener,

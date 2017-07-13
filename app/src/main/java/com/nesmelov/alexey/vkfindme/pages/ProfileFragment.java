@@ -17,13 +17,14 @@ import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
+import com.nesmelov.alexey.vkfindme.ui.CircleNetworkImageView;
 import com.vk.sdk.VKSdk;
 
 import org.json.JSONObject;
 
 public class ProfileFragment extends Fragment implements OnUpdateListener {
 
-    private NetworkImageView mAvatarView;
+    private CircleNetworkImageView mAvatarView;
     private TextView mUserNameView;
     private Button mLogoutBtn;
 
@@ -42,8 +43,8 @@ public class ProfileFragment extends Fragment implements OnUpdateListener {
                              final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.profile_page, null);
 
-        mAvatarView = (NetworkImageView) view.findViewById(R.id.avatar);
-        mAvatarView.setImageUrl(mStorage.getUserIconUrl(), mHTTPManager.getCircleImageLoader());
+        mAvatarView = (CircleNetworkImageView) view.findViewById(R.id.avatar);
+        mAvatarView.setImageUrl(mStorage.getUserIconUrl(), mHTTPManager.getImageLoader());
 
         mUserNameView = (TextView) view.findViewById(R.id.user_name);
         mUserNameView.setText(mStorage.getUserName() + " " + mStorage.getUserSurname());

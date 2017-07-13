@@ -109,7 +109,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 if (isChecked) {
                     mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_VISIBILITY_TRUE,
                             HTTPManager.REQUEST_SET_VISIBILITY_FALSE,
-                            MapFragment.this, user.toString(), "0", "0");
+                            MapFragment.this, user.toString(),
+                            String.valueOf(mStorage.getUserLat()),
+                            String.valueOf(mStorage.getUserLon()));
                 } else {
                     mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_VISIBILITY_FALSE,
                             HTTPManager.REQUEST_SET_VISIBILITY_TRUE,
