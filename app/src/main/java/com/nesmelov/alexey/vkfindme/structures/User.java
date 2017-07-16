@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.IntegerRes;
 
 public class User {
-    private Integer mVkId = 0;
+    private Integer mVkId;
     private String mName = "";
     private String mSurname = "";
     private Boolean mChecked = false;

@@ -31,18 +31,18 @@ public class Storage {
     private SharedPreferences mSharedPrefs;
     private DataBaseHelper mDataBaseHelper;
 
-    private List<OnAlarmRemovedListener> mAlarmRemovedListeners = new CopyOnWriteArrayList<>();
+    private List<OnAlarmUpdatedListener> mAlarmRemovedListeners = new CopyOnWriteArrayList<>();
 
     public Storage(final Context context) {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mDataBaseHelper = FindMeApp.getDataBaseHelper();
     }
 
-    public void addAlarmRemovedListener(final OnAlarmRemovedListener listener) {
+    public void addAlarmRemovedListener(final OnAlarmUpdatedListener listener) {
         mAlarmRemovedListeners.add(listener);
     }
 
-    public void removeAlarmRemovedListener(final OnAlarmRemovedListener listener) {
+    public void removeAlarmRemovedListener(final OnAlarmUpdatedListener listener) {
         mAlarmRemovedListeners.remove(listener);
     }
 
@@ -146,6 +146,18 @@ public class Storage {
         ed.commit();
     }
 
+    public long addUser(final User user) {
+        final ContentValues userValues = new ContentValues();
+        userValues.put(DataBaseHelper.VK_ID, user.getVkId());
+        userValues.put(DataBaseHelper.NAME, user.getName());
+        userValues.put(DataBaseHelper.SURNAME, user.getSurname());
+        userValues.put(DataBaseHelper.LATITUDE, Const.BAD_LAT);
+        userValues.put(DataBaseHelper.LONGITUDE, Const.BAD_LON);
+        userValues.put(DataBaseHelper.PHOTO_URL, user.getIconUrl());
+        userValues.put(DataBaseHelper.VISIBLE, 0);
+        return mDataBaseHelper.insertUser(userValues);
+    }
+
     public long addUser(final long vkId, final String name, final String surname,
                         final double lat, final double lon, final String photoUrl) {
         final ContentValues userValues = new ContentValues();
@@ -159,8 +171,16 @@ public class Storage {
         return mDataBaseHelper.insertUser(userValues);
     }
 
+    public List<User> getFriends() {
+        return mDataBaseHelper.getUsers(Const.FRIENDS_LIMIT);
+    }
+
     public List<Alarm> getAlarmsForMe() {
         return mDataBaseHelper.getAlarmsForMe();
+    }
+
+    public boolean isAlarmCompleted(final long alarmId) {
+        return mDataBaseHelper.isAlarmCompleted(alarmId);
     }
 
     public long addAlarm(final double lat, final double lon, final float radius, final List<Integer> users) {
@@ -196,8 +216,15 @@ public class Storage {
 
     public void removeAlarm(final long alarmId) {
         mDataBaseHelper.removeAlarm(alarmId);
-        for (final OnAlarmRemovedListener listener : mAlarmRemovedListeners) {
-            listener.onRemoved(alarmId);
+        for (final OnAlarmUpdatedListener listener : mAlarmRemovedListeners) {
+            listener.onAlarmRemoved(alarmId);
+        }
+    }
+
+    public void removeAlarmParticipant(final long alarmId, final long userId) {
+        mDataBaseHelper.removeAlarmUser(alarmId, userId);
+        for (final OnAlarmUpdatedListener listener : mAlarmRemovedListeners) {
+            listener.onAlarmUpdated(alarmId);
         }
     }
 
@@ -211,5 +238,9 @@ public class Storage {
 
     public List<AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
         return mDataBaseHelper.getAlarmMarkers(context, map);
+    }
+
+    public AlarmMarker getAlarmMarker(final long alarmId) {
+        return mDataBaseHelper.getAlarmMarker(alarmId);
     }
 }

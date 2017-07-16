@@ -6,7 +6,7 @@
     android:layout_gravity="center"
     android:layout_height="match_parent">
 
-    <com.nesmelov.alexey.vkfindme.ui.CircleNetworkImageView
+    <com.nesmelov.alexey.vkfindme.ui.CircleImageView
         android:id="@+id/avatar"
         android:layout_marginTop="60dp"
         android:layout_width="200dp"

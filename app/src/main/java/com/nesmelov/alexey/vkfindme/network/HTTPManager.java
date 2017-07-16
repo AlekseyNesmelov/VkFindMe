@@ -3,6 +3,7 @@ package com.nesmelov.alexey.vkfindme.network;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
+import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -14,6 +15,7 @@ import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class HTTPManager {
@@ -26,17 +28,20 @@ public class HTTPManager {
     public static final int REQUEST_SET_VISIBILITY_TRUE = 1;
     public static final int REQUEST_SET_VISIBILITY_FALSE = 2;
     public static final int REQUEST_SET_POSITION = 3;
+    public static final int REQUEST_CHECK_USERS = 4;
 
     private static final String SERVER_URL = "http://findmeapp-nesmelov.rhcloud.com/FindMe/Server";
     private static final String ADD_USER_ACTION_URL = "?action=add";
     private static final String SET_VISIBLE_ACTION_URL = "?action=set_visible";
     private static final String SET_POSITION_ACTION_URL = "?action=set_pos";
+    private static final String CHECK_USERS_ACTION_URL = "?action=check";
     private RequestQueue mQueue;
 
     private JsonRequest mAddUserRequest = null;
     private JsonRequest mSetVisibilityTrueRequest = null;
     private JsonRequest mSetVisibilityFalseRequest = null;
     private JsonRequest mSetPositionRequest = null;
+    private JsonRequest mCheckUsersRequest = null;
 
     private ImageLoader mImageLoader;
 
@@ -56,8 +61,21 @@ public class HTTPManager {
         });
     }
 
-    public ImageLoader getImageLoader() {
-        return mImageLoader;
+    public void asyncLoadBitmap(final String url, final ImageView imageView) {
+        mImageLoader.get(url, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                imageView.setImageBitmap(response.getBitmap());
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+            }
+        });
+    }
+
+    public void asyncLoadBitmap(final String url, final ImageLoader.ImageListener listener) {
+        mImageLoader.get(url, listener);
     }
 
     public synchronized void executeRequest(final int request, final int requestToCancel, final OnUpdateListener listener,
@@ -98,6 +116,22 @@ public class HTTPManager {
                     sb.append("{\"user\": ").append(params[0]).append(", \"lat\": ").append(params[1])
                             .append(", \"lon\": ").append(params[2]).append("}");
                     addRequest(request, Request.Method.POST, listener, new JSONObject(sb.toString()));
+                } catch (Exception e) {
+                    listener.onError(request, PARSE_ERROR_CODE);
+                }
+                break;
+            case REQUEST_CHECK_USERS:
+                try {
+                    final JSONObject json = new JSONObject();
+                    final JSONArray users = new JSONArray();
+                    final String[] usersString = params[0].split(";");
+                    for (final String userString : usersString) {
+                        if (!userString.isEmpty()) {
+                            users.put(userString);
+                        }
+                    }
+                    json.put("users", users);
+                    addRequest(request, Request.Method.POST, listener, new JSONObject(json.toString()));
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
@@ -337,6 +371,10 @@ public class HTTPManager {
                 if (mSetPositionRequest != null) {
                     mSetPositionRequest.cancel();
                 }
+            case REQUEST_CHECK_USERS:
+                if (mCheckUsersRequest != null) {
+                    mCheckUsersRequest.cancel();
+                }
                 break;
         }
     }
@@ -384,6 +422,13 @@ public class HTTPManager {
                             method, SERVER_URL + SET_POSITION_ACTION_URL, data, responseListener, errorListener);
                     mSetPositionRequest = jsonRequest;
                     mQueue.add(mSetPositionRequest);
+                    break;
+                }
+                case REQUEST_CHECK_USERS: {
+                    final JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                            method, SERVER_URL + CHECK_USERS_ACTION_URL, data, responseListener, errorListener);
+                    mCheckUsersRequest = jsonRequest;
+                    mQueue.add(mCheckUsersRequest);
                     break;
                 }
                 default:

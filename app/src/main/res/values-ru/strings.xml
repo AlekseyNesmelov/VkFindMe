@@ -7,6 +7,7 @@
     <string name="error_title">Ошибка!</string>
     <string name="on_visibility_server_error_message">Сервер не доступен. Нет возможности сменить видимость.</string>
     <string name="off_visibility_server_error_message">Сервер не доступен. Вы не будете посылать свои новые координаты, но друзья будут видеть Вашу последнюю посланную позицию.</string>
+    <string name="refresh_friends_server_error_message">Сервер не доступен. Не возможно обновить список друзей.</string>
     <string name="visibility_true_message">Видимость включена</string>
     <string name="visibility_false_message">Видимость выключена</string>
     <string name="gps_service_on_message">Видимость включена</string>
@@ -14,8 +15,12 @@
     <string name="alarm_users_title">Участники будильника</string>
     <string name="alarm_canceled">Будильник отменен</string>
     <string name="alarm_accepted">Будильник установлен</string>
+    <string name="alarm_updated">Будильник обновлен</string>
     <string name="alarm_must_select_users_message">Нужно выбрать хотя бы одного участника</string>
     <string name="set_alarm_pos">Установите место для будильника</string>
+    <string name="refresh_friends_title">Друзья</string>
+    <string name="refresh_friends_message_ok">Список друзей был успешно обновлен</string>
+    <string name="refresh_friends_message_nok">Не удалось обновить список друзей</string>
     <string name="set_alarm_radius">Установите радиус будильника</string>
     <string name="me_in_alarm">Вы участвуете в одном из будильников</string>
     <string name="alarm">Будильник (нажмите для редактирования)</string>

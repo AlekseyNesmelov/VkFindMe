@@ -115,7 +115,7 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
             }
 
             synchronized (mLock) {
-                Alarm removedAlarm = null;
+                Alarm updatedAlarm = null;
                 for (final Alarm alarm : mAlarmsForMe) {
                     float results[] = new float[1];
                     Location.distanceBetween(
@@ -125,16 +125,18 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
                             location.getLongitude(),
                             results);
                     if (results[0] < alarm.getRadius()) {
-                        mStorage.removeAlarm(alarm.getAlarmId());
-                        removedAlarm = alarm;
-                        Log.d("ANESMELOV", "ALLLARRRM!!!");
+                        mStorage.removeAlarmParticipant(alarm.getAlarmId(), mStorage.getUserVkId());
+                        updatedAlarm = alarm;
                         break;
                     }
                 }
-                if (removedAlarm != null) {
+                if (updatedAlarm != null) {
                     FindMeApp.displayAlarmRingNotification(RING_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
                             getString(R.string.reach_alarm), MainActivity.class);
-                    mAlarmsForMe.remove(removedAlarm);
+                    mAlarmsForMe.remove(updatedAlarm);
+                    if (mStorage.isAlarmCompleted(updatedAlarm.getAlarmId())) {
+                        mStorage.removeAlarm(updatedAlarm.getAlarmId());
+                    }
                     if (!isVisible() && !isMeInAlarm()) {
                         stopSelf();
                     }

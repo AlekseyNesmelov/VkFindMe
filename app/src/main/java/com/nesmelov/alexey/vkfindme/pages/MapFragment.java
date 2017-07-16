@@ -3,6 +3,8 @@ package com.nesmelov.alexey.vkfindme.pages;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
@@ -16,10 +18,13 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,22 +40,36 @@ import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
+import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.services.GpsService;
 import com.nesmelov.alexey.vkfindme.storage.Const;
-import com.nesmelov.alexey.vkfindme.storage.OnAlarmRemovedListener;
+import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
+import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
+import com.nesmelov.alexey.vkfindme.ui.UserMarker;
+import com.nesmelov.alexey.vkfindme.utils.Utils;
+import com.vk.sdk.api.VKError;
+import com.vk.sdk.api.VKRequest;
+import com.vk.sdk.api.VKResponse;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmRemovedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener {
+    private static final int USER_PREVIEW_SIZE = 60;
+    private static final int USER_MARKER_SIZE = 50;
+
     private static final int MODE_USUAL = 0;
     private static final int MODE_SELECT_ALARM_POS = 1;
     private static final int MODE_SELECT_ALARM_RADIUS = 2;
@@ -64,6 +83,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private GoogleMap mMap = null;
     private LocationManager mLocationManager;
 
+    private VKManager mVKManager;
     private HTTPManager mHTTPManager;
     private Storage mStorage;
     private int mCurrentMode = MODE_USUAL;
@@ -73,20 +93,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private ImageView mAlarmTarget;
     private SeekBar mRadiusSeekBar;
+    private ImageButton mRefreshFriendsBtn;
     private ImageButton mAlarmButton;
     private ImageButton mOkBtn;
     private ImageButton mNokBtn;
+
+    private LinearLayout mPictureLayout;
 
     private TextView mMessageView;
 
     private Circle mAlarmRadius;
 
     private List<AlarmMarker> mAlarmMarkers = new CopyOnWriteArrayList<>();
+    private Map<Long, UserMarker> mUserMarkers = new ConcurrentHashMap<>();
+
+    private Map<Long, User> mUsersBuffer = new ConcurrentHashMap<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mHTTPManager = FindMeApp.getHTTPManager();
+        mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
         mStorage.addAlarmRemovedListener(this);
 
@@ -100,6 +127,48 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
+
+        mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
+
+        mRefreshFriendsBtn = (ImageButton) view.findViewById(R.id.refreshBtn);
+        mRefreshFriendsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                final VKRequest.VKRequestListener requestListener = new VKRequest.VKRequestListener() {
+                    @Override
+                    public void onComplete(VKResponse response) {
+                        super.onComplete(response);
+                        try {
+                            mUsersBuffer.clear();
+                            final JSONObject jsonResponse = response.json.getJSONObject("response");
+                            final int count = (int) jsonResponse.getLong("count");
+
+                            final JSONArray usersArray = jsonResponse.getJSONArray("items");
+                            final StringBuilder idToCheck = new StringBuilder();
+                            for (int i = 0; i < count; i++) {
+                                final JSONObject userJson = usersArray.getJSONObject(i);
+                                idToCheck.append(userJson.getLong("id")).append(";");
+                                final User user = new User();
+                                user.setVkId(userJson.getInt("id"));
+                                user.setName(userJson.getString("first_name"));
+                                user.setSurname(userJson.getString("last_name"));
+                                user.setIconUrl(userJson.getString("photo_200"));
+                                mUsersBuffer.put(userJson.getLong("id"), user);
+                            }
+                            mHTTPManager.executeRequest(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.REQUEST_CHECK_USERS,
+                                    MapFragment.this, idToCheck.toString());
+                        } catch (Exception e) {
+                        }
+                    }
+
+                    @Override
+                    public void onError(VKError error) {
+                        MapFragment.this.onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
+                    }
+                };
+                mVKManager.executeRequest(VKManager.REQUEST_GET_FRIENDS, requestListener);
+            }
+        });
 
         mVisibilityBtn = (ToggleButton) view.findViewById(R.id.visibleBtn);
         mVisibilityBtnListener = new CompoundButton.OnCheckedChangeListener() {
@@ -234,6 +303,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 if (resultCode == RESULT_OK) {
                     final ArrayList<Integer> users = data.getIntegerArrayListExtra(Const.USERS);
                     mStorage.updateAlarm(alarmId, users);
+                    AlarmMarker markerToUpdate = null;
+                    for (final AlarmMarker alarmMarker : mAlarmMarkers) {
+                        if (alarmMarker.getAlarmId() == alarmId) {
+                            markerToUpdate = alarmMarker;
+                            break;
+                        }
+                    }
+                    if (markerToUpdate != null) {
+                        final String names = data.getStringExtra(Const.NAMES);
+                        markerToUpdate.getMarker().setSnippet(names);
+                        markerToUpdate.setUsers(users);
+                        markerToUpdate.getMarker().hideInfoWindow();
+                        FindMeApp.showToast(getContext(), getString(R.string.alarm_updated));
+                    }
                 } else {
                     AlarmMarker markerToRemove = null;
                     for (final AlarmMarker alarmMarker : mAlarmMarkers) {
@@ -320,6 +403,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             }
         });
         mAlarmMarkers.addAll(mStorage.getAlarmMarkers(getContext(), mMap));
+        addFriendsFromDataBase();
     }
 
     @Override
@@ -336,6 +420,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 FindMeApp.showToast(getContext(), getString(R.string.visibility_false_message));
                 mStorage.setVisibility(false);
                 getActivity().startService(new Intent(getContext(), GpsService.class));
+                break;
+            case HTTPManager.REQUEST_CHECK_USERS:
+                try {
+                    final JSONArray users = update.getJSONArray("users");
+                    for (int i = 0; i < users.length(); i++) {
+                        final Long userId = users.getLong(i);
+                        final User user = mUsersBuffer.get(userId);
+                        if(user != null && !mUserMarkers.containsKey(userId)) {
+                            final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
+                                @Override
+                                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                                    if (response.getBitmap() != null) {
+                                        mStorage.addUser(user);
+                                        addUserPreviewIcon(user, response.getBitmap(), mMap);
+                                    }
+                                }
+
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                }
+                            };
+                            mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
+                        }
+                    }
+                    FindMeApp.showPopUp(getContext(), getString(R.string.refresh_friends_title),
+                            getString(R.string.refresh_friends_message_ok));
+                } catch (JSONException e) {
+                    onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
+                }
                 break;
             default:
                 break;
@@ -359,6 +472,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         getString(R.string.off_visibility_server_error_message));
                 mStorage.setVisibility(false);
                 getActivity().startService(new Intent(getContext(), GpsService.class));
+                break;
+            case HTTPManager.REQUEST_CHECK_USERS:
+                FindMeApp.showPopUp(getContext(), getString(R.string.error_title),
+                        getString(R.string.refresh_friends_server_error_message));
                 break;
             default:
                 break;
@@ -416,7 +533,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     }
 
     @Override
-    public void onRemoved(long alarmId) {
+    public void onAlarmRemoved(long alarmId) {
         AlarmMarker markerToRemove = null;
         for (final AlarmMarker alarmMarker : mAlarmMarkers) {
             if (alarmMarker.getAlarmId() == alarmId) {
@@ -432,8 +549,100 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     }
 
     @Override
+    public void onAlarmUpdated(long alarmId) {
+        AlarmMarker markerToUpdate = null;
+        for (final AlarmMarker alarmMarker : mAlarmMarkers) {
+            if (alarmMarker.getAlarmId() == alarmId) {
+                markerToUpdate = alarmMarker;
+                break;
+            }
+        }
+        if (markerToUpdate != null) {
+            final AlarmMarker marker = mStorage.getAlarmMarker(alarmId);
+            if (marker != null) {
+                markerToUpdate.getMarker().setSnippet(marker.getNames());
+                markerToUpdate.setUsers(marker.getUsers());
+                markerToUpdate.getMarker().hideInfoWindow();
+            }
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         mStorage.removeAlarmRemovedListener(this);
+    }
+
+    private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
+        final int size = Utils.dpToPx(getContext(), USER_PREVIEW_SIZE);
+        final int circleSize = Utils.dpToPx(getContext(), USER_MARKER_SIZE);
+        final Bitmap squareBitmap;
+        final Bitmap circleBitmap;
+        if (bitmap == null) {
+            squareBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(),
+                    R.drawable.default_user_icon), size, size, false);
+            circleBitmap = Utils.getCroppedBitmap(Bitmap.createScaledBitmap(squareBitmap, circleSize, circleSize, false));
+        } else {
+            squareBitmap = Bitmap.createScaledBitmap(bitmap, size, size, false);
+            circleBitmap = Utils.getCroppedBitmap(Bitmap.createScaledBitmap(squareBitmap, circleSize, circleSize, false));
+        }
+        final UserMarker userMarker = new UserMarker(user.getVkId(),
+                Const.BAD_LAT, Const.BAD_LON, user.getName(), user.getSurname(), circleBitmap);
+
+        final ImageView imageView = new ImageView(getContext());
+        final String userId = userMarker.addOnMap(map).replace("m", "");
+
+        imageView.setId(Integer.parseInt(userId));
+        imageView.setPadding(4, 4, 4, 4);
+        imageView.setMinimumHeight(size);
+        imageView.setMinimumWidth(size);
+        imageView.setMaxHeight(size);
+        imageView.setMaxWidth(size);
+        imageView.setImageBitmap(squareBitmap);
+
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+
+        imageView.setClickable(true);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserMarker userMarker = null;
+                for (final Long id : mUserMarkers.keySet()) {
+                    final UserMarker marker = mUserMarkers.get(id);
+                    if (marker.getMarkerId() == v.getId()) {
+                        userMarker = marker;
+                        break;
+                    }
+                }
+                mUserMarkers.get((long)v.getId());
+                if (userMarker != null) {
+                    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(userMarker.getLat(), userMarker.getLon()), getZoomLevel(mAlarmRadius));
+                    mMap.animateCamera(cameraUpdate);
+                }
+            }
+        });
+        mPictureLayout.addView(imageView);
+
+        mUserMarkers.put((long)user.getVkId(), userMarker);
+    }
+
+    private void addFriendsFromDataBase() {
+        final List<User> friend = mStorage.getFriends();
+        for (final User user : friend) {
+            final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
+                @Override
+                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                    if (response.getBitmap() != null) {
+                        addUserPreviewIcon(user, response.getBitmap(), mMap);
+                    }
+                }
+
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                }
+            };
+            mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
+        }
     }
 }

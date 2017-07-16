@@ -1,7 +1,6 @@
 package com.nesmelov.alexey.vkfindme.ui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
     }
 
     static class ViewHolder {
-        protected CircleNetworkImageView iconView;
+        protected ImageView iconView;
         protected TextView nameView;
         protected CheckBox checkBox;
     }
@@ -44,8 +43,8 @@ public class UserListAdapter extends ArrayAdapter<User> {
             final LayoutInflater inflater = mContext.getLayoutInflater();
             convertView = inflater.inflate(R.layout.user_list_row, null);
             viewHolder = new ViewHolder();
-            viewHolder.iconView = (CircleNetworkImageView) convertView.findViewById(R.id.icon);
-            viewHolder.iconView.setImageUrl(mUsers.get(position).getIconUrl(), mHTTPManager.getImageLoader());
+            viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
+            mHTTPManager.asyncLoadBitmap(mUsers.get(position).getIconUrl(), viewHolder.iconView);
             viewHolder.nameView = (TextView) convertView.findViewById(R.id.name);
             viewHolder.checkBox = (CheckBox) convertView.findViewById(R.id.check_box);
             viewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

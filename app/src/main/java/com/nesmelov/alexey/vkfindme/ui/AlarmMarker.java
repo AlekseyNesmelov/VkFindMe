@@ -38,6 +38,21 @@ public class AlarmMarker {
         mMarker = map.addMarker(markerOptions);
     }
 
+    public AlarmMarker(final long alarmId, final double lat, final double lon,
+                       final float radius, final ArrayList<Integer> users,
+                       final String names) {
+        mAlarmId = alarmId;
+        mLat = lat;
+        mLon = lon;
+        mRadius = radius;
+        mUsers = users;
+        mNames = names;
+    }
+
+    public void setUsers(final ArrayList<Integer> users) {
+        mUsers = users;
+    }
+
     public long getAlarmId() {
         return mAlarmId;
     }

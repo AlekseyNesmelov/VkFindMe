@@ -10,21 +10,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.android.volley.toolbox.NetworkImageView;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
-import com.nesmelov.alexey.vkfindme.ui.CircleNetworkImageView;
+import com.nesmelov.alexey.vkfindme.ui.CircleImageView;
 import com.vk.sdk.VKSdk;
 
 import org.json.JSONObject;
 
 public class ProfileFragment extends Fragment implements OnUpdateListener {
 
-    private CircleNetworkImageView mAvatarView;
+    private CircleImageView mAvatarView;
     private TextView mUserNameView;
     private Button mLogoutBtn;
 
@@ -43,8 +42,8 @@ public class ProfileFragment extends Fragment implements OnUpdateListener {
                              final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.profile_page, null);
 
-        mAvatarView = (CircleNetworkImageView) view.findViewById(R.id.avatar);
-        mAvatarView.setImageUrl(mStorage.getUserIconUrl(), mHTTPManager.getImageLoader());
+        mAvatarView = (CircleImageView) view.findViewById(R.id.avatar);
+        mHTTPManager.asyncLoadBitmap(mStorage.getUserIconUrl(), mAvatarView);
 
         mUserNameView = (TextView) view.findViewById(R.id.user_name);
         mUserNameView.setText(mStorage.getUserName() + " " + mStorage.getUserSurname());

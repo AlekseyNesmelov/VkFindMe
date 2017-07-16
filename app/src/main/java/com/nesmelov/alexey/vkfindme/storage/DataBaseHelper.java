@@ -109,6 +109,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return database.delete(alarmTable, ID + "=" + alarmId, null);
     }
 
+    public long removeAlarmUser(final long alarmId, final long alarmUser) {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
+        final SQLiteDatabase database = this.getWritableDatabase();
+        return database.delete(alarmUsersTable, ALARM_ID + "=" + alarmId + " AND "
+                + USER_ID + "=" + alarmUser, null);
+    }
+
     public long removeAlarmUsers(final long alarmId) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
@@ -155,7 +163,25 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 alarms.add(alarm);
             } while (cursor.moveToNext());
         }
+        cursor.close();
         return alarms;
+    }
+
+    public boolean isAlarmCompleted(final long alarmId) {
+        boolean isCompleted = true;
+
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
+        final String selectQuery = "SELECT COUNT(*) FROM " + alarmUsersTable +
+                " WHERE " + ALARM_ID + "=" + alarmId + ";";
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            isCompleted =  cursor.getLong(0) == 0;
+        }
+        cursor.close();
+        return isCompleted;
     }
 
     public long updateUser(final Integer vkId, final ContentValues values) {
@@ -255,6 +281,63 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return alarms;
+    }
+
+    public AlarmMarker getAlarmMarker(final long alarmId) {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+        final String alarmTable = ALARM_TABLE + "_" + user;
+        final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
+
+        StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT * FROM ").append(alarmTable)
+                .append(" WHERE ").append(ID).append("=").append(alarmId).append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        AlarmMarker alarmMarker = null;
+        if (cursor.moveToFirst()) {
+            do {
+                final int id = cursor.getInt(0);
+                final double lat = cursor.getDouble(1);
+                final double lon = cursor.getDouble(2);
+                final float radius = cursor.getFloat(3);
+
+                selectQuery = new StringBuilder();
+                selectQuery.append("SELECT ").append (VK_ID).append(", ")
+                        .append(NAME).append(", ").append(SURNAME).append(" FROM ")
+                        .append(alarmUsersTable).append(", ").append(usersTable)
+                        .append(" WHERE ").append(USER_ID).append("=").append(VK_ID)
+                        .append(" AND ").append(ALARM_ID).append("=").append(id).append(";");
+
+                final Cursor usersCursor = database.rawQuery(selectQuery.toString(), null);
+
+                final ArrayList<Integer> alarmUsers = new ArrayList<>();
+                StringBuilder names = new StringBuilder();
+                if (usersCursor.moveToFirst()) {
+                    do {
+                        final int vkId =  usersCursor.getInt(0);
+                        final String name =  usersCursor.getString(1);
+                        final String surname =  usersCursor.getString(2);
+
+                        alarmUsers.add(vkId);
+                        names.append(name + " " + surname).append(", ");
+                    } while (usersCursor.moveToNext());
+                }
+                usersCursor.close();
+
+                if (names.length() != 0) {
+                    names = names.delete(names.length() - 2, names.length());
+                }
+
+                alarmMarker = new AlarmMarker(id, lat, lon,
+                        radius, alarmUsers, names.toString());
+                break;
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return alarmMarker;
     }
 
     public ArrayList<HashMap<String, String>> getAllFriends(final long limit) {
