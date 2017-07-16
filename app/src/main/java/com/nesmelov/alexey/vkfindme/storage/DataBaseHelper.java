@@ -198,6 +198,28 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return database.delete(usersTable, VK_ID + "=" + vkId, null);
     }
 
+    public String getUserIdsString(final long limit) {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+
+        final StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT * FROM ").append(usersTable)
+                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
+                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        final StringBuilder sb = new StringBuilder();
+        if (cursor.moveToFirst()) {
+            do {
+                sb.append(cursor.getInt(1)).append(";");
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return sb.toString();
+    }
+
     public List<User> getUsers(final long limit) {
         final List<User> users = new CopyOnWriteArrayList<>();
 
@@ -339,58 +361,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return alarmMarker;
     }
-
-    public ArrayList<HashMap<String, String>> getAllFriends(final long limit) {
-        final Integer user = FindMeApp.getStorage().getUserVkId();
-        final String usersTable = USERS_TABLE + "_" + user;
-        final ArrayList<HashMap<String, String>> records = new ArrayList<>();
-        final StringBuilder selectQuery = new StringBuilder();
-        selectQuery.append("SELECT * FROM ").append(usersTable)
-                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
-                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
-        final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                final HashMap<String, String> map = new HashMap<String, String>();
-                map.put(ID, cursor.getString(0));
-                map.put(VK_ID, cursor.getString(1));
-                map.put(NAME, cursor.getString(2));
-                map.put(SURNAME, cursor.getString(3));
-                map.put(LATITUDE, cursor.getString(4));
-                map.put(LONGITUDE, cursor.getString(5));
-                map.put(PHOTO_URL, cursor.getString(6));
-                map.put(VISIBLE, cursor.getString(7));
-                records.add(map);
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return records;
-    }
-
-    /*public List<String> getUserIds(final long limit) {
-        final List<String> result = new ArrayList();
-        final String selectQuery = "SELECT " + Constant.VK_ID + " FROM " + Constant.FRIENDS_TABLE
-                +" ORDER BY " + Constant.VISIBLE + " DESC" + ";";
-        final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                final String vkId = cursor.getString(0);
-                result.add(vkId);
-            } while (cursor.moveToNext() && (result.size() < limit || limit == 0));
-        }
-        return result;
-    }
-
-    public void deleteAllRecords() {
-        final List<String> records = getUserIds(Constant.FRIENDS_LIMIT);
-        for (final String id : records) {
-            deleteRecord(id);
-        }
-    }*/
 
     private void createUsersTable(final SQLiteDatabase db, final Integer user) {
         final String usersTable = USERS_TABLE + "_" + user;

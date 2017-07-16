@@ -54,6 +54,7 @@
             android:theme="@style/VK.Transparent" />
 
         <service android:name=".services.GpsService" />
+        <service android:name=".services.UpdateFriendsService" />
 
         <receiver android:name=".receiver.BootBroadcastReceiver" android:enabled="true" android:exported="false">
             <intent-filter>

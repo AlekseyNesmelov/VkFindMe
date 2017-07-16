@@ -27,23 +27,37 @@ public class Storage {
     public static final String ALARM_RADIUS = "alarm_radius";
     public static final String USER_LAT = "user_lat";
     public static final String USER_LON = "user_lon";
+    public static final String REFRESH_FRIENDS_DELAY = "refresh_friends_delay";
 
     private SharedPreferences mSharedPrefs;
     private DataBaseHelper mDataBaseHelper;
 
-    private List<OnAlarmUpdatedListener> mAlarmRemovedListeners = new CopyOnWriteArrayList<>();
+    private List<OnAlarmUpdatedListener> mAlarmUpdatedListeners = new CopyOnWriteArrayList<>();
+    private List<OnUserUpdatedListener> mUserUpdatedListeners = new CopyOnWriteArrayList<>();
 
     public Storage(final Context context) {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mDataBaseHelper = FindMeApp.getDataBaseHelper();
     }
 
-    public void addAlarmRemovedListener(final OnAlarmUpdatedListener listener) {
-        mAlarmRemovedListeners.add(listener);
+    public void addAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
+        mAlarmUpdatedListeners.add(listener);
     }
 
-    public void removeAlarmRemovedListener(final OnAlarmUpdatedListener listener) {
-        mAlarmRemovedListeners.remove(listener);
+    public String getUserIdsString() {
+        return mDataBaseHelper.getUserIdsString(Const.FRIENDS_LIMIT);
+    }
+
+    public void removeAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
+        mAlarmUpdatedListeners.remove(listener);
+    }
+
+    public void addUserUpdatedListener(final OnUserUpdatedListener listener) {
+        mUserUpdatedListeners.add(listener);
+    }
+
+    public void removeUserUpdatedListener(final OnUserUpdatedListener listener) {
+        mUserUpdatedListeners.remove(listener);
     }
 
     public double getUserLat() {
@@ -83,7 +97,11 @@ public class Storage {
     }
 
     public Float getAlarmRadius() {
-        return  mSharedPrefs.getFloat(ALARM_RADIUS, MIN_ALARM_RADIUS);
+        return mSharedPrefs.getFloat(ALARM_RADIUS, MIN_ALARM_RADIUS);
+    }
+
+    public Long getRefreshFriendsDelay() {
+        return mSharedPrefs.getLong(REFRESH_FRIENDS_DELAY, 3000);
     }
 
     public void setUserVkId(final Integer userVkId) {
@@ -95,6 +113,12 @@ public class Storage {
     public void setUserName(final String userName) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(USER_NAME, userName);
+        ed.commit();
+    }
+
+    public void setRefreshFriendsDelay(final long refreshFriendsDelay) {
+        final SharedPreferences.Editor ed = mSharedPrefs.edit();
+        ed.putLong(REFRESH_FRIENDS_DELAY, refreshFriendsDelay);
         ed.commit();
     }
 
@@ -144,6 +168,22 @@ public class Storage {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putFloat(ALARM_RADIUS, radius);
         ed.commit();
+    }
+
+    public void setUserPos(final Integer userId, final double lat, final double lon) {
+        final ContentValues values = new ContentValues();
+        values.put(DataBaseHelper.VK_ID, userId);
+        values.put(DataBaseHelper.LATITUDE, lat);
+        values.put(DataBaseHelper.LONGITUDE, lon);
+        values.put(DataBaseHelper.VISIBLE, 1);
+        mDataBaseHelper.updateUser(userId, values);
+    }
+
+    public void makeUserInvisible(final Integer userId) {
+        final ContentValues values = new ContentValues();
+        values.put(DataBaseHelper.VK_ID, userId);
+        values.put(DataBaseHelper.VISIBLE, 0);
+        mDataBaseHelper.updateUser(userId, values);
     }
 
     public long addUser(final User user) {
@@ -216,14 +256,14 @@ public class Storage {
 
     public void removeAlarm(final long alarmId) {
         mDataBaseHelper.removeAlarm(alarmId);
-        for (final OnAlarmUpdatedListener listener : mAlarmRemovedListeners) {
+        for (final OnAlarmUpdatedListener listener : mAlarmUpdatedListeners) {
             listener.onAlarmRemoved(alarmId);
         }
     }
 
     public void removeAlarmParticipant(final long alarmId, final long userId) {
         mDataBaseHelper.removeAlarmUser(alarmId, userId);
-        for (final OnAlarmUpdatedListener listener : mAlarmRemovedListeners) {
+        for (final OnAlarmUpdatedListener listener : mAlarmUpdatedListeners) {
             listener.onAlarmUpdated(alarmId);
         }
     }

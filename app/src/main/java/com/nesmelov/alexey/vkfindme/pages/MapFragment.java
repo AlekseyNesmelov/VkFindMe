@@ -42,8 +42,10 @@ import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.services.GpsService;
+import com.nesmelov.alexey.vkfindme.services.UpdateFriendsService;
 import com.nesmelov.alexey.vkfindme.storage.Const;
 import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
+import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
@@ -66,7 +68,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener,
+        OnUserUpdatedListener{
     private static final int USER_PREVIEW_SIZE = 60;
     private static final int USER_MARKER_SIZE = 50;
 
@@ -115,14 +118,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mHTTPManager = FindMeApp.getHTTPManager();
         mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
-        mStorage.addAlarmRemovedListener(this);
-
         getActivity().startService(new Intent(getContext(), GpsService.class));
+        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
+        mStorage.addAlarmUpdatedListener(this);
+        mStorage.addUserUpdatedListener(this);
+
         final View view = inflater.inflate(R.layout.map_page, container, false);
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
@@ -570,7 +575,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mStorage.removeAlarmRemovedListener(this);
+        mStorage.removeAlarmUpdatedListener(this);
+        mStorage.removeUserUpdatedListener(this);
+
+        getActivity().stopService(new Intent(getContext(), UpdateFriendsService.class));
     }
 
     private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
@@ -644,5 +652,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             };
             mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
         }
+    }
+
+    @Override
+    public void onUserUpdated(long userId, double lat, double lon) {
+
+    }
+
+    @Override
+    public void onUserInvisible(long userId) {
+
     }
 }

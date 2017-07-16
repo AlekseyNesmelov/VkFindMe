@@ -29,12 +29,14 @@ public class HTTPManager {
     public static final int REQUEST_SET_VISIBILITY_FALSE = 2;
     public static final int REQUEST_SET_POSITION = 3;
     public static final int REQUEST_CHECK_USERS = 4;
+    public static final int REQUEST_GET_USERS_POS = 5;
 
     private static final String SERVER_URL = "http://findmeapp-nesmelov.rhcloud.com/FindMe/Server";
     private static final String ADD_USER_ACTION_URL = "?action=add";
     private static final String SET_VISIBLE_ACTION_URL = "?action=set_visible";
     private static final String SET_POSITION_ACTION_URL = "?action=set_pos";
     private static final String CHECK_USERS_ACTION_URL = "?action=check";
+    private static final String GET_USERS_POS_ACTION_URL = "?action=get_pos";
     private RequestQueue mQueue;
 
     private JsonRequest mAddUserRequest = null;
@@ -42,6 +44,7 @@ public class HTTPManager {
     private JsonRequest mSetVisibilityFalseRequest = null;
     private JsonRequest mSetPositionRequest = null;
     private JsonRequest mCheckUsersRequest = null;
+    private JsonRequest mGetUsersPosRequest = null;
 
     private ImageLoader mImageLoader;
 
@@ -136,219 +139,24 @@ public class HTTPManager {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
                 break;
-        }
-    }
-
-   /* private class CheckUsersThread extends Thread {
-
-        private List<String> mUsersToCheck;
-        private List<String> mCheckedUsers = null;
-        private boolean mResultFound = false;
-
-        public CheckUsersThread(List<String> usersToCheck) {
-            mUsersToCheck = usersToCheck;
-        }
-
-        @Override
-        public void run() {
-            mCheckedUsers = checkFriends();
-        }
-
-        public List<String> checkFriends() {
-            List<String> result = new ArrayList<>();
-            if (mUsersToCheck.size() > 0) {
-                HttpURLConnection urlConnection = null;
+            case REQUEST_GET_USERS_POS:
                 try {
-                    String urlStr =;
-                    for (final String id : mUsersToCheck) {
-                        urlStr += id + ":";
+                    final JSONObject json = new JSONObject();
+                    final JSONArray users = new JSONArray();
+                    final String[] usersString = params[0].split(";");
+                    for (final String userString : usersString) {
+                        if (!userString.isEmpty()) {
+                            users.put(userString);
+                        }
                     }
-                    urlStr = urlStr.substring(0, urlStr.length() - 1);
-                    final URL url = new URL(urlStr);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    final InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                    final BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                    final StringBuilder total = new StringBuilder();
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        total.append(line).append('\n');
-                    }
-                    final int start = total.indexOf("<body>") + "<body>".length();
-                    final int end = total.indexOf("</body>", start);
-                    final String body = total.substring(start, end).replace("\n", "");
-                    final String[] users = body.split(":");
-                    for (final String user : users) {
-                        result.add(user);
-                    }
-                    mResultFound = true;
+                    json.put("users", users);
+                    addRequest(request, Request.Method.POST, listener, new JSONObject(json.toString()));
                 } catch (Exception e) {
-                    result = null;
-                } finally {
-                    urlConnection.disconnect();
+                    listener.onError(request, PARSE_ERROR_CODE);
                 }
-            }
-            return result;
-        }
-
-        public boolean resultWasFound() {
-            return mResultFound;
-        }
-
-        public List<String> getResult() {
-            return mCheckedUsers;
+                break;
         }
     }
-
-    private class AddUserThread extends Thread {
-
-        private String mUser;
-        private boolean mResultFound = false;
-        private boolean mResult = false;
-
-        public AddUserThread(String user) {
-            mUser = user;
-        }
-
-        @Override
-        public void run() {
-            mResult = addUser();
-        }
-
-        public boolean resultWasFound() {
-            return mResultFound;
-        }
-
-        public boolean getResult() {
-            return mResult;
-        }
-
-        private boolean addUser() {
-            HttpURLConnection urlConnection = null;
-            try {
-                final String urlStr = "http://findmeapp-nesmelov.rhcloud.com/FindMe/Server?action=add&user=" + mUser;
-                final URL url = new URL(urlStr);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                final InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                final BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                final StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line).append('\n');
-                }
-                final int start = total.indexOf("<body>") + "<body>".length();
-                final int end = total.indexOf("</body>", start);
-                final String body = total.substring(start, end).replace("\n", "");
-                mResult = body == "true";
-                mResultFound = true;
-            } catch (Exception e) {
-            } finally {
-                urlConnection.disconnect();
-            }
-            return mResult;
-        }
-    }
-
-    private class SendPosThread extends Thread {
-        private Location mPosition;
-        private String mUser;
-        private boolean mResultFound = false;
-        private boolean mResult = false;
-
-        public SendPosThread(final String user, final Location position) {
-            mUser = user;
-            mPosition = position;
-        }
-
-        @Override
-        public void run() {
-            mResult = sendPos();
-        }
-
-        public boolean sendPos() {
-            HttpURLConnection urlConnection = null;
-            try {
-                final String urlStr = "http://findmeapp-nesmelov.rhcloud.com/FindMe/Server?action=set_pos&user=" + mUser +
-                        "&lat=" + mPosition.getLatitude() + "&lon=" + mPosition.getLongitude();
-                final URL url = new URL(urlStr);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                final InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                final BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                final StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line).append('\n');
-                }
-                final int start = total.indexOf("<body>") + "<body>".length();
-                final int end = total.indexOf("</body>", start);
-                final String body = total.substring(start, end).replace("\n", "");
-                mResultFound = true;
-                return  body == "true";
-            } catch (Exception e) {
-            } finally {
-                urlConnection.disconnect();
-            }
-            return false;
-        }
-
-        public boolean resultWasFound() {
-            return mResultFound;
-        }
-
-        public boolean getResult() {
-            return mResult;
-        }
-    }
-
-    private class SendVisibleThread extends Thread {
-        private boolean mVisible;
-        private String mUser;
-        private boolean mResultFound = false;
-        private boolean mResult = false;
-
-        public SendVisibleThread(final String user, final boolean visible) {
-            mUser = user;
-            mVisible = visible;
-        }
-
-        @Override
-        public void run() {
-            mResult = sendVisible();
-        }
-
-        public boolean sendVisible() {
-            HttpURLConnection urlConnection = null;
-            try {
-                final String urlStr = "http://findmeapp-nesmelov.rhcloud.com/FindMe/Server?action=set_visible&user="
-                        + mUser + "&visible=" + mVisible;
-                final URL url = new URL(urlStr);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                final InputStream in = new BufferedInputStream(urlConnection.getInputStream());
-                final BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                final StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line).append('\n');
-                }
-                final int start = total.indexOf("<body>") + "<body>".length();
-                final int end = total.indexOf("</body>", start);
-                final String body = total.substring(start, end).replace("\n", "");
-                mResultFound = true;
-                return  body == "true";
-            } catch (Exception ee) {
-            } finally {
-                urlConnection.disconnect();
-            }
-            return false;
-        }
-
-        public boolean resultWasFound() {
-            return mResultFound;
-        }
-
-        public boolean getResult() {
-            return mResult;
-        }
-    }*/
 
     private void cancelRequest(final int requestToCancel) {
         switch (requestToCancel) {
@@ -371,9 +179,15 @@ public class HTTPManager {
                 if (mSetPositionRequest != null) {
                     mSetPositionRequest.cancel();
                 }
+                break;
             case REQUEST_CHECK_USERS:
                 if (mCheckUsersRequest != null) {
                     mCheckUsersRequest.cancel();
+                }
+                break;
+            case REQUEST_GET_USERS_POS:
+                if (mGetUsersPosRequest != null) {
+                    mGetUsersPosRequest.cancel();
                 }
                 break;
         }
@@ -429,6 +243,13 @@ public class HTTPManager {
                             method, SERVER_URL + CHECK_USERS_ACTION_URL, data, responseListener, errorListener);
                     mCheckUsersRequest = jsonRequest;
                     mQueue.add(mCheckUsersRequest);
+                    break;
+                }
+                case REQUEST_GET_USERS_POS: {
+                    final JsonObjectRequest jsonRequest = new JsonObjectRequest(
+                            method, SERVER_URL + GET_USERS_POS_ACTION_URL, data, responseListener, errorListener);
+                    mGetUsersPosRequest = jsonRequest;
+                    mQueue.add(mGetUsersPosRequest);
                     break;
                 }
                 default:
