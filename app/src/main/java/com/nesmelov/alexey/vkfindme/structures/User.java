@@ -3,6 +3,8 @@ package com.nesmelov.alexey.vkfindme.structures;
 import android.graphics.Bitmap;
 import android.support.annotation.IntegerRes;
 
+import com.nesmelov.alexey.vkfindme.storage.Const;
+
 public class User {
     private Integer mVkId;
     private String mName = "";
@@ -10,6 +12,8 @@ public class User {
     private Boolean mChecked = false;
     private Bitmap mIcon = null;
     private String mIconUrl = "";
+    private double mLat = Const.BAD_LAT;
+    private double mLon = Const.BAD_LON;
 
     public void setVkId(final Integer vkId) {
         mVkId = vkId;
@@ -35,6 +39,14 @@ public class User {
         mChecked = checked;
     }
 
+    public void setLat(final double lat) {
+        mLat = lat;
+    }
+
+    public void setLon(final double lon) {
+        mLon = lon;
+    }
+
     public Integer getVkId() {
         return mVkId;
     }
@@ -57,5 +69,13 @@ public class User {
 
     public boolean getChecked() {
         return mChecked;
+    }
+
+    public double getLat() {
+        return mLat;
+    }
+
+    public double getLon() {
+        return mLon;
     }
 }

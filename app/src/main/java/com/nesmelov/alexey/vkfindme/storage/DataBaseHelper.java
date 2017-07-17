@@ -220,6 +220,29 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return sb.toString();
     }
 
+    public List<Integer> getUserIds(final long limit) {
+        final List<Integer> users = new ArrayList<>();
+
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+
+        final StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT * FROM ").append(usersTable)
+                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
+                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                users.add(cursor.getInt(1));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return users;
+    }
+
     public List<User> getUsers(final long limit) {
         final List<User> users = new CopyOnWriteArrayList<>();
 

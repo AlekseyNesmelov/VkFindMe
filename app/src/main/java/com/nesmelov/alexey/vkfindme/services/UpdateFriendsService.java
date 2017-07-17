@@ -1,24 +1,16 @@
 package com.nesmelov.alexey.vkfindme.services;
 
-import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
-import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
-import com.nesmelov.alexey.vkfindme.structures.Alarm;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,13 +56,20 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
     @Override
     public void onUpdate(int request, JSONObject update) {
         try {
+            final List<Integer> allUsers = mStorage.getUserIds();
+
             final JSONArray users = update.getJSONArray("users");
             for (int i = 0; i < users.length(); i++) {
                 final JSONObject user = users.getJSONObject(i);
-                final int id = user.getInt("user");
+                final Integer id = user.getInt("user");
                 final double lat = user.getDouble("lat");
                 final double lon  = user.getDouble("lon");
+                allUsers.remove(id);
                 mStorage.setUserPos(id, lat, lon);
+            }
+
+            for (final Integer invisibleUser : allUsers) {
+                mStorage.makeUserInvisible(invisibleUser);
             }
         } catch (JSONException e) {
         }
@@ -91,14 +90,6 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
                         mStorage.getUserIdsString());
             }
         }, mStorage.getRefreshFriendsDelay());
-    }
-
-    private boolean isVisible() {
-        return mStorage.getVisibility();
-    }
-
-    private boolean isMeInAlarm() {
-        return mStorage.isMeInAlarm();
     }
 }
 

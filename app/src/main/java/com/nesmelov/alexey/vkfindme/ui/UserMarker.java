@@ -40,8 +40,8 @@ public class UserMarker {
         return mMarkerId;
     }
 
-    public Long getMarkerId() {
-        return Long.parseLong(mMarkerId.replace("m", ""));
+    public Integer getMarkerId() {
+        return Integer.parseInt(mMarkerId.replace("m", ""));
     }
 
     public long getUserId() {
@@ -54,5 +54,15 @@ public class UserMarker {
 
     public double getLon() {
         return mLon;
+    }
+
+    public void setLatLon(final double lat, final double lon) {
+        mLat = lat;
+        mLon = lon;
+        mMarker.setPosition(new LatLng(lat, lon));
+    }
+
+    public void setVisible(final boolean visible) {
+        mMarker.setVisible(visible);
     }
 }

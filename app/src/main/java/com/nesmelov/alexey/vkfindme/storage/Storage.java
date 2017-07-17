@@ -48,6 +48,10 @@ public class Storage {
         return mDataBaseHelper.getUserIdsString(Const.FRIENDS_LIMIT);
     }
 
+    public List<Integer> getUserIds() {
+        return mDataBaseHelper.getUserIds(Const.FRIENDS_LIMIT);
+    }
+
     public void removeAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
         mAlarmUpdatedListeners.remove(listener);
     }
@@ -177,6 +181,9 @@ public class Storage {
         values.put(DataBaseHelper.LONGITUDE, lon);
         values.put(DataBaseHelper.VISIBLE, 1);
         mDataBaseHelper.updateUser(userId, values);
+        for (final OnUserUpdatedListener listener : mUserUpdatedListeners) {
+            listener.onUserUpdated(userId, lat, lon);
+        }
     }
 
     public void makeUserInvisible(final Integer userId) {
@@ -184,6 +191,9 @@ public class Storage {
         values.put(DataBaseHelper.VK_ID, userId);
         values.put(DataBaseHelper.VISIBLE, 0);
         mDataBaseHelper.updateUser(userId, values);
+        for (final OnUserUpdatedListener listener : mUserUpdatedListeners) {
+            listener.onUserInvisible(userId);
+        }
     }
 
     public long addUser(final User user) {
