@@ -28,6 +28,7 @@ public class Storage {
     public static final String USER_LAT = "user_lat";
     public static final String USER_LON = "user_lon";
     public static final String REFRESH_FRIENDS_DELAY = "refresh_friends_delay";
+    public static final String REFRESH_FRIENDS = "refresh_friends";
 
     private SharedPreferences mSharedPrefs;
     private DataBaseHelper mDataBaseHelper;
@@ -62,6 +63,10 @@ public class Storage {
 
     public void removeUserUpdatedListener(final OnUserUpdatedListener listener) {
         mUserUpdatedListeners.remove(listener);
+    }
+
+    public boolean gerRefreshFriends() {
+        return mSharedPrefs.getBoolean(REFRESH_FRIENDS, false);
     }
 
     public double getUserLat() {
@@ -123,6 +128,12 @@ public class Storage {
     public void setRefreshFriendsDelay(final long refreshFriendsDelay) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putLong(REFRESH_FRIENDS_DELAY, refreshFriendsDelay);
+        ed.commit();
+    }
+
+    public void setRefreshFriends(final boolean refreshFriends) {
+        final SharedPreferences.Editor ed = mSharedPrefs.edit();
+        ed.putBoolean(REFRESH_FRIENDS, refreshFriends);
         ed.commit();
     }
 

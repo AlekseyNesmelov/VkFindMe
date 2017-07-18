@@ -18,7 +18,7 @@ public class UserMarker {
     private Marker mMarker;
     final MarkerOptions mMarkerOptions;
 
-    public UserMarker(final long userId, final double lat, final double lon,
+    public UserMarker(final long userId, final double lat, final double lon, final boolean visible,
                       final String name, final String surname, final Bitmap bitmap) {
         mUserId = userId;
         mLat = lat;
@@ -27,6 +27,7 @@ public class UserMarker {
         mSurname = surname;
         mMarkerOptions = new MarkerOptions()
             .title(name + " " + surname)
+                .visible(visible)
             .position(new LatLng(lat, lon))
             .anchor(0.5f, 0.5f);
         if (bitmap != null) {
@@ -42,6 +43,21 @@ public class UserMarker {
 
     public Integer getMarkerId() {
         return Integer.parseInt(mMarkerId.replace("m", ""));
+    }
+
+    public boolean getVisible() {
+        if (mMarker != null) {
+            return mMarker.isVisible();
+        }
+        return false;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public String getSurname() {
+        return mSurname;
     }
 
     public long getUserId() {

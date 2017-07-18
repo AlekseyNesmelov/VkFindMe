@@ -16,6 +16,8 @@
     <string name="alarm_canceled">Будильник отменен</string>
     <string name="alarm_accepted">Будильник установлен</string>
     <string name="alarm_updated">Будильник обновлен</string>
+    <string name="is_offline">не в сети</string>
+    <string name="refresh_friends_is_on">Обновление друзей включено</string>
     <string name="alarm_must_select_users_message">Нужно выбрать хотя бы одного участника</string>
     <string name="set_alarm_pos">Установите место для будильника</string>
     <string name="refresh_friends_title">Друзья</string>

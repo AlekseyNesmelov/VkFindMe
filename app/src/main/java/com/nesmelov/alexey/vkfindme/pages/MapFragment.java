@@ -66,6 +66,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.CONSUMER_IR_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener,
@@ -101,7 +102,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private ImageView mAlarmTarget;
     private SeekBar mRadiusSeekBar;
-    private ImageButton mRefreshFriendsBtn;
+    private ToggleButton mRefreshFriendsBtn;
+    private ImageButton mAddFriendsBtn;
     private ImageButton mAlarmButton;
     private ImageButton mOkBtn;
     private ImageButton mNokBtn;
@@ -124,7 +126,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
         getActivity().startService(new Intent(getContext(), GpsService.class));
-        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
     }
 
     @Override
@@ -141,8 +142,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
 
-        mRefreshFriendsBtn = (ImageButton) view.findViewById(R.id.refreshBtn);
-        mRefreshFriendsBtn.setOnClickListener(new View.OnClickListener() {
+        mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
+        mRefreshFriendsBtn.setChecked(mStorage.gerRefreshFriends());
+        mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
+                } else {
+                    getActivity().stopService(new Intent(getContext(), UpdateFriendsService.class));
+                }
+                mStorage.setRefreshFriends(isChecked);
+            }
+        });
+
+        mAddFriendsBtn = (ImageButton) view.findViewById(R.id.addFriendsBtn);
+        mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 final VKRequest.VKRequestListener requestListener = new VKRequest.VKRequestListener() {
@@ -583,8 +598,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         super.onDestroyView();
         mStorage.removeAlarmUpdatedListener(this);
         mStorage.removeUserUpdatedListener(this);
-
-        getActivity().stopService(new Intent(getContext(), UpdateFriendsService.class));
     }
 
     private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
@@ -601,7 +614,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             circleBitmap = Utils.getCroppedBitmap(Bitmap.createScaledBitmap(squareBitmap, circleSize, circleSize, false));
         }
         final UserMarker userMarker = new UserMarker(user.getVkId(),
-                user.getLon(), user.getLon(), user.getName(), user.getSurname(), circleBitmap);
+                user.getLat(), user.getLon(), false, user.getName(), user.getSurname(), circleBitmap);
 
         final ImageView imageView = new ImageView(getContext());
         final String userId = userMarker.addOnMap(map).replace("m", "");
@@ -629,11 +642,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         break;
                     }
                 }
-                mUserMarkers.get(v.getId());
                 if (userMarker != null) {
-                    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(userMarker.getLat(), userMarker.getLon()), mMap.getCameraPosition().zoom);
-                    mMap.animateCamera(cameraUpdate);
+                    if (userMarker.getVisible() && userMarker.getLat() != Const.BAD_LAT &&
+                            userMarker.getLon() != Const.BAD_LON) {
+                        final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(userMarker.getLat(), userMarker.getLon()), mMap.getCameraPosition().zoom);
+                        mMap.animateCamera(cameraUpdate);
+                    } else {
+                        FindMeApp.showToast(getContext(), userMarker.getName() + " " + userMarker.getSurname()
+                                + " " + getString(R.string.is_offline));
+                    }
                 }
             }
         });

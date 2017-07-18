@@ -53,6 +53,13 @@
             android:layout_height="75dp"
             android:background="#000">
 
+            <ImageButton
+                android:id="@+id/addFriendsBtn"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_gravity="center"
+                android:background="@drawable/add_friends_selector" />
+
             <HorizontalScrollView
                 android:id="@+id/pictureHorizontalScroll"
                 android:layout_width="match_parent"
@@ -82,16 +89,19 @@
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal">
 
-        <ImageButton
+        <ToggleButton
             android:id="@+id/refreshBtn"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:textOff=""
+            android:textOn=""
+            android:layout_gravity="center"
             android:background="@drawable/refresh_selector" />
 
         <ToggleButton
             android:id="@+id/visibleBtn"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="53dp"
+            android:layout_height="53dp"
             android:cursorVisible="false"
             android:textOff=""
             android:textOn=""
@@ -102,6 +112,9 @@
             android:id="@+id/alarmBtn"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:textOff=""
+            android:textOn=""
+            android:layout_gravity="center"
             android:background="@drawable/alarm_selector"/>
     </LinearLayout>
 

@@ -20,8 +20,10 @@
     <string name="set_alarm_pos">Set an alarm position</string>
     <string name="set_alarm_radius">Set an alarm radius</string>
     <string name="me_in_alarm">You are the participant of the alarm</string>
+    <string name="refresh_friends_is_on">Friends is being refreshed</string>
     <string name="alarm">Alarm (click for settings)</string>
     <string name="refresh_friends_title">Friends</string>
+    <string name="is_offline">is offline</string>
     <string name="refresh_friends_message_ok">Friends have been refreshed</string>
     <string name="refresh_friends_message_nok">Can not refresh friends</string>
     <string name="reach_alarm">You have reached the alarm</string>

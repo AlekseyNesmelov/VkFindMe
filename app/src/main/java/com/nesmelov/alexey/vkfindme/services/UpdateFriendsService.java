@@ -7,6 +7,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.nesmelov.alexey.vkfindme.R;
+import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class UpdateFriendsService extends Service implements OnUpdateListener{
+    public static final int FRIENDS_REFRESH_NOTIFICATION_ID = 444;
+
     private Storage mStorage;
     private HTTPManager mHTTPManager;
 
@@ -39,17 +43,24 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
         super.onCreate();
         mStorage = FindMeApp.getStorage();
         mHTTPManager = FindMeApp.getHTTPManager();
+        FindMeApp.displayNotification(FRIENDS_REFRESH_NOTIFICATION_ID, this, getString(R.string.app_name),
+                getString(R.string.refresh_friends_is_on), MainActivity.class);
     }
 
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         Log.d("UpdateFriendsService", "onStartCommand");
-        mHandler.removeCallbacksAndMessages(null);
-        refreshData();
+        if (mStorage.gerRefreshFriends()) {
+            mHandler.removeCallbacksAndMessages(null);
+            refreshData();
+        } else {
+            stopSelf();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
     public void onDestroy() {
         Log.d("UpdateFriendsService", "onDestroy");
+        FindMeApp.cancelNotification(FRIENDS_REFRESH_NOTIFICATION_ID);
         super.onDestroy();
     }
 
