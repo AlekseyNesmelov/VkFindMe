@@ -15,6 +15,15 @@ public class User {
     private double mLat = Const.BAD_LAT;
     private double mLon = Const.BAD_LON;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            return mVkId.equals(((User) obj).getVkId());
+        } else {
+            return mVkId.equals(obj);
+        }
+    }
+
     public void setVkId(final Integer vkId) {
         mVkId = vkId;
     }

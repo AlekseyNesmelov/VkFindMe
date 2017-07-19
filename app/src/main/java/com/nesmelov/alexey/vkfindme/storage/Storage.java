@@ -3,6 +3,8 @@ package com.nesmelov.alexey.vkfindme.storage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -11,7 +13,10 @@ import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Storage {
@@ -65,7 +70,7 @@ public class Storage {
         mUserUpdatedListeners.remove(listener);
     }
 
-    public boolean gerRefreshFriends() {
+    public boolean getRefreshFriends() {
         return mSharedPrefs.getBoolean(REFRESH_FRIENDS, false);
     }
 
@@ -303,5 +308,9 @@ public class Storage {
 
     public AlarmMarker getAlarmMarker(final long alarmId) {
         return mDataBaseHelper.getAlarmMarker(alarmId);
+    }
+
+    public Map<User, List<Alarm>> getAlarmUsers() {
+        return mDataBaseHelper.getAlarmUsers();
     }
 }

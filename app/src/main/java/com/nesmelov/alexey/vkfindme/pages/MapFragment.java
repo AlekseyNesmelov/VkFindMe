@@ -66,7 +66,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static android.app.Activity.RESULT_OK;
-import static android.content.Context.CONSUMER_IR_SERVICE;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener,
@@ -74,7 +73,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
-    private static final int USER_PREVIEW_SIZE = 60;
+    private static final int USER_PREVIEW_SIZE = 65;
     private static final int USER_MARKER_SIZE = 50;
 
     private static final int MODE_USUAL = 0;
@@ -126,6 +125,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
         getActivity().startService(new Intent(getContext(), GpsService.class));
+        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
     }
 
     @Override
@@ -143,16 +143,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
 
         mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
-        mRefreshFriendsBtn.setChecked(mStorage.gerRefreshFriends());
+        mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
         mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
-                } else {
-                    getActivity().stopService(new Intent(getContext(), UpdateFriendsService.class));
+                    FindMeApp.showToast(getContext(), getString(R.string.refresh_friends_is_on));
                 }
                 mStorage.setRefreshFriends(isChecked);
+                getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
             }
         });
 

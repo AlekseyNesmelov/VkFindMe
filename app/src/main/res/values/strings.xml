@@ -21,6 +21,7 @@
     <string name="set_alarm_radius">Set an alarm radius</string>
     <string name="me_in_alarm">You are the participant of the alarm</string>
     <string name="refresh_friends_is_on">Friends is being refreshed</string>
+    <string name="refresh_friends_is_off">Friends refreshing is off</string>
     <string name="alarm">Alarm (click for settings)</string>
     <string name="refresh_friends_title">Friends</string>
     <string name="is_offline">is offline</string>

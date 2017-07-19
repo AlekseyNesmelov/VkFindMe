@@ -16,6 +16,8 @@ import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DataBaseHelper extends SQLiteOpenHelper {
@@ -165,6 +167,69 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return alarms;
+    }
+
+    public Map<User, List<Alarm>> getAlarmUsers() {
+        final Map<User, List<Alarm>> alarmUsers = new ConcurrentHashMap<>();
+
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+        final String alarmTable = ALARM_TABLE + "_" + user;
+        final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
+
+        final StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT ")
+                .append(usersTable).append(".").append (ID).append(", ")
+                .append(usersTable).append(".").append(NAME).append(", ")
+                .append(usersTable).append(".").append(SURNAME).append(", ")
+
+                .append(alarmTable).append(".").append(ID).append(", ")
+                .append(alarmTable).append(".").append(LATITUDE).append(", ")
+                .append(alarmTable).append(".").append(LONGITUDE).append(", ")
+                .append(alarmTable).append(".").append(RADIUS)
+
+                .append(" FROM ")
+                .append(usersTable).append(", ")
+                .append(alarmUsersTable).append(", ")
+                .append(alarmTable)
+
+                .append(" WHERE ")
+                .append(usersTable).append(".").append (ID).append("=").append(USER_ID)
+                .append(" AND ")
+                .append(alarmTable).append(".").append(ID).append("=").append(ALARM_ID)
+                .append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                final int userVkId = cursor.getInt(0);
+                final String name = cursor.getString(1);
+                final String surname = cursor.getString(2);
+                final int alarmId = cursor.getInt(3);
+                final double lat = cursor.getDouble(4);
+                final double lon = cursor.getDouble(5);
+                final float radius = cursor.getFloat(6);
+
+                final User alarmUser = new User();
+                alarmUser.setVkId(userVkId);
+                alarmUser.setName(name);
+                alarmUser.setSurname(surname);
+
+                final Alarm alarm = new Alarm(alarmId, lat, lon, radius);
+
+                List<Alarm> alarms = alarmUsers.get(alarmUser);
+                if (alarms == null) {
+                    alarms = new ArrayList<>();
+                }
+                alarms.add(alarm);
+
+                alarmUsers.put(alarmUser, alarms);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return alarmUsers;
     }
 
     public boolean isAlarmCompleted(final long alarmId) {

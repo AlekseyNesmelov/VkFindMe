@@ -55,8 +55,8 @@
 
             <ImageButton
                 android:id="@+id/addFriendsBtn"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
                 android:layout_gravity="center"
                 android:background="@drawable/add_friends_selector" />
 
@@ -65,12 +65,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/friends_list_bg"
+                android:layout_gravity="center_vertical"
                 android:layout_margin="3dp">
 
                 <LinearLayout
                     android:id="@+id/pictureLinear"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal" >
                 </LinearLayout>
 
