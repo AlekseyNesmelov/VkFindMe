@@ -50,6 +50,10 @@ public class Storage {
         mAlarmUpdatedListeners.add(listener);
     }
 
+    public boolean isAlarmUpdateListenerExist() {
+        return !mAlarmUpdatedListeners.isEmpty();
+    }
+
     public String getUserIdsString() {
         return mDataBaseHelper.getUserIdsString(Const.FRIENDS_LIMIT);
     }
@@ -68,6 +72,10 @@ public class Storage {
 
     public void removeUserUpdatedListener(final OnUserUpdatedListener listener) {
         mUserUpdatedListeners.remove(listener);
+    }
+
+    public boolean isUserUpdateListenerExist() {
+        return !mUserUpdatedListeners.isEmpty();
     }
 
     public boolean getRefreshFriends() {

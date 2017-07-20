@@ -179,7 +179,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         final StringBuilder selectQuery = new StringBuilder();
         selectQuery.append("SELECT ")
-                .append(usersTable).append(".").append (ID).append(", ")
+                .append(usersTable).append(".").append(VK_ID).append(", ")
                 .append(usersTable).append(".").append(NAME).append(", ")
                 .append(usersTable).append(".").append(SURNAME).append(", ")
 
@@ -194,7 +194,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 .append(alarmTable)
 
                 .append(" WHERE ")
-                .append(usersTable).append(".").append (ID).append("=").append(USER_ID)
+                .append(usersTable).append(".").append (VK_ID).append("=").append(USER_ID)
                 .append(" AND ")
                 .append(alarmTable).append(".").append(ID).append("=").append(ALARM_ID)
                 .append(";");

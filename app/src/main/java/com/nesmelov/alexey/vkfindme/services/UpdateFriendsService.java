@@ -2,6 +2,7 @@ package com.nesmelov.alexey.vkfindme.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -20,6 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -82,9 +84,35 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
                 allUsers.remove(id);
                 mStorage.setUserPos(id, lat, lon);
 
+                final List<Alarm> updatedAlarms = new ArrayList<>();
                 final List<Alarm> alarms = alarmUsers.get(id);
                 if (alarms != null) {
+                    for (final Alarm alarm : alarms) {
+                        float results[] = new float[1];
+                        Location.distanceBetween(
+                                alarm.getLat(),
+                                alarm.getLon(),
+                                lat,
+                                lon,
+                                results);
+                        if (results[0] < alarm.getRadius()) {
+                            mStorage.removeAlarmParticipant(alarm.getAlarmId(), id);
+                            updatedAlarms.add(alarm);
+                            break;
+                        }
+                    }
+                }
 
+                if (!updatedAlarms.isEmpty()) {
+                    /*FindMeApp.displayAlarmRingNotification(id, this, getString(R.string.app_name),
+                            user., MainActivity.class);
+                    mAlarmsForMe.remove(updatedAlarm);
+                    if (mStorage.isAlarmCompleted(updatedAlarm.getAlarmId())) {
+                        mStorage.removeAlarm(updatedAlarm.getAlarmId());
+                    }
+                    if (!isVisible() && !isMeInAlarm()) {
+                        stopSelf();
+                    }*/
                 }
             }
 
@@ -102,7 +130,7 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
     }
 
     private void refreshData() {
-        if (mStorage.getRefreshFriends()) {
+        if (mStorage.getRefreshFriends()/* && mStorage.isUserUpdateListenerExist()*/) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
