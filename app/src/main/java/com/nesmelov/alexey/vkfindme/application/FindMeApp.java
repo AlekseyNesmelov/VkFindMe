@@ -8,11 +8,9 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.v7.app.NotificationCompat;
 import android.widget.Toast;
-
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
@@ -83,8 +81,8 @@ public class FindMeApp extends Application {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
-    public static void displayNotification(final int id, final Context context,
-                                           final String ticket, final String message, final Class<?> pendingClass) {
+    public static void displayActiveNotification(final int id, final Context context,
+                                                 final String ticket, final String message, final Class<?> pendingClass) {
         final Intent intent = new Intent(context, pendingClass);
         final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
         final Notification notification = new NotificationCompat.Builder(context)
@@ -98,10 +96,6 @@ public class FindMeApp extends Application {
         sNotificationManager.notify(id, notification);
     }
 
-    public static void cancelNotification(final int id) {
-        sNotificationManager.cancel(id);
-    }
-
     public static void displayAlarmRingNotification(final int id, final Context context,
                                            final String ticket, final String message, final Class<?> pendingClass) {
         final Intent intent = new Intent(context, pendingClass);
@@ -113,10 +107,14 @@ public class FindMeApp extends Application {
                 .setTicker(ticket)
                 .setAutoCancel(true)
                 .setContentIntent(contentIntent)
-                .setVibrate(new long[] {500,500, 500, 500, 500})
+                .setVibrate(new long[] {3000, 3000, 3000, 3000, 3000})
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
-                .setLights(0xff00ff00, 300, 100)
+                .setLights(0xff00ff00, 2000, 4000)
                 .build();
         sNotificationManager.notify(id, notification);
+    }
+
+    public static void cancelNotification(final int id) {
+        sNotificationManager.cancel(id);
     }
 }

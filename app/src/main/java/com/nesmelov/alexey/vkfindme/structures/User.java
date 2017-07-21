@@ -10,7 +10,6 @@ public class User {
     private String mName = "";
     private String mSurname = "";
     private Boolean mChecked = false;
-    private Bitmap mIcon = null;
     private String mIconUrl = "";
     private double mLat = Const.BAD_LAT;
     private double mLon = Const.BAD_LON;
@@ -25,10 +24,6 @@ public class User {
 
     public void setSurname(final String surname) {
         mSurname = surname;
-    }
-
-    public void setIcon(final Bitmap icon) {
-        mIcon = icon;
     }
 
     public void setIconUrl(final String iconUrl) {
@@ -57,10 +52,6 @@ public class User {
 
     public String getSurname() {
         return mSurname;
-    }
-
-    public Bitmap getIcon() {
-        return mIcon;
     }
 
     public String getIconUrl() {

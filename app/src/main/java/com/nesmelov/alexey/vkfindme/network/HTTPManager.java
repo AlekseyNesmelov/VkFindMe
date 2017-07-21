@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 import android.widget.ImageView;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -13,8 +12,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
-import com.nesmelov.alexey.vkfindme.utils.Utils;
-
+import com.nesmelov.alexey.vkfindme.storage.Const;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -37,6 +35,7 @@ public class HTTPManager {
     private static final String SET_POSITION_ACTION_URL = "?action=set_pos";
     private static final String CHECK_USERS_ACTION_URL = "?action=check";
     private static final String GET_USERS_POS_ACTION_URL = "?action=get_pos";
+
     private RequestQueue mQueue;
 
     private JsonRequest mAddUserRequest = null;
@@ -87,38 +86,42 @@ public class HTTPManager {
         switch (request) {
             case REQUEST_ADD_USER:
                 try {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append("{\"user\": ").append(params[0]).append("}");
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(sb.toString()));
+                    final JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(Const.USER, params[0]);
+                    addRequest(request, Request.Method.POST, listener, jsonObject);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
                 break;
             case REQUEST_SET_VISIBILITY_TRUE:
                 try {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append("{\"user\": ").append(params[0]).append(", \"visible\": true, \"lat\": ")
-                            .append(params[1]).append(", \"lon\": ").append(params[2]).append("}");
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(sb.toString()));
+                    final JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(Const.USER, params[0]);
+                    jsonObject.put(Const.VISIBLE, true);
+                    jsonObject.put(Const.LAT, params[1]);
+                    jsonObject.put(Const.LON, params[2]);
+                    addRequest(request, Request.Method.POST, listener, jsonObject);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
                 break;
             case REQUEST_SET_VISIBILITY_FALSE:
                 try {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append("{\"user\": ").append(params[0]).append(", \"visible\": false}");
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(sb.toString()));
+                    final JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(Const.USER, params[0]);
+                    jsonObject.put(Const.VISIBLE, false);
+                    addRequest(request, Request.Method.POST, listener, jsonObject);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
                 break;
             case REQUEST_SET_POSITION:
                 try {
-                    final StringBuilder sb = new StringBuilder();
-                    sb.append("{\"user\": ").append(params[0]).append(", \"lat\": ").append(params[1])
-                            .append(", \"lon\": ").append(params[2]).append("}");
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(sb.toString()));
+                    final JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(Const.USER, params[0]);
+                    jsonObject.put(Const.LAT, params[1]);
+                    jsonObject.put(Const.LON, params[2]);
+                    addRequest(request, Request.Method.POST, listener, jsonObject);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
@@ -133,8 +136,8 @@ public class HTTPManager {
                             users.put(userString);
                         }
                     }
-                    json.put("users", users);
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(json.toString()));
+                    json.put(Const.USERS, users);
+                    addRequest(request, Request.Method.POST, listener, json);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }
@@ -149,8 +152,8 @@ public class HTTPManager {
                             users.put(userString);
                         }
                     }
-                    json.put("users", users);
-                    addRequest(request, Request.Method.POST, listener, new JSONObject(json.toString()));
+                    json.put(Const.USERS, users);
+                    addRequest(request, Request.Method.POST, listener, json);
                 } catch (Exception e) {
                     listener.onError(request, PARSE_ERROR_CODE);
                 }

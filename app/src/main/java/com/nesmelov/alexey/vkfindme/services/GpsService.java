@@ -25,7 +25,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class GpsService extends Service implements LocationListener, OnUpdateListener{
     public static final int VISIBLE_NOTIFICATION_ID = 111;
@@ -72,13 +71,13 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
                         mStorage.getGPSMinDelay(), mStorage.getGPSMinDistance(), this);
 
                 if (isVisible()) {
-                    FindMeApp.displayNotification(VISIBLE_NOTIFICATION_ID, this, getString(R.string.app_name),
+                    FindMeApp.displayActiveNotification(VISIBLE_NOTIFICATION_ID, this, getString(R.string.app_name),
                             getString(R.string.gps_service_on_message), MainActivity.class);
                 } else {
                     FindMeApp.cancelNotification(VISIBLE_NOTIFICATION_ID);
                 }
                 if (isMeInAlarm()) {
-                    FindMeApp.displayNotification(ME_IN_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
+                    FindMeApp.displayActiveNotification(ME_IN_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
                             getString(R.string.me_in_alarm), MainActivity.class);
                 } else {
                     FindMeApp.cancelNotification(ME_IN_ALARM_NOTIFICATION_ID);

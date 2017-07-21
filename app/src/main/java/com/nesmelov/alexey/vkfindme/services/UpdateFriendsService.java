@@ -49,7 +49,7 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
         mStorage = FindMeApp.getStorage();
         mHTTPManager = FindMeApp.getHTTPManager();
         if (mStorage.getRefreshFriends()) {
-            FindMeApp.displayNotification(FRIENDS_REFRESH_NOTIFICATION_ID, this, getString(R.string.app_name),
+            FindMeApp.displayActiveNotification(FRIENDS_REFRESH_NOTIFICATION_ID, this, getString(R.string.app_name),
                     getString(R.string.refresh_friends_is_on), MainActivity.class);
         }
     }

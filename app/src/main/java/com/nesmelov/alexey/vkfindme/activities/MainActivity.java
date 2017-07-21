@@ -10,14 +10,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.ProgressBar;
+
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
-import com.nesmelov.alexey.vkfindme.pages.ProfileFragment;
-import com.nesmelov.alexey.vkfindme.storage.Const;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
+import com.nesmelov.alexey.vkfindme.structures.User;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
@@ -25,7 +27,6 @@ import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -40,6 +41,7 @@ public class MainActivity extends Activity implements OnUpdateListener{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.loading_screen);
 
         mStorage = FindMeApp.getStorage();
         mVKManager = FindMeApp.getVKManager();
@@ -52,20 +54,25 @@ public class MainActivity extends Activity implements OnUpdateListener{
                     final JSONArray jsonResponse = response.json.getJSONArray(VKManager.RESPONSE);
                     final JSONObject jsonObjectRequest = jsonResponse.getJSONObject(0);
 
+                    final User user = new User();
+
                     final Integer id = jsonObjectRequest.getInt(VKManager.ID);
                     mStorage.setUserVkId(id);
+                    user.setVkId(id);
 
                     final String photoUrl = jsonObjectRequest.getString(VKManager.PHOTO_MAX);
                     mStorage.setUserIconUrl(photoUrl);
+                    user.setIconUrl(photoUrl);
 
                     final String firstName = jsonObjectRequest.getString(VKManager.FIRST_NAME);
                     mStorage.setUserName(firstName);
+                    user.setName(firstName);
 
                     final String lastName = jsonObjectRequest.getString(VKManager.LAST_NAME);
                     mStorage.setUserSurname(lastName);
+                    user.setSurname(lastName);
 
-                    mStorage.addUser(mStorage.getUserVkId(), mStorage.getUserName(), mStorage.getUserSurname(),
-                            Const.BAD_LAT, Const.BAD_LON, mStorage.getUserIconUrl());
+                    mStorage.addUser(user);
 
                     mHTTPManager.executeRequest(HTTPManager.REQUEST_ADD_USER,
                             HTTPManager.REQUEST_IDLE,
@@ -123,24 +130,11 @@ public class MainActivity extends Activity implements OnUpdateListener{
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     login();
                 } else {
+                    FindMeApp.showToast(MainActivity.this, getString(R.string.location_not_granted));
                     finish();
                 }
                 break;
             }
-        }
-    }
-
-    private void start() {
-        final Intent intent = new Intent(this, TabHostActivity.class);
-        startActivity(intent);
-        finish();
-    }
-
-    private void login() {
-        if (VKSdk.wakeUpSession(this)) {
-            mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
-        } else {
-            VKSdk.login(this, VKScope.FRIENDS, VKScope.PHOTOS);
         }
     }
 
@@ -158,5 +152,19 @@ public class MainActivity extends Activity implements OnUpdateListener{
                         finish();
                     }
                 });
+    }
+
+    private void start() {
+        final Intent intent = new Intent(this, TabHostActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void login() {
+        if (VKSdk.wakeUpSession(this)) {
+            mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+        } else {
+            VKSdk.login(this, VKScope.FRIENDS, VKScope.PHOTOS);
+        }
     }
 }

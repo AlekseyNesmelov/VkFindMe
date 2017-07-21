@@ -3,20 +3,16 @@ package com.nesmelov.alexey.vkfindme.storage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
-import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
+import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Storage {
@@ -228,20 +224,7 @@ public class Storage {
         userValues.put(DataBaseHelper.LATITUDE, Const.BAD_LAT);
         userValues.put(DataBaseHelper.LONGITUDE, Const.BAD_LON);
         userValues.put(DataBaseHelper.PHOTO_URL, user.getIconUrl());
-        userValues.put(DataBaseHelper.VISIBLE, 0);
-        return mDataBaseHelper.insertUser(userValues);
-    }
-
-    public long addUser(final long vkId, final String name, final String surname,
-                        final double lat, final double lon, final String photoUrl) {
-        final ContentValues userValues = new ContentValues();
-        userValues.put(DataBaseHelper.VK_ID, vkId);
-        userValues.put(DataBaseHelper.NAME, name);
-        userValues.put(DataBaseHelper.SURNAME, surname);
-        userValues.put(DataBaseHelper.LATITUDE, lat);
-        userValues.put(DataBaseHelper.LONGITUDE, lon);
-        userValues.put(DataBaseHelper.PHOTO_URL, photoUrl);
-        userValues.put(DataBaseHelper.VISIBLE, 0);
+        userValues.put(DataBaseHelper.VISIBLE, Const.INVISIBLE_STATE);
         return mDataBaseHelper.insertUser(userValues);
     }
 

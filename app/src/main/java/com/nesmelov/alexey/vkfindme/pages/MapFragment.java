@@ -22,7 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.google.android.gms.maps.CameraUpdate;
@@ -36,6 +35,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.nesmelov.alexey.vkfindme.activities.AlarmUsersActivity;
+import com.nesmelov.alexey.vkfindme.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
@@ -48,33 +48,30 @@ import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
-import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
-import com.nesmelov.alexey.vkfindme.ui.UserMarker;
+import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
+import com.nesmelov.alexey.vkfindme.ui.marker.UserMarker;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener,
-        OnUserUpdatedListener{
+        OnUserUpdatedListener {
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
-    private static final int USER_PREVIEW_SIZE = 65;
-    private static final int USER_MARKER_SIZE = 50;
+    private static final int USER_PREVIEW_SIZE_DP = 65;
+    private static final int USER_MARKER_SIZE_DP = 50;
 
     private static final int MODE_USUAL = 0;
     private static final int MODE_SELECT_ALARM_POS = 1;
@@ -85,8 +82,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private static final float START_ZOOM = 15f;
 
-    private View mView;
-
     private MapView mMapView;
     private GoogleMap mMap = null;
     private LocationManager mLocationManager;
@@ -94,24 +89,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private VKManager mVKManager;
     private HTTPManager mHTTPManager;
     private Storage mStorage;
+
     private int mCurrentMode = MODE_USUAL;
 
     private ToggleButton mVisibilityBtn;
     private CompoundButton.OnCheckedChangeListener mVisibilityBtnListener;
 
+    private Circle mAlarmRadius;
     private ImageView mAlarmTarget;
     private SeekBar mRadiusSeekBar;
-    private ToggleButton mRefreshFriendsBtn;
-    private ImageButton mAddFriendsBtn;
     private ImageButton mAlarmButton;
     private ImageButton mOkBtn;
     private ImageButton mNokBtn;
 
+    private ToggleButton mRefreshFriendsBtn;
+    private ImageButton mAddFriendsBtn;
+
     private LinearLayout mPictureLayout;
-
     private TextView mMessageView;
-
-    private Circle mAlarmRadius;
 
     private List<AlarmMarker> mAlarmMarkers = new CopyOnWriteArrayList<>();
     private Map<Integer, UserMarker> mUserMarkers = new ConcurrentHashMap<>();
@@ -135,7 +130,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mStorage.addUserUpdatedListener(this);
 
         final View view = inflater.inflate(R.layout.map_page, container, false);
-        mView = view;
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
@@ -429,6 +423,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         });
         mAlarmMarkers.addAll(mStorage.getAlarmMarkers(getContext(), mMap));
         addFriendsFromDataBase();
+
+        ((TabHostActivity)getActivity()).hideProgressBar();
     }
 
     @Override
@@ -450,7 +446,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 try {
                     final JSONArray users = update.getJSONArray("users");
                     for (int i = 0; i < users.length(); i++) {
-                        final Long userId = users.getLong(i);
+                        final Integer userId = users.getInt(i);
                         final User user = mUsersBuffer.get(userId);
                         if(user != null && !mUserMarkers.containsKey(userId)) {
                             final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
@@ -600,8 +596,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     }
 
     private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
-        final int size = Utils.dpToPx(getContext(), USER_PREVIEW_SIZE);
-        final int circleSize = Utils.dpToPx(getContext(), USER_MARKER_SIZE);
+        final int size = Utils.dpToPx(getContext(), USER_PREVIEW_SIZE_DP);
+        final int circleSize = Utils.dpToPx(getContext(), USER_MARKER_SIZE_DP);
         final Bitmap squareBitmap;
         final Bitmap circleBitmap;
         if (bitmap == null) {

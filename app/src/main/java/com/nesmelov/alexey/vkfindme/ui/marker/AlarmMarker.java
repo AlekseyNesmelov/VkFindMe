@@ -1,4 +1,4 @@
-package com.nesmelov.alexey.vkfindme.ui;
+package com.nesmelov.alexey.vkfindme.ui.marker;
 
 import android.content.Context;
 

@@ -7,14 +7,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
-import com.nesmelov.alexey.vkfindme.ui.AlarmMarker;
+import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +65,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
 
-        final long vkId = values.getAsLong(VK_ID);
+        final int vkId = values.getAsInteger(VK_ID);
 
         final StringBuilder selectQuery = new StringBuilder();
         selectQuery.append("SELECT COUNT(*) FROM ").append(usersTable)
@@ -84,8 +82,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         if (shouldInsert) {
             return database.insert(usersTable, null, values);
-        }
-        return -1;
+        }/* else {
+            final ContentValues contentValues = new ContentValues();
+            contentValues.put(PHOTO_URL, values.getAsString(PHOTO_URL));
+            return updateUser(vkId, contentValues);
+        }*/return -1;
     }
 
     public long insertAlarm(final ContentValues values) {

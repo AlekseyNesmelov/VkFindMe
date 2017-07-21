@@ -1,6 +1,7 @@
 package com.nesmelov.alexey.vkfindme.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,10 +11,11 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
-
 import com.nesmelov.alexey.vkfindme.R;
+import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.pages.MapFragment;
 import com.nesmelov.alexey.vkfindme.pages.ProfileFragment;
 import com.nesmelov.alexey.vkfindme.pages.SettingsFragment;
@@ -31,15 +33,19 @@ public class TabHostActivity extends FragmentActivity {
 
     private static final int PAGE_COUNT = 3;
 
+    private ProgressBar mProgressBar;
     private ViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private TabHost mTabHost;
 
     final VKAccessTokenTracker mVkAccessTokenTracker = new VKAccessTokenTracker() {
         @Override
-        public void onVKAccessTokenChanged(VKAccessToken oldToken, VKAccessToken newToken) {
+        public void onVKAccessTokenChanged(final VKAccessToken oldToken, final VKAccessToken newToken) {
             if (newToken == null) {
-                //TODO: finish activity, start MainActivity and show toast. Add certain string to string.xml
+                FindMeApp.showToast(TabHostActivity.this, getString(R.string.needs_authorization));
+                final Intent intent = new Intent(TabHostActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
             }
         }
     };
@@ -49,6 +55,7 @@ public class TabHostActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mViewPager = (ViewPager) findViewById(R.id.main_pager);
         mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
             @Override
@@ -73,10 +80,10 @@ public class TabHostActivity extends FragmentActivity {
 
         mViewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(final int position) {
                 switch (position) {
                     case PAGE_NUMBER_PROFILE:
-                    mTabHost.setCurrentTabByTag(TAG_PROFILE);
+                        mTabHost.setCurrentTabByTag(TAG_PROFILE);
                         break;
                     case PAGE_NUMBER_MAP:
                         mTabHost.setCurrentTabByTag(TAG_MAP);
@@ -90,12 +97,12 @@ public class TabHostActivity extends FragmentActivity {
             }
 
             @Override
-            public void onPageScrolled(int position, float positionOffset,
-                                       int positionOffsetPixels) {
+            public void onPageScrolled(final int position, final float positionOffset,
+                                       final int positionOffsetPixels) {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
+            public void onPageScrollStateChanged(final int state) {
             }
         });
 
@@ -126,6 +133,10 @@ public class TabHostActivity extends FragmentActivity {
         mTabHost.setCurrentTabByTag(TAG_MAP);
 
         mVkAccessTokenTracker.startTracking();
+    }
+
+    public void hideProgressBar() {
+        mProgressBar.setVisibility(View.GONE);
     }
 
     private void setupTab(final String tag, final String name) {
