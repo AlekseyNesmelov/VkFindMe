@@ -1,0 +1,14 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/tabhost_background">
+
+    <ListPreference
+        android:key="list_preference"
+        android:title="Частота обновления друзей"
+        android:summary="Как часто запрвшивать координаты друзей"
+        android:entries="@array/friend_refresh_delays_titles"
+        android:entryValues="@array/friend_refresh_delays_values" />
+
+</PreferenceScreen>

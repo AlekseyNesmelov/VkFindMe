@@ -34,4 +34,22 @@
     <string name="server_is_not_accessible">Server is not accessible. Please, try again later.</string>
     <string name="logout">Logout</string>
     <integer name="com_vk_sdk_AppId">6108914</integer>
+    <array name="friend_refresh_delays_titles" >
+        <item>1 second</item>
+        <item>2 seconds</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>3 minute</item>
+    </array>
+    <array name="friend_refresh_delays_values" >
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>180000</item>
+    </array>
 </resources>

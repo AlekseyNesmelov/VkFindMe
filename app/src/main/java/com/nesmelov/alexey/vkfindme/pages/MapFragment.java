@@ -1,6 +1,7 @@
 package com.nesmelov.alexey.vkfindme.pages;
 
 import android.Manifest;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,7 +11,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -137,10 +137,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    FindMeApp.showToast(getContext(), getString(R.string.refresh_friends_is_on));
+                    FindMeApp.showToast(getActivity(), getString(R.string.refresh_friends_is_on));
                 }
                 mStorage.setRefreshFriends(isChecked);
-                getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
+                getActivity().startService(new Intent(getActivity(), UpdateFriendsService.class));
             }
         });
         mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
@@ -233,7 +233,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         setMode(MODE_SELECT_ALARM_RADIUS);
                         break;
                     case MODE_SELECT_ALARM_RADIUS:
-                        final Intent intent = new Intent(MapFragment.this.getContext(), AlarmUsersActivity.class);
+                        final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
                         final LatLng latLng = mAlarmRadius.getCenter();
                         intent.putExtra(Const.LAT,latLng.latitude);
                         intent.putExtra(Const.LON,latLng.longitude);
@@ -305,13 +305,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
                     final long alarmId = mStorage.addAlarm(lat, lon, radius, users);
                     final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, users, names);
-                    alarmMarker.addToMap(getContext(), mMap);
+                    alarmMarker.addToMap(getActivity(), mMap);
                     mAlarmMarkers.put(alarmId, alarmMarker);
 
-                    FindMeApp.showToast(getContext(), getString(R.string.alarm_accepted));
-                    getActivity().startService(new Intent(getContext(), GpsService.class));
+                    FindMeApp.showToast(getActivity(), getString(R.string.alarm_accepted));
+                    getActivity().startService(new Intent(getActivity(), GpsService.class));
                 } else {
-                    FindMeApp.showToast(getContext(), getString(R.string.alarm_canceled));
+                    FindMeApp.showToast(getActivity(), getString(R.string.alarm_canceled));
                 }
                 break;
             case CHANGE_ALARM_USERS_REQUEST_CODE:
@@ -326,7 +326,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         markerToUpdate.getMarker().setSnippet(names);
                         markerToUpdate.setUsers(users);
                         markerToUpdate.getMarker().hideInfoWindow();
-                        FindMeApp.showToast(getContext(), getString(R.string.alarm_updated));
+                        FindMeApp.showToast(getActivity(), getString(R.string.alarm_updated));
                     }
                 } else if (resultCode == Const.RESULT_UPDATE) {
                     final AlarmMarker markerToRemove = mAlarmMarkers.get(alarmId);
@@ -337,9 +337,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     }
                     mStorage.removeAlarm(alarmId);
 
-                    FindMeApp.showToast(getContext(), getString(R.string.alarm_canceled));
+                    FindMeApp.showToast(getActivity(), getString(R.string.alarm_canceled));
                 }
-                getActivity().startService(new Intent(getContext(), GpsService.class));
+                getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
         }
     }
@@ -373,7 +373,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
         if (ActivityCompat.checkSelfPermission(
-                getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             mLocationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
             final Location location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
@@ -387,7 +387,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             @Override
             public void onInfoWindowClick(final Marker marker) {
                 if (marker.getTitle().equals(getString(R.string.alarm))) {
-                    final Intent intent = new Intent(MapFragment.this.getContext(), AlarmUsersActivity.class);
+                    final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
 
                     AlarmMarker selectedMarker = null;
                     for (final Long alarmMarkerId : mAlarmMarkers.keySet()) {
@@ -408,7 +408,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 }
             }
         });
-        mAlarmMarkers.putAll(mStorage.getAlarmMarkers(getContext(), mMap));
+        mAlarmMarkers.putAll(mStorage.getAlarmMarkers(getActivity(), mMap));
         addFriendsFromDataBase();
 
         ((TabHostActivity)getActivity()).hideProgressBar();
@@ -420,14 +420,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             case HTTPManager.REQUEST_ADD_USER:
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_TRUE:
-                FindMeApp.showToast(getContext(), getString(R.string.visibility_true_message));
+                FindMeApp.showToast(getActivity(), getString(R.string.visibility_true_message));
                 mStorage.setVisibility(true);
-                getActivity().startService(new Intent(getContext(), GpsService.class));
+                getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
-                FindMeApp.showToast(getContext(), getString(R.string.visibility_false_message));
+                FindMeApp.showToast(getActivity(), getString(R.string.visibility_false_message));
                 mStorage.setVisibility(false);
-                getActivity().startService(new Intent(getContext(), GpsService.class));
+                getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
             case HTTPManager.REQUEST_CHECK_USERS:
                 try {
@@ -452,7 +452,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                             mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
                         }
                     }
-                    FindMeApp.showPopUp(getContext(), getString(R.string.refresh_friends_title),
+                    FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
                             getString(R.string.refresh_friends_message_ok));
                 } catch (JSONException e) {
                     onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
@@ -469,20 +469,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             case HTTPManager.REQUEST_ADD_USER:
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_TRUE:
-                FindMeApp.showPopUp(getContext(), getString(R.string.error_title),
+                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
                         getString(R.string.on_visibility_server_error_message));
                 mVisibilityBtn.setOnCheckedChangeListener(null);
                 mVisibilityBtn.setChecked(mStorage.getVisibility());
                 mVisibilityBtn.setOnCheckedChangeListener(mVisibilityBtnListener);
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
-                FindMeApp.showPopUp(getContext(), getString(R.string.error_title),
+                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
                         getString(R.string.off_visibility_server_error_message));
                 mStorage.setVisibility(false);
-                getActivity().startService(new Intent(getContext(), GpsService.class));
+                getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
             case HTTPManager.REQUEST_CHECK_USERS:
-                FindMeApp.showPopUp(getContext(), getString(R.string.error_title),
+                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
                         getString(R.string.refresh_friends_server_error_message));
                 break;
             default:
@@ -567,13 +567,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     public void onDestroyView() {
         mStorage.removeAlarmUpdatedListener();
         mStorage.removeUserUpdatedListener();
-        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
+        getActivity().startService(new Intent(getActivity(), UpdateFriendsService.class));
         super.onDestroyView();
     }
 
     private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
-        final int size = Utils.dpToPx(getContext(), USER_PREVIEW_SIZE_DP);
-        final int circleSize = Utils.dpToPx(getContext(), USER_MARKER_SIZE_DP);
+        final int size = Utils.dpToPx(getActivity(), USER_PREVIEW_SIZE_DP);
+        final int circleSize = Utils.dpToPx(getActivity(), USER_MARKER_SIZE_DP);
         final Bitmap squareBitmap;
         final Bitmap circleBitmap;
         if (bitmap == null) {
@@ -587,7 +587,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         final UserMarker userMarker = new UserMarker(user.getVkId(),user.getName(), user.getSurname(),
                 user.getLat(), user.getLon(), user.isVisible(), circleBitmap);
 
-        final ImageView imageView = new ImageView(getContext());
+        final ImageView imageView = new ImageView(getActivity());
         final String userId = userMarker.addToMap(map).replace("m", "");
 
         imageView.setId(Integer.parseInt(userId));
@@ -622,7 +622,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                                 new LatLng(userMarker.getLat(), userMarker.getLon()), mMap.getCameraPosition().zoom);
                         mMap.animateCamera(cameraUpdate);
                     } else {
-                        FindMeApp.showToast(getContext(), userMarker.getName() + " " + userMarker.getSurname()
+                        FindMeApp.showToast(getActivity(), userMarker.getName() + " " + userMarker.getSurname()
                                 + " " + getString(R.string.is_offline));
                     }
                 }

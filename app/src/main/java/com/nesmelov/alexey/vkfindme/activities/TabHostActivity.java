@@ -1,12 +1,12 @@
 package com.nesmelov.alexey.vkfindme.activities;
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -22,7 +22,7 @@ import com.nesmelov.alexey.vkfindme.pages.SettingsFragment;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKAccessTokenTracker;
 
-public class TabHostActivity extends FragmentActivity {
+public class TabHostActivity extends Activity {
     private static final String TAG_PROFILE = "tagProfile";
     private static final String TAG_MAP = "tagMap";
     private static final String TAG_SETTINGS = "tagSettings";
@@ -57,7 +57,7 @@ public class TabHostActivity extends FragmentActivity {
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mViewPager = (ViewPager) findViewById(R.id.main_pager);
-        mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+        mPagerAdapter = new FragmentPagerAdapter(getFragmentManager()) {
             @Override
             public int getCount() {
                 return PAGE_COUNT;

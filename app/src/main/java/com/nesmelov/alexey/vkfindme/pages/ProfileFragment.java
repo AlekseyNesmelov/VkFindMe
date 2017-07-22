@@ -1,15 +1,14 @@
 package com.nesmelov.alexey.vkfindme.pages;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
@@ -73,7 +72,7 @@ public class ProfileFragment extends Fragment implements OnUpdateListener {
 
     private void returnToMainActivity() {
         VKSdk.logout();
-        final Intent intent = new Intent(getContext(), MainActivity.class);
+        final Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
         getActivity().finish();
     }
