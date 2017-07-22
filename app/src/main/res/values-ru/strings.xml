@@ -29,6 +29,7 @@
     <string name="alarm">Будильник (нажмите для редактирования)</string>
     <string name="location_not_granted">Вы должны дать разрешение</string>
     <string name="reach_alarm">Будильник достигнут</string>
+    <string name="friend_in_alarm">Ваш друг достиг будильник</string>
     <string name="needs_authorization">Необходима авторизация ВК</string>
     <string name="logout">Выйти</string>
     <string name="server_is_not_accessible">Сервер не доступен. Проверьте Интернет-соединение.</string>

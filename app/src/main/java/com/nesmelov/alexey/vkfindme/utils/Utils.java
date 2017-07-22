@@ -7,13 +7,13 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.location.Location;
 import android.util.DisplayMetrics;
 
-/**
- * Created by 70508 on 12.07.2017.
- */
+import com.nesmelov.alexey.vkfindme.structures.Alarm;
 
 public class Utils {
+
     public static Bitmap getCroppedBitmap(final Bitmap bitmap) {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
@@ -33,5 +33,11 @@ public class Utils {
     public static int dpToPx(final Context context, final int dp) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    public static boolean checkAlarm(final Alarm alarm, final double lat, final double lon) {
+        float results[] = new float[1];
+        Location.distanceBetween(alarm.getLat(), alarm.getLon(), lat, lon, results);
+        return results[0] < alarm.getRadius();
     }
 }

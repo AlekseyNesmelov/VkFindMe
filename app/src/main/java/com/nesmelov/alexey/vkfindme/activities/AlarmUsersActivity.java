@@ -81,7 +81,7 @@ public class AlarmUsersActivity extends FragmentActivity {
             public void onClick(View v) {
                 final Intent intent = new Intent();
                 intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
-                setResult(RESULT_CANCELED, intent);
+                setResult(Const.RESULT_UPDATE, intent);
                 finish();
             }
         });

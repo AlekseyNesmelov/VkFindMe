@@ -24,6 +24,7 @@
     <string name="refresh_friends_is_off">Friends refreshing is off</string>
     <string name="alarm">Alarm (click for settings)</string>
     <string name="refresh_friends_title">Friends</string>
+    <string name="friend_in_alarm">Your friend has reached the alarm</string>
     <string name="is_offline">is offline</string>
     <string name="refresh_friends_message_ok">Friends have been refreshed</string>
     <string name="refresh_friends_message_nok">Can not refresh friends</string>

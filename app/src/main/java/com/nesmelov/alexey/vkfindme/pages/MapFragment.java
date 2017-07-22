@@ -61,12 +61,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener, OnAlarmUpdatedListener,
-        OnUserUpdatedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener,
+        OnAlarmUpdatedListener, OnUserUpdatedListener {
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
@@ -108,7 +107,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private LinearLayout mPictureLayout;
     private TextView mMessageView;
 
-    private List<AlarmMarker> mAlarmMarkers = new CopyOnWriteArrayList<>();
+    private Map<Long, AlarmMarker> mAlarmMarkers = new ConcurrentHashMap<>();
     private Map<Integer, UserMarker> mUserMarkers = new ConcurrentHashMap<>();
 
     private Map<Integer, User> mUsersBuffer = new ConcurrentHashMap<>();
@@ -119,16 +118,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mHTTPManager = FindMeApp.getHTTPManager();
         mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
-        getActivity().startService(new Intent(getContext(), GpsService.class));
-        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
+        mStorage.setAlarmUpdatedListener(this);
+        mStorage.setUserUpdatedListener(this);
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
-        mStorage.addAlarmUpdatedListener(this);
-        mStorage.addUserUpdatedListener(this);
-
         final View view = inflater.inflate(R.layout.map_page, container, false);
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
@@ -137,7 +133,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
 
         mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
-        mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
         mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -148,6 +143,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
             }
         });
+        mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
 
         mAddFriendsBtn = (ImageButton) view.findViewById(R.id.addFriendsBtn);
         mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
@@ -308,7 +304,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     final float radius = data.getFloatExtra(Const.RADIUS, Const.BAD_RADIUS);
 
                     final long alarmId = mStorage.addAlarm(lat, lon, radius, users);
-                    mAlarmMarkers.add(new AlarmMarker(getContext(), alarmId, lat, lon, radius, users, names, mMap));
+                    final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, users, names);
+                    alarmMarker.addToMap(getContext(), mMap);
+                    mAlarmMarkers.put(alarmId, alarmMarker);
 
                     FindMeApp.showToast(getContext(), getString(R.string.alarm_accepted));
                     getActivity().startService(new Intent(getContext(), GpsService.class));
@@ -322,13 +320,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 if (resultCode == RESULT_OK) {
                     final ArrayList<Integer> users = data.getIntegerArrayListExtra(Const.USERS);
                     mStorage.updateAlarm(alarmId, users);
-                    AlarmMarker markerToUpdate = null;
-                    for (final AlarmMarker alarmMarker : mAlarmMarkers) {
-                        if (alarmMarker.getAlarmId() == alarmId) {
-                            markerToUpdate = alarmMarker;
-                            break;
-                        }
-                    }
+                    final AlarmMarker markerToUpdate = mAlarmMarkers.get(alarmId);
                     if (markerToUpdate != null) {
                         final String names = data.getStringExtra(Const.NAMES);
                         markerToUpdate.getMarker().setSnippet(names);
@@ -336,14 +328,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         markerToUpdate.getMarker().hideInfoWindow();
                         FindMeApp.showToast(getContext(), getString(R.string.alarm_updated));
                     }
-                } else {
-                    AlarmMarker markerToRemove = null;
-                    for (final AlarmMarker alarmMarker : mAlarmMarkers) {
-                        if (alarmMarker.getAlarmId() == alarmId) {
-                            markerToRemove = alarmMarker;
-                            break;
-                        }
-                    }
+                } else if (resultCode == Const.RESULT_UPDATE) {
+                    final AlarmMarker markerToRemove = mAlarmMarkers.get(alarmId);
                     if (markerToRemove != null) {
                         markerToRemove.getMarker().setVisible(false);
                         markerToRemove.getMarker().remove();
@@ -404,7 +390,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     final Intent intent = new Intent(MapFragment.this.getContext(), AlarmUsersActivity.class);
 
                     AlarmMarker selectedMarker = null;
-                    for (final AlarmMarker alarmMarker : mAlarmMarkers) {
+                    for (final Long alarmMarkerId : mAlarmMarkers.keySet()) {
+                        final AlarmMarker alarmMarker = mAlarmMarkers.get(alarmMarkerId);
                         if (alarmMarker.getMarker().equals(marker)) {
                             selectedMarker = alarmMarker;
                             break;
@@ -421,7 +408,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 }
             }
         });
-        mAlarmMarkers.addAll(mStorage.getAlarmMarkers(getContext(), mMap));
+        mAlarmMarkers.putAll(mStorage.getAlarmMarkers(getContext(), mMap));
         addFriendsFromDataBase();
 
         ((TabHostActivity)getActivity()).hideProgressBar();
@@ -555,29 +542,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     @Override
     public void onAlarmRemoved(long alarmId) {
-        AlarmMarker markerToRemove = null;
-        for (final AlarmMarker alarmMarker : mAlarmMarkers) {
-            if (alarmMarker.getAlarmId() == alarmId) {
-                markerToRemove = alarmMarker;
-                break;
-            }
-        }
+        final AlarmMarker markerToRemove = mAlarmMarkers.get(alarmId);
         if (markerToRemove != null) {
             markerToRemove.getMarker().setVisible(false);
             markerToRemove.getMarker().remove();
-            mAlarmMarkers.remove(markerToRemove);
+            mAlarmMarkers.remove(alarmId);
         }
     }
 
     @Override
     public void onAlarmUpdated(long alarmId) {
-        AlarmMarker markerToUpdate = null;
-        for (final AlarmMarker alarmMarker : mAlarmMarkers) {
-            if (alarmMarker.getAlarmId() == alarmId) {
-                markerToUpdate = alarmMarker;
-                break;
-            }
-        }
+        final AlarmMarker markerToUpdate = mAlarmMarkers.get(alarmId);
         if (markerToUpdate != null) {
             final AlarmMarker marker = mStorage.getAlarmMarker(alarmId);
             if (marker != null) {
@@ -590,9 +565,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     @Override
     public void onDestroyView() {
+        mStorage.removeAlarmUpdatedListener();
+        mStorage.removeUserUpdatedListener();
+        getActivity().startService(new Intent(getContext(), UpdateFriendsService.class));
         super.onDestroyView();
-        mStorage.removeAlarmUpdatedListener(this);
-        mStorage.removeUserUpdatedListener(this);
     }
 
     private void addUserPreviewIcon(final User user, final Bitmap bitmap, final GoogleMap map) {
@@ -608,11 +584,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             squareBitmap = Bitmap.createScaledBitmap(bitmap, size, size, false);
             circleBitmap = Utils.getCroppedBitmap(Bitmap.createScaledBitmap(squareBitmap, circleSize, circleSize, false));
         }
-        final UserMarker userMarker = new UserMarker(user.getVkId(),
-                user.getLat(), user.getLon(), false, user.getName(), user.getSurname(), circleBitmap);
+        final UserMarker userMarker = new UserMarker(user.getVkId(),user.getName(), user.getSurname(),
+                user.getLat(), user.getLon(), user.isVisible(), circleBitmap);
 
         final ImageView imageView = new ImageView(getContext());
-        final String userId = userMarker.addOnMap(map).replace("m", "");
+        final String userId = userMarker.addToMap(map).replace("m", "");
 
         imageView.setId(Integer.parseInt(userId));
         imageView.setPadding(4, 4, 4, 4);
@@ -621,10 +597,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         imageView.setMaxHeight(size);
         imageView.setMaxWidth(size);
         imageView.setImageBitmap(squareBitmap);
-        imageView.setBackgroundColor(Color.parseColor(COLOR_INVISIBLE));
-
+        if (user.isVisible()) {
+            imageView.setBackgroundColor(Color.parseColor(COLOR_VISIBLE));
+        } else {
+            imageView.setBackgroundColor(Color.parseColor(COLOR_INVISIBLE));
+        }
         imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-
         imageView.setClickable(true);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -656,18 +634,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     }
 
     private void addFriendsFromDataBase() {
-        final List<User> friend = mStorage.getFriends();
-        for (final User user : friend) {
+        final List<User> friends = mStorage.getFriends();
+        for (final User user : friends) {
             final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
                 @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                public void onResponse(final ImageLoader.ImageContainer response, final boolean isImmediate) {
                     if (response.getBitmap() != null) {
                         addUserPreviewIcon(user, response.getBitmap(), mMap);
                     }
                 }
 
                 @Override
-                public void onErrorResponse(VolleyError error) {
+                public void onErrorResponse(final VolleyError error) {
                 }
             };
             mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
@@ -681,7 +659,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             userMarker.setVisible(true);
             userMarker.setLatLon(lat, lon);
 
-            final ImageView previewIcon = (ImageView) getActivity().findViewById(userMarker.getMarkerId());
+            final int markerId = userMarker.getMarkerId();
+            final ImageView previewIcon = (ImageView) mPictureLayout.findViewById(markerId);
             if (previewIcon != null) {
                 previewIcon.setBackgroundColor(Color.parseColor(COLOR_VISIBLE));
             }

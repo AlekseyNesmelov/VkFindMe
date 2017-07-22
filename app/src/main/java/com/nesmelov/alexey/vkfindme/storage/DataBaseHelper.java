@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
@@ -142,6 +143,19 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return false;
     }
 
+    public boolean isAlarmExist() {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
+        final String selectQuery = "SELECT COUNT(*) FROM " + alarmUsersTable +
+                " WHERE NOT " + USER_ID + "=" + user + ";";
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            return cursor.getLong(0) != 0;
+        }
+        return false;
+    }
+
     public List<Alarm> getAlarmsForMe() {
         final List<Alarm> alarms = new ArrayList<>();
 
@@ -170,19 +184,16 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return alarms;
     }
 
-    public Map<User, List<Alarm>> getAlarmUsers() {
-        final Map<User, List<Alarm>> alarmUsers = new ConcurrentHashMap<>();
+    public Map<Integer, List<Alarm>> getAlarmUsers() {
+        final Map<Integer, List<Alarm>> alarmUsers = new ConcurrentHashMap<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
-        final String usersTable = USERS_TABLE + "_" + user;
         final String alarmTable = ALARM_TABLE + "_" + user;
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
 
         final StringBuilder selectQuery = new StringBuilder();
         selectQuery.append("SELECT ")
-                .append(usersTable).append(".").append(VK_ID).append(", ")
-                .append(usersTable).append(".").append(NAME).append(", ")
-                .append(usersTable).append(".").append(SURNAME).append(", ")
+                .append(alarmUsersTable).append(".").append(USER_ID).append(", ")
 
                 .append(alarmTable).append(".").append(ID).append(", ")
                 .append(alarmTable).append(".").append(LATITUDE).append(", ")
@@ -190,13 +201,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 .append(alarmTable).append(".").append(RADIUS)
 
                 .append(" FROM ")
-                .append(usersTable).append(", ")
                 .append(alarmUsersTable).append(", ")
                 .append(alarmTable)
 
                 .append(" WHERE ")
-                .append(usersTable).append(".").append (VK_ID).append("=").append(USER_ID)
-                .append(" AND ")
                 .append(alarmTable).append(".").append(ID).append("=").append(ALARM_ID)
                 .append(";");
 
@@ -206,27 +214,20 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 final int userVkId = cursor.getInt(0);
-                final String name = cursor.getString(1);
-                final String surname = cursor.getString(2);
-                final int alarmId = cursor.getInt(3);
-                final double lat = cursor.getDouble(4);
-                final double lon = cursor.getDouble(5);
-                final float radius = cursor.getFloat(6);
-
-                final User alarmUser = new User();
-                alarmUser.setVkId(userVkId);
-                alarmUser.setName(name);
-                alarmUser.setSurname(surname);
+                final int alarmId = cursor.getInt(1);
+                final double lat = cursor.getDouble(2);
+                final double lon = cursor.getDouble(3);
+                final float radius = cursor.getFloat(4);
 
                 final Alarm alarm = new Alarm(alarmId, lat, lon, radius);
 
-                List<Alarm> alarms = alarmUsers.get(alarmUser);
+                List<Alarm> alarms = alarmUsers.get(userVkId);
                 if (alarms == null) {
                     alarms = new ArrayList<>();
                 }
                 alarms.add(alarm);
 
-                alarmUsers.put(alarmUser, alarms);
+                alarmUsers.put(userVkId, alarms);
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -286,6 +287,27 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return sb.toString();
     }
 
+    public String getUserName(final int id) {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+
+        final StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT ").append(NAME).append(", ").append(SURNAME)
+                .append(" FROM ").append(usersTable)
+                .append(" WHERE ").append(VK_ID).append(" = ").append(id).append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                return cursor.getString(0) + " " + cursor.getString(1);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return "";
+    }
+
     public List<Integer> getUserIds(final long limit) {
         final List<Integer> users = new ArrayList<>();
 
@@ -329,7 +351,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 friend.setVkId(cursor.getInt(1));
                 friend.setName(cursor.getString(2));
                 friend.setSurname(cursor.getString(3));
+                friend.setLat(cursor.getDouble(4));
+                friend.setLon(cursor.getDouble(5));
                 friend.setIconUrl(cursor.getString(6));
+                friend.setVisible(cursor.getInt(7) == 1);
                 users.add(friend);
             } while (cursor.moveToNext());
         }
@@ -337,8 +362,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return users;
     }
 
-    public List<AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
-        final List<AlarmMarker> alarms = new CopyOnWriteArrayList<>();
+    public Map<Long, AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
+        final Map<Long, AlarmMarker> alarms = new ConcurrentHashMap<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
@@ -353,7 +378,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                final int id = cursor.getInt(0);
+                final long id = cursor.getLong(0);
                 final double lat = cursor.getDouble(1);
                 final double lon = cursor.getDouble(2);
                 final float radius = cursor.getFloat(3);
@@ -385,9 +410,10 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                     names = names.delete(names.length() - 2, names.length());
                 }
 
-                final AlarmMarker alarmMarker = new AlarmMarker(context, id, lat, lon,
-                        radius, alarmUsers, names.toString(), map);
-                alarms.add(alarmMarker);
+                final AlarmMarker alarmMarker = new AlarmMarker(id, lat, lon,
+                        radius, alarmUsers, names.toString());
+                alarmMarker.addToMap(context, map);
+                alarms.put(id, alarmMarker);
             } while (cursor.moveToNext());
         }
         cursor.close();

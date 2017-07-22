@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
@@ -20,9 +18,8 @@ import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
-
+import com.nesmelov.alexey.vkfindme.utils.Utils;
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,14 +43,12 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
 
     @Override
     public void onCreate() {
-        Log.d("GpsService", "onCreate");
         super.onCreate();
         mStorage = FindMeApp.getStorage();
         mHTTPManager = FindMeApp.getHTTPManager();
     }
 
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-        Log.d("GpsService", "onStartCommand");
         if (isVisible() || isMeInAlarm()) {
 
             synchronized (mLock) {
@@ -90,7 +85,6 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
     }
 
     public void onDestroy() {
-        Log.d("GpsService", "onDestroy");
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 mLocationManager != null) {
@@ -104,8 +98,11 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
 
     @Override
     public void onLocationChanged(final Location location) {
-        Log.d("GpsService", "onLocationChanged");
         if (location != null) {
+
+            mStorage.setUserLat(location.getLatitude());
+            mStorage.setUserLon(location.getLongitude());
+
             if (mHTTPManager != null && isVisible()) {
                 mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_POSITION, HTTPManager.REQUEST_IDLE, this,
                         String.valueOf(mStorage.getUserVkId()),
@@ -116,14 +113,7 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
             synchronized (mLock) {
                 Alarm updatedAlarm = null;
                 for (final Alarm alarm : mAlarmsForMe) {
-                    float results[] = new float[1];
-                    Location.distanceBetween(
-                            alarm.getLat(),
-                            alarm.getLon(),
-                            location.getLatitude(),
-                            location.getLongitude(),
-                            results);
-                    if (results[0] < alarm.getRadius()) {
+                    if (Utils.checkAlarm(alarm, location.getLatitude(), location.getLongitude())) {
                         mStorage.removeAlarmParticipant(alarm.getAlarmId(), mStorage.getUserVkId());
                         updatedAlarm = alarm;
                         break;
@@ -145,28 +135,23 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
+    public void onStatusChanged(final String provider, final int status, final Bundle extras) {
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
-
+    public void onProviderEnabled(final String provider) {
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
-
+    public void onProviderDisabled(final String provider) {
     }
 
     @Override
-    public void onUpdate(int request, JSONObject update) {
-
+    public void onUpdate(final int request, final JSONObject update) {
     }
 
     @Override
-    public void onError(int request, int errorCode) {
-
+    public void onError(final int request, final int errorCode) {
     }
 
     private boolean isVisible() {

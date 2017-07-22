@@ -10,25 +10,25 @@ import com.nesmelov.alexey.vkfindme.utils.Utils;
 public class CircleImageView extends android.support.v7.widget.AppCompatImageView {
     Context mContext;
 
-    public CircleImageView(Context context) {
+    public CircleImageView(final Context context) {
         super(context);
         mContext = context;
     }
 
-    public CircleImageView(Context context, AttributeSet attrs) {
+    public CircleImageView(final Context context, final AttributeSet attrs) {
         this(context, attrs, 0);
         mContext = context;
     }
 
-    public CircleImageView(Context context, AttributeSet attrs,
-                           int defStyle) {
+    public CircleImageView(final Context context, final AttributeSet attrs,
+                           final int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
     }
 
     @Override
-    public void setImageBitmap(Bitmap bm) {
-        if(bm==null) return;
+    public void setImageBitmap(final Bitmap bm) {
+        if(bm == null) return;
         setImageDrawable(new BitmapDrawable(mContext.getResources(),
                 Utils.getCroppedBitmap(bm)));
     }

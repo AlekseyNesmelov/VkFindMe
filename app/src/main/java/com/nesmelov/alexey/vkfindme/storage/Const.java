@@ -13,10 +13,13 @@ public class Const {
     public static final double BAD_LAT = -999;
     public static final double BAD_LON = -999;
     public static final long BAD_ID = -1;
+    public static final int BAD_USER_ID = -1;
     public static final float BAD_RADIUS = 0;
 
     public static final int FRIENDS_LIMIT = 100;
 
     public static final int INVISIBLE_STATE = 0;
     public static final int VISIBLE_STATE = 1;
+
+    public static final int RESULT_UPDATE = 2;
 }

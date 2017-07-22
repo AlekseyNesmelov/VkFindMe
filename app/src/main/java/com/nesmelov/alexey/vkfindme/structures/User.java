@@ -1,18 +1,28 @@
 package com.nesmelov.alexey.vkfindme.structures;
 
-import android.graphics.Bitmap;
-import android.support.annotation.IntegerRes;
-
 import com.nesmelov.alexey.vkfindme.storage.Const;
 
 public class User {
-    private Integer mVkId;
-    private String mName = "";
-    private String mSurname = "";
-    private Boolean mChecked = false;
-    private String mIconUrl = "";
-    private double mLat = Const.BAD_LAT;
-    private double mLon = Const.BAD_LON;
+    protected Integer mVkId;
+    protected String mName = "";
+    protected String mSurname = "";
+    protected Boolean mChecked = false;
+    protected String mIconUrl = "";
+    protected double mLat = Const.BAD_LAT;
+    protected double mLon = Const.BAD_LON;
+    private boolean mVisible = false;
+
+    public User() {
+    }
+
+    public User(final Integer vkId, final String name, final String surname,
+                final double lat, final double lon) {
+        mVkId = vkId;
+        mName = name;
+        mSurname = surname;
+        mLat = lat;
+        mLon = lon;
+    }
 
     public void setVkId(final Integer vkId) {
         mVkId = vkId;
@@ -42,6 +52,10 @@ public class User {
         mLon = lon;
     }
 
+    public void setVisible(final boolean visible) {
+        mVisible = visible;
+    }
+
     public Integer getVkId() {
         return mVkId;
     }
@@ -68,5 +82,9 @@ public class User {
 
     public double getLon() {
         return mLon;
+    }
+
+    public boolean isVisible() {
+        return mVisible;
     }
 }

@@ -107,7 +107,7 @@ public class FindMeApp extends Application {
                 .setTicker(ticket)
                 .setAutoCancel(true)
                 .setContentIntent(contentIntent)
-                .setVibrate(new long[] {3000, 3000, 3000, 3000, 3000})
+                .setVibrate(new long[] {1000, 1000, 1000, 1000})
                 .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
                 .setLights(0xff00ff00, 2000, 4000)
                 .build();

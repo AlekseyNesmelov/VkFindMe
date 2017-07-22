@@ -4,15 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Storage {
@@ -34,20 +33,26 @@ public class Storage {
     private SharedPreferences mSharedPrefs;
     private DataBaseHelper mDataBaseHelper;
 
-    private List<OnAlarmUpdatedListener> mAlarmUpdatedListeners = new CopyOnWriteArrayList<>();
-    private List<OnUserUpdatedListener> mUserUpdatedListeners = new CopyOnWriteArrayList<>();
+    private OnAlarmUpdatedListener mAlarmUpdatedListener = null;
+    private OnUserUpdatedListener mUserUpdatedListener = null;
+
+    private Object mLock = new Object();
 
     public Storage(final Context context) {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mDataBaseHelper = FindMeApp.getDataBaseHelper();
     }
 
-    public void addAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
-        mAlarmUpdatedListeners.add(listener);
+    public void setAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
+        synchronized (mLock) {
+            mAlarmUpdatedListener = listener;
+        }
     }
 
     public boolean isAlarmUpdateListenerExist() {
-        return !mAlarmUpdatedListeners.isEmpty();
+        synchronized (mLock) {
+            return mAlarmUpdatedListener != null;
+        }
     }
 
     public String getUserIdsString() {
@@ -58,20 +63,32 @@ public class Storage {
         return mDataBaseHelper.getUserIds(Const.FRIENDS_LIMIT);
     }
 
-    public void removeAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
-        mAlarmUpdatedListeners.remove(listener);
+    public void removeAlarmUpdatedListener() {
+        synchronized (mLock) {
+            mAlarmUpdatedListener = null;
+        }
     }
 
-    public void addUserUpdatedListener(final OnUserUpdatedListener listener) {
-        mUserUpdatedListeners.add(listener);
+    public void setUserUpdatedListener(final OnUserUpdatedListener listener) {
+        synchronized (mLock) {
+            mUserUpdatedListener = listener;
+        }
     }
 
-    public void removeUserUpdatedListener(final OnUserUpdatedListener listener) {
-        mUserUpdatedListeners.remove(listener);
+    public void removeUserUpdatedListener() {
+        synchronized (mLock) {
+            mUserUpdatedListener = null;
+        }
     }
 
     public boolean isUserUpdateListenerExist() {
-        return !mUserUpdatedListeners.isEmpty();
+        synchronized (mLock) {
+            return mUserUpdatedListener != null;
+        }
+    }
+
+    public boolean isAlarmExist() {
+        return mDataBaseHelper.isAlarmExist();
     }
 
     public boolean getRefreshFriends() {
@@ -79,11 +96,11 @@ public class Storage {
     }
 
     public double getUserLat() {
-        return mSharedPrefs.getFloat(USER_LAT, 0);
+        return mSharedPrefs.getFloat(USER_LAT, (float) Const.BAD_LAT);
     }
 
     public double getUserLon() {
-        return mSharedPrefs.getFloat(USER_LON, 0);
+        return mSharedPrefs.getFloat(USER_LON, (float)Const.BAD_LON);
     }
 
     public String getUserName() {
@@ -99,7 +116,7 @@ public class Storage {
     }
 
     public Integer getUserVkId() {
-        return mSharedPrefs.getInt(USER_VK_ID, 0);
+        return mSharedPrefs.getInt(USER_VK_ID, Const.BAD_USER_ID);
     }
 
     public Boolean getVisibility() {
@@ -201,8 +218,10 @@ public class Storage {
         values.put(DataBaseHelper.LONGITUDE, lon);
         values.put(DataBaseHelper.VISIBLE, 1);
         mDataBaseHelper.updateUser(userId, values);
-        for (final OnUserUpdatedListener listener : mUserUpdatedListeners) {
-            listener.onUserUpdated(userId, lat, lon);
+        synchronized (mLock) {
+            if (mUserUpdatedListener != null) {
+                mUserUpdatedListener.onUserUpdated(userId, lat, lon);
+            }
         }
     }
 
@@ -211,8 +230,10 @@ public class Storage {
         values.put(DataBaseHelper.VK_ID, userId);
         values.put(DataBaseHelper.VISIBLE, 0);
         mDataBaseHelper.updateUser(userId, values);
-        for (final OnUserUpdatedListener listener : mUserUpdatedListeners) {
-            listener.onUserInvisible(userId);
+        synchronized (mLock) {
+            if (mUserUpdatedListener != null) {
+                mUserUpdatedListener.onUserInvisible(userId);
+            }
         }
     }
 
@@ -273,15 +294,19 @@ public class Storage {
 
     public void removeAlarm(final long alarmId) {
         mDataBaseHelper.removeAlarm(alarmId);
-        for (final OnAlarmUpdatedListener listener : mAlarmUpdatedListeners) {
-            listener.onAlarmRemoved(alarmId);
+        synchronized (mLock) {
+            if (mAlarmUpdatedListener != null) {
+                mAlarmUpdatedListener.onAlarmRemoved(alarmId);
+            }
         }
     }
 
     public void removeAlarmParticipant(final long alarmId, final long userId) {
         mDataBaseHelper.removeAlarmUser(alarmId, userId);
-        for (final OnAlarmUpdatedListener listener : mAlarmUpdatedListeners) {
-            listener.onAlarmUpdated(alarmId);
+        synchronized (mLock) {
+            if (mAlarmUpdatedListener != null) {
+                mAlarmUpdatedListener.onAlarmUpdated(alarmId);
+            }
         }
     }
 
@@ -293,7 +318,7 @@ public class Storage {
         return mDataBaseHelper.getUsers(limit);
     }
 
-    public List<AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
+    public Map<Long, AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
         return mDataBaseHelper.getAlarmMarkers(context, map);
     }
 
@@ -301,7 +326,11 @@ public class Storage {
         return mDataBaseHelper.getAlarmMarker(alarmId);
     }
 
-    public Map<User, List<Alarm>> getAlarmUsers() {
+    public Map<Integer, List<Alarm>> getAlarmUsers() {
         return mDataBaseHelper.getAlarmUsers();
+    }
+
+    public String getUserName(final int id) {
+        return mDataBaseHelper.getUserName(id);
     }
 }
