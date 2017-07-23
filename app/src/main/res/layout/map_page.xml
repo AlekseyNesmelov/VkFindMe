@@ -38,6 +38,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
+                android:textColor="#000"
                 android:layout_alignParentBottom="true"
                 android:textSize="14sp"/>
 
@@ -143,6 +144,36 @@
             android:background="@drawable/nok_selector"
             android:layout_margin="5dp"
             android:alpha="0"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/verticalScrollLayout"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:id="@+id/pictureScroll"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#18000000"
+            android:layout_margin="3dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:id="@+id/pictureVerticalLinear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+        </ScrollView>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
     </LinearLayout>
 
 </RelativeLayout>

@@ -93,7 +93,7 @@ public class Storage {
     }
 
     public boolean getRefreshFriends() {
-        return mSharedPrefs.getBoolean(REFRESH_FRIENDS, false);
+        return mSharedPrefs.getBoolean(REFRESH_FRIENDS, true);
     }
 
     public double getUserLat() {

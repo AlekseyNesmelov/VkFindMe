@@ -24,6 +24,7 @@ public class AlarmMarker extends Alarm {
     private Marker mMarker;
     private Circle mCircle;
     private int mColor;
+    private int mMarkerId;
 
     public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius,
                        final int color) {
@@ -67,5 +68,14 @@ public class AlarmMarker extends Alarm {
 
     public Marker getMarker() {
         return mMarker;
+    }
+
+    public int getMarkerId() {
+        final String alarmMarkerId = mMarker.getId().replace("m", "");
+        return Integer.parseInt(alarmMarkerId);
+    }
+
+    public int getColor() {
+        return mColor;
     }
 }

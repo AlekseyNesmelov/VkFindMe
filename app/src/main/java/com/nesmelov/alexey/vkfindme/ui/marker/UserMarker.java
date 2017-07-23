@@ -52,4 +52,8 @@ public class UserMarker extends User {
     public void setVisible(final boolean visible) {
         mMarker.setVisible(visible);
     }
+
+    public Marker getMarker() {
+        return mMarker;
+    }
 }

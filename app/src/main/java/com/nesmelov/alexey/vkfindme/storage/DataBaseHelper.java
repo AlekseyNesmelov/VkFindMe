@@ -414,7 +414,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
                 final AlarmMarker alarmMarker = new AlarmMarker(id, lat, lon,
                         radius, color, alarmUsers, names.toString());
-                alarmMarker.addToMap(context, map);
+                //alarmMarker.addToMap(context, map);
                 alarms.put(id, alarmMarker);
             } while (cursor.moveToNext());
         }

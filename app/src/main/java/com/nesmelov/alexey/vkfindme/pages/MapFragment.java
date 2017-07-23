@@ -69,6 +69,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
+    private static final int ALARM_PREVIEW_SIZE_DP = 40;
     private static final int USER_PREVIEW_SIZE_DP = 65;
     private static final int USER_MARKER_SIZE_DP = 50;
 
@@ -104,6 +105,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private ToggleButton mRefreshFriendsBtn;
     private ImageButton mAddFriendsBtn;
 
+    private LinearLayout mAlarmPictureLayout;
     private LinearLayout mPictureLayout;
     private TextView mMessageView;
 
@@ -144,6 +146,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMapView.onResume();
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
+        mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
 
         mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
         mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -320,8 +323,45 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
                     final long alarmId = mStorage.addAlarm(lat, lon, radius, color, users);
                     final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, color, users, names);
-                    alarmMarker.addToMap(getActivity(), mMap);
+                    final Marker mapMarker = alarmMarker.addToMap(getActivity(), mMap);
                     mAlarmMarkers.put(alarmId, alarmMarker);
+
+                    final int size = Utils.dpToPx(getActivity(), ALARM_PREVIEW_SIZE_DP);
+                    final Bitmap squareBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(),
+                        R.drawable.alarm_miniature), size, size, false);
+
+                    final ImageView imageView = new ImageView(getActivity());
+                    final String alarmMarkerId = mapMarker.getId().replace("m", "");
+                    imageView.setId(Integer.parseInt(alarmMarkerId));
+                    imageView.setPadding(4, 4, 4, 4);
+                    imageView.setMinimumHeight(size);
+                    imageView.setMinimumWidth(size);
+                    imageView.setMaxHeight(size);
+                    imageView.setMaxWidth(size);
+                    imageView.setImageBitmap(squareBitmap);
+                    imageView.setBackgroundColor(color);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+                    imageView.setClickable(true);
+                    imageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            AlarmMarker alarmMarker = null;
+                            for (final Long id : mAlarmMarkers.keySet()) {
+                                final AlarmMarker marker = mAlarmMarkers.get(id);
+                                if (marker.getMarkerId() == v.getId()) {
+                                    alarmMarker = marker;
+                                    break;
+                                }
+                            }
+                            if (alarmMarker != null) {
+                                final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(alarmMarker.getLat(), alarmMarker.getLon()), mMap.getCameraPosition().zoom);
+                                mMap.animateCamera(cameraUpdate);
+                                alarmMarker.getMarker().showInfoWindow();
+                            }
+                        }
+                    });
+                    mAlarmPictureLayout.addView(imageView);
 
                     FindMeApp.showToast(getActivity(), getString(R.string.alarm_accepted));
                     getActivity().startService(new Intent(getActivity(), GpsService.class));
@@ -430,7 +470,50 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 }
             }
         });
-        mAlarmMarkers.putAll(mStorage.getAlarmMarkers(getActivity(), mMap));
+
+        final int size = Utils.dpToPx(getActivity(), ALARM_PREVIEW_SIZE_DP);
+        final Bitmap squareBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(),
+                R.drawable.alarm_miniature), size, size, false);
+
+        final Map<Long, AlarmMarker> markers = mStorage.getAlarmMarkers(getActivity(), mMap);
+        for (final Long markerId : markers.keySet()) {
+            final AlarmMarker alarmMarker = markers.get(markerId);
+            final Marker mapMarker = alarmMarker.addToMap(getActivity(), mMap);
+
+            final ImageView imageView = new ImageView(getActivity());
+            final String alarmMarkerId = mapMarker.getId().replace("m", "");
+            imageView.setId(Integer.parseInt(alarmMarkerId));
+            imageView.setPadding(4, 4, 4, 4);
+            imageView.setMinimumHeight(size);
+            imageView.setMinimumWidth(size);
+            imageView.setMaxHeight(size);
+            imageView.setMaxWidth(size);
+            imageView.setImageBitmap(squareBitmap);
+            imageView.setBackgroundColor(alarmMarker.getColor());
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            imageView.setClickable(true);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    AlarmMarker alarmMarker = null;
+                    for (final Long id : mAlarmMarkers.keySet()) {
+                        final AlarmMarker marker = mAlarmMarkers.get(id);
+                        if (marker.getMarkerId() == v.getId()) {
+                            alarmMarker = marker;
+                            break;
+                        }
+                    }
+                    if (alarmMarker != null) {
+                        final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                                new LatLng(alarmMarker.getLat(), alarmMarker.getLon()), mMap.getCameraPosition().zoom);
+                        mMap.animateCamera(cameraUpdate);
+                        alarmMarker.getMarker().showInfoWindow();
+                    }
+                }
+            });
+            mAlarmPictureLayout.addView(imageView);
+            mAlarmMarkers.put(markerId, alarmMarker);
+        }
         addFriendsFromDataBase();
 
         ((TabHostActivity)getActivity()).hideProgressBar();
@@ -571,6 +654,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             markerToRemove.getCircle().setVisible(false);
             markerToRemove.getCircle().remove();
             mAlarmMarkers.remove(alarmId);
+
+            final ImageView previewIcon = (ImageView) mAlarmPictureLayout.findViewById(markerToRemove.getMarkerId());
+            if (previewIcon != null) {
+                previewIcon.setVisibility(View.GONE);
+                mAlarmPictureLayout.removeView(previewIcon);
+            }
         }
     }
 
@@ -645,6 +734,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
                                 new LatLng(userMarker.getLat(), userMarker.getLon()), mMap.getCameraPosition().zoom);
                         mMap.animateCamera(cameraUpdate);
+                        userMarker.getMarker().showInfoWindow();
                     } else {
                         FindMeApp.showToast(getActivity(), userMarker.getName() + " " + userMarker.getSurname()
                                 + " " + getString(R.string.is_offline));
