@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.google.android.gms.maps.GoogleMap;
+import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
@@ -35,10 +36,12 @@ public class Storage {
     private OnUserUpdatedListener mUserUpdatedListener = null;
 
     private Object mLock = new Object();
+    private Context mContext;
 
     public Storage(final Context context) {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         mDataBaseHelper = FindMeApp.getDataBaseHelper();
+        mContext = context;
     }
 
     public void setAlarmUpdatedListener(final OnAlarmUpdatedListener listener) {
@@ -122,7 +125,8 @@ public class Storage {
     }
 
     public Long getGPSMinDelay() {
-        return mSharedPrefs.getLong(GPS_MIN_DELAY, 3000);
+        return Long.parseLong(mSharedPrefs.getString(GPS_MIN_DELAY,
+                mContext.getString(R.string.send_pos_default_delay)));
     }
 
     public Float getGPSMinDistance() {
@@ -134,7 +138,8 @@ public class Storage {
     }
 
     public Long getRefreshFriendsDelay() {
-        return mSharedPrefs.getLong(REFRESH_FRIENDS_DELAY, 3000);
+        return Long.parseLong(mSharedPrefs.getString(REFRESH_FRIENDS_DELAY,
+                mContext.getString(R.string.friend_refresh_default_delay)));
     }
 
     public void setUserVkId(final Integer userVkId) {
@@ -151,7 +156,7 @@ public class Storage {
 
     public void setRefreshFriendsDelay(final long refreshFriendsDelay) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
-        ed.putLong(REFRESH_FRIENDS_DELAY, refreshFriendsDelay);
+        ed.putString(REFRESH_FRIENDS_DELAY, String.valueOf(refreshFriendsDelay));
         ed.commit();
     }
 
@@ -193,7 +198,7 @@ public class Storage {
 
     public void setGPSMinDelay(final Long delay) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
-        ed.putLong(GPS_MIN_DELAY, delay);
+        ed.putString(GPS_MIN_DELAY, String.valueOf(delay));
         ed.commit();
     }
 

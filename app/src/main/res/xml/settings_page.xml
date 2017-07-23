@@ -5,10 +5,19 @@
     android:background="@drawable/tabhost_background">
 
     <ListPreference
-        android:key="list_preference"
-        android:title="Частота обновления друзей"
-        android:summary="Как часто запрвшивать координаты друзей"
+        android:key="refresh_friends_delay"
+        android:title="@string/friend_refresh_title"
+        android:summary="@string/friend_refresh_summary"
         android:entries="@array/friend_refresh_delays_titles"
-        android:entryValues="@array/friend_refresh_delays_values" />
+        android:entryValues="@array/friend_refresh_delays_values"
+        android:defaultValue="@string/friend_refresh_default_delay"/>
+
+    <ListPreference
+        android:key="gps_min_delay"
+        android:title="@string/send_pos_title"
+        android:summary="@string/send_pos_summary"
+        android:entries="@array/send_pos_delays_titles"
+        android:entryValues="@array/send_pos_delays_values"
+        android:defaultValue="@string/send_pos_default_delay"/>
 
 </PreferenceScreen>

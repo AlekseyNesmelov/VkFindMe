@@ -34,22 +34,56 @@
     <string name="server_is_not_accessible">Server is not accessible. Please, try again later.</string>
     <string name="logout">Logout</string>
     <integer name="com_vk_sdk_AppId">6108914</integer>
-    <array name="friend_refresh_delays_titles" >
+
+    <string name="friend_refresh_title">Friends refreshing delay</string>
+    <string name="friend_refresh_summary">How often to refresh friends positions</string>
+    <string-array name="friend_refresh_delays_titles" >
         <item>1 second</item>
         <item>2 seconds</item>
+        <item>3 seconds</item>
         <item>5 seconds</item>
         <item>10 seconds</item>
         <item>30 seconds</item>
         <item>1 minute</item>
         <item>3 minute</item>
-    </array>
-    <array name="friend_refresh_delays_values" >
+        <item>10 minute</item>
+    </string-array>
+    <string-array name="friend_refresh_delays_values" >
         <item>1000</item>
         <item>2000</item>
+        <item>3000</item>
         <item>5000</item>
         <item>10000</item>
         <item>30000</item>
         <item>60000</item>
         <item>180000</item>
-    </array>
+        <item>600000</item>
+    </string-array>
+    <string name="friend_refresh_default_delay">3000</string>
+
+    <string name="send_pos_title">Send position delay</string>
+    <string name="send_pos_summary">How often to send your positions if you are visible</string>
+    <string-array name="send_pos_delays_titles" >
+        <item>1 second</item>
+        <item>2 seconds</item>
+        <item>3 seconds</item>
+        <item>5 seconds</item>
+        <item>10 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>3 minute</item>
+        <item>10 minute</item>
+    </string-array>
+    <string-array name="send_pos_delays_values" >
+        <item>1000</item>
+        <item>2000</item>
+        <item>3000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>180000</item>
+        <item>600000</item>
+    </string-array>
+    <string name="send_pos_default_delay">3000</string>
 </resources>

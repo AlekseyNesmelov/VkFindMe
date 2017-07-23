@@ -33,4 +33,56 @@
     <string name="needs_authorization">Необходима авторизация ВК</string>
     <string name="logout">Выйти</string>
     <string name="server_is_not_accessible">Сервер не доступен. Проверьте Интернет-соединение.</string>
+    <string name="friend_refresh_title">Частота обновления друзей</string>
+
+    <string name="friend_refresh_summary">Как часто обновлять координаты друзей</string>
+    <string-array name="friend_refresh_delays_titles" >
+        <item>1 секунда</item>
+        <item>2 секунды</item>
+        <item>3 секунды</item>
+        <item>5 секунд</item>
+        <item>10 секунд</item>
+        <item>30 секунд</item>
+        <item>1 минута</item>
+        <item>3 минуты</item>
+        <item>10 минут</item>
+    </string-array>
+    <string-array name="friend_refresh_delays_values" >
+        <item>1000</item>
+        <item>2000</item>
+        <item>3000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>180000</item>
+        <item>600000</item>
+    </string-array>
+    <string name="friend_refresh_default_delay">3000</string>
+
+    <string name="send_pos_title">Частота отправления координат</string>
+    <string name="send_pos_summary">Как часто отправлять свои координаты, если видимость включена</string>
+    <string-array name="send_pos_delays_titles" >
+        <item>1 секунда</item>
+        <item>2 секунды</item>
+        <item>3 секунды</item>
+        <item>5 секунд</item>
+        <item>10 секунд</item>
+        <item>30 секунд</item>
+        <item>1 минута</item>
+        <item>3 минуты</item>
+        <item>10 минут</item>
+    </string-array>
+    <string-array name="send_pos_delays_values" >
+        <item>1000</item>
+        <item>2000</item>
+        <item>3000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>180000</item>
+        <item>600000</item>
+    </string-array>
+    <string name="send_pos_default_delay">3000</string>
 </resources>
