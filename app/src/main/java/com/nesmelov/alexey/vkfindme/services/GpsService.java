@@ -121,7 +121,7 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
                 }
                 if (updatedAlarm != null) {
                     FindMeApp.displayAlarmRingNotification(RING_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
-                            getString(R.string.reach_alarm), MainActivity.class);
+                            getString(R.string.reach_alarm), MainActivity.class, updatedAlarm.getLat(), updatedAlarm.getLon());
                     mAlarmsForMe.remove(updatedAlarm);
                     if (mStorage.isAlarmCompleted(updatedAlarm.getAlarmId())) {
                         mStorage.removeAlarm(updatedAlarm.getAlarmId());

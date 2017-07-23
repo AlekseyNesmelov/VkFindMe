@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
+import com.nesmelov.alexey.vkfindme.storage.Const;
 import com.nesmelov.alexey.vkfindme.storage.DataBaseHelper;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.vk.sdk.VKSdk;
@@ -99,8 +100,11 @@ public class FindMeApp extends Application {
     }
 
     public static void displayAlarmRingNotification(final int id, final Context context,
-                                           final String ticket, final String message, final Class<?> pendingClass) {
+                                           final String ticket, final String message, final Class<?> pendingClass,
+                                                    final double lat, final double lon) {
         final Intent intent = new Intent(context, pendingClass);
+        intent.putExtra(Const.LAT, String.valueOf(lat));
+        intent.putExtra(Const.LON, String.valueOf(lon));
         final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, intent, 0);
         final Notification notification = new NotificationCompat.Builder(context)
                 .setContentTitle(ticket)

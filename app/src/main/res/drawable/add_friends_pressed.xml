@@ -8,13 +8,13 @@
 			<padding android:bottom="8dp" android:left="8dp" android:right="8dp"
 				android:top="8dp" />
 			<gradient
-				android:startColor="#888888"
+				android:startColor="#5F5F5F"
 				android:centerColor="#5F5F5F"
 				android:endColor="#363636"
 				android:angle="-90" />
 		</shape>
 	</item>
 	<item>
-		<bitmap android:src="@drawable/plus"/>
+		<bitmap android:src="@drawable/refresh_friends"/>
 	</item>
 </layer-list>

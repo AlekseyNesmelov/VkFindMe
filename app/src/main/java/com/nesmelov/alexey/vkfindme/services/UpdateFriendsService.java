@@ -96,7 +96,9 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
                         message.append(": ").append(userName);
                     }
                     FindMeApp.displayAlarmRingNotification(id, this, getString(R.string.app_name),
-                            message.toString(), MainActivity.class);
+                            message.toString(), MainActivity.class,
+                            updatedAlarms.get(0).getLat(),
+                            updatedAlarms.get(0).getLon());
                     for (final Alarm alarm : updatedAlarms) {
                         if (mStorage.isAlarmCompleted(alarm.getAlarmId())) {
                             mStorage.removeAlarm(alarm.getAlarmId());

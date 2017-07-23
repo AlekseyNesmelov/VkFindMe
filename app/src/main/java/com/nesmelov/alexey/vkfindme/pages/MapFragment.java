@@ -112,6 +112,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private Map<Integer, User> mUsersBuffer = new ConcurrentHashMap<>();
 
+    private LatLng mStartPos = null;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +122,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mStorage = FindMeApp.getStorage();
         mStorage.setAlarmUpdatedListener(this);
         mStorage.setUserUpdatedListener(this);
+
+        final Intent intent = getActivity().getIntent();
+        if (intent != null) {
+            final String lat = intent.getStringExtra(Const.LAT);
+            final String lon = intent.getStringExtra(Const.LON);
+            if (lat != null && lon != null) {
+                mStartPos = new LatLng(
+                        Double.parseDouble(lat),
+                        Double.parseDouble(lon));
+            }
+        }
     }
 
     @Override
@@ -380,10 +393,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             mLocationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-            final Location location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-            if (location != null) {
-                final LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, START_ZOOM);
+            if (mStartPos == null) {
+                final Location location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                if (location != null) {
+                    final LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, START_ZOOM);
+                    mMap.moveCamera(cameraUpdate);
+                }
+            } else {
+                final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(mStartPos, START_ZOOM);
                 mMap.moveCamera(cameraUpdate);
             }
         }
