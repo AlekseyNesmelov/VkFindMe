@@ -20,4 +20,12 @@
         android:entryValues="@array/send_pos_delays_values"
         android:defaultValue="@string/send_pos_default_delay"/>
 
+    <ListPreference
+        android:key="gps_min_distance"
+        android:title="@string/min_gps_distance_title"
+        android:summary="@string/min_gps_distance_summary"
+        android:entries="@array/min_gps_distance_titles"
+        android:entryValues="@array/min_gps_distance_values"
+        android:defaultValue="@string/min_gps_distance_default"/>
+
 </PreferenceScreen>

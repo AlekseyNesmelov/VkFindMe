@@ -85,4 +85,28 @@
         <item>600000</item>
     </string-array>
     <string name="send_pos_default_delay">3000</string>
+
+    <string name="min_gps_distance_title">Минимальное расстояние для обновления координат</string>
+    <string name="min_gps_distance_summary">Минимальное расстояние, которое должно пройти между обновлениями координат</string>
+    <string-array name="min_gps_distance_titles" >
+        <item>2 метра</item>
+        <item>5 метров</item>
+        <item>10 метров</item>
+        <item>30 метров</item>
+        <item>100 метров</item>
+        <item>500 метров</item>
+        <item>1 километр</item>
+        <item>3 километра</item>
+    </string-array>
+    <string-array name="min_gps_distance_values" >
+        <item>2</item>
+        <item>5</item>
+        <item>10</item>
+        <item>30</item>
+        <item>100</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>3000</item>
+    </string-array>
+    <string name="min_gps_distance_default">2</string>
 </resources>

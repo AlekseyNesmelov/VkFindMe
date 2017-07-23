@@ -130,7 +130,8 @@ public class Storage {
     }
 
     public Float getGPSMinDistance() {
-        return mSharedPrefs.getFloat(GPS_MIN_DISTANCE, 2);
+        return Float.parseFloat(mSharedPrefs.getString(GPS_MIN_DISTANCE,
+                mContext.getString(R.string.min_gps_distance_default)));
     }
 
     public Float getAlarmRadius() {
