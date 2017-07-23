@@ -333,6 +333,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     if (markerToRemove != null) {
                         markerToRemove.getMarker().setVisible(false);
                         markerToRemove.getMarker().remove();
+                        markerToRemove.getCircle().setVisible(false);
+                        markerToRemove.getCircle().remove();
                         mAlarmMarkers.remove(markerToRemove);
                     }
                     mStorage.removeAlarm(alarmId);
@@ -546,6 +548,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         if (markerToRemove != null) {
             markerToRemove.getMarker().setVisible(false);
             markerToRemove.getMarker().remove();
+            markerToRemove.getCircle().setVisible(false);
+            markerToRemove.getCircle().remove();
             mAlarmMarkers.remove(alarmId);
         }
     }
