@@ -12,20 +12,25 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
+import com.nesmelov.alexey.vkfindme.utils.Utils;
 
 import java.util.ArrayList;
 
 public class AlarmMarker extends Alarm {
     private Marker mMarker;
     private Circle mCircle;
+    private int mColor;
 
-    public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius) {
+    public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius,
+                       final int color) {
         super(alarmId, lat, lon, radius);
+        mColor = color;
     }
 
     public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius,
-                 final ArrayList<Integer> users, final String names) {
+                 final int color, final ArrayList<Integer> users, final String names) {
         super(alarmId, lat, lon, radius, users, names);
+        mColor = color;
     }
 
     public Marker addToMap(final Context context, final GoogleMap map) {
@@ -40,9 +45,9 @@ public class AlarmMarker extends Alarm {
         mCircle = map.addCircle(new CircleOptions()
                 .center(new LatLng(mLat, mLon))
                 .visible(true)
-                .fillColor(Color.argb(128, 180, 217, 242))
-                .strokeColor(Color.argb(128, 118, 176, 215))
-                .strokeWidth(5)
+                .fillColor(mColor)
+                .strokeColor(Color.argb(96, 100, 100, 100))
+                .strokeWidth(3)
                 .radius(mRadius)
         );
 

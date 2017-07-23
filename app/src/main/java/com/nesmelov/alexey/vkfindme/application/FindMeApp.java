@@ -18,6 +18,8 @@ import com.nesmelov.alexey.vkfindme.storage.DataBaseHelper;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.vk.sdk.VKSdk;
 
+import java.util.Random;
+
 public class FindMeApp extends Application {
     public static final String USERS_DATABASE_NAME = "USERS_DATABASE";
 

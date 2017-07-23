@@ -3,6 +3,7 @@ package com.nesmelov.alexey.vkfindme.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -12,7 +13,11 @@ import android.util.DisplayMetrics;
 
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 
+import java.util.Random;
+
 public class Utils {
+
+    private static Random sRandom = new Random();
 
     public static Bitmap getCroppedBitmap(final Bitmap bitmap) {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -39,5 +44,12 @@ public class Utils {
         float results[] = new float[1];
         Location.distanceBetween(alarm.getLat(), alarm.getLon(), lat, lon, results);
         return results[0] < alarm.getRadius();
+    }
+
+    public static int getRandomColor() {
+        return Color.argb(96,
+                sRandom.nextInt(255),
+                sRandom.nextInt(255),
+                sRandom.nextInt(255));
     }
 }

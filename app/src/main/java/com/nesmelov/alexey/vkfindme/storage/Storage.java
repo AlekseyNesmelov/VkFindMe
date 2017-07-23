@@ -265,12 +265,14 @@ public class Storage {
         return mDataBaseHelper.isAlarmCompleted(alarmId);
     }
 
-    public long addAlarm(final double lat, final double lon, final float radius, final List<Integer> users) {
+    public long addAlarm(final double lat, final double lon, final float radius, final int color,
+                         final List<Integer> users) {
         final ContentValues alarmValues = new ContentValues();
         alarmValues.put(DataBaseHelper.LATITUDE, lat);
         alarmValues.put(DataBaseHelper.LONGITUDE, lon);
         alarmValues.put(DataBaseHelper.RADIUS, radius);
         alarmValues.put(DataBaseHelper.CHECKED, 1);
+        alarmValues.put(DataBaseHelper.COLOR, color);
         final long alarmId = mDataBaseHelper.insertAlarm(alarmValues);
 
         for (final Integer user : users) {

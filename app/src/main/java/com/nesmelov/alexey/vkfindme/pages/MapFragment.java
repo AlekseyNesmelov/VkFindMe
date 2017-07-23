@@ -238,6 +238,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                         intent.putExtra(Const.LAT,latLng.latitude);
                         intent.putExtra(Const.LON,latLng.longitude);
                         intent.putExtra(Const.RADIUS, (float)mAlarmRadius.getRadius());
+                        intent.putExtra(Const.COLOR, Utils.getRandomColor());
                         startActivityForResult(intent, GET_ALARM_USERS_REQUEST_CODE);
                         break;
                     default:
@@ -302,9 +303,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     final double lat = data.getDoubleExtra(Const.LAT, Const.BAD_LAT);
                     final double lon = data.getDoubleExtra(Const.LON, Const.BAD_LON);
                     final float radius = data.getFloatExtra(Const.RADIUS, Const.BAD_RADIUS);
+                    final int color = data.getIntExtra(Const.COLOR, Utils.getRandomColor());
 
-                    final long alarmId = mStorage.addAlarm(lat, lon, radius, users);
-                    final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, users, names);
+                    final long alarmId = mStorage.addAlarm(lat, lon, radius, color, users);
+                    final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, color, users, names);
                     alarmMarker.addToMap(getActivity(), mMap);
                     mAlarmMarkers.put(alarmId, alarmMarker);
 

@@ -9,6 +9,7 @@ public class Const {
     public static final String RADIUS = "radius";
     public static final String ALARM_ID = "alarm_id";
     public static final String NAMES = "names";
+    public static final String COLOR = "color";
 
     public static final double BAD_LAT = -999;
     public static final double BAD_LON = -999;

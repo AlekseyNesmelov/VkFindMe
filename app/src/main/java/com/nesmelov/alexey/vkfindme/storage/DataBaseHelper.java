@@ -33,6 +33,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     public static final String RADIUS = "RADIUS";
     public static final String CHECKED = "CHECKED";
     public static final String ALARM_TABLE = "ALARM";
+    public static final String COLOR = "COLOR";
 
     public static final String ALARM_USERS_TABLE = "AUSER";
     public static final String ALARM_ID = "AID";
@@ -382,6 +383,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 final double lat = cursor.getDouble(1);
                 final double lon = cursor.getDouble(2);
                 final float radius = cursor.getFloat(3);
+                final int color = cursor.getInt(5);
 
                 selectQuery = new StringBuilder();
                 selectQuery.append("SELECT ").append (VK_ID).append(", ")
@@ -411,7 +413,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 }
 
                 final AlarmMarker alarmMarker = new AlarmMarker(id, lat, lon,
-                        radius, alarmUsers, names.toString());
+                        radius, color, alarmUsers, names.toString());
                 alarmMarker.addToMap(context, map);
                 alarms.put(id, alarmMarker);
             } while (cursor.moveToNext());
@@ -440,6 +442,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 final double lat = cursor.getDouble(1);
                 final double lon = cursor.getDouble(2);
                 final float radius = cursor.getFloat(3);
+                final int color = cursor.getInt(5);
 
                 selectQuery = new StringBuilder();
                 selectQuery.append("SELECT ").append (VK_ID).append(", ")
@@ -469,7 +472,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 }
 
                 alarmMarker = new AlarmMarker(id, lat, lon,
-                        radius, alarmUsers, names.toString());
+                        radius, color, alarmUsers, names.toString());
                 break;
             } while (cursor.moveToNext());
         }
@@ -497,7 +500,8 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + LATITUDE + " REAL,"
                 + LONGITUDE + " REAL,"
                 + RADIUS + " REAL,"
-                + CHECKED + " INTEGER);");
+                + CHECKED + " INTEGER,"
+                + COLOR + " INTEGER);");
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         db.execSQL("CREATE TABLE " + alarmUsersTable + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
