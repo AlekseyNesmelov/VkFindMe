@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -108,6 +109,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private LinearLayout mAlarmPictureLayout;
     private LinearLayout mPictureLayout;
     private TextView mMessageView;
+    private ProgressBar mAddFriendsProgressBar;
 
     private Map<Long, AlarmMarker> mAlarmMarkers = new ConcurrentHashMap<>();
     private Map<Integer, UserMarker> mUserMarkers = new ConcurrentHashMap<>();
@@ -147,6 +149,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
         mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
+        mAddFriendsProgressBar = (ProgressBar) view.findViewById(R.id.addFriendsProgress);
 
         mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
         mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -165,6 +168,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+                mAddFriendsBtn.setEnabled(false);
+                mAddFriendsProgressBar.setVisibility(View.VISIBLE);
                 final VKRequest.VKRequestListener requestListener = new VKRequest.VKRequestListener() {
                     @Override
                     public void onComplete(VKResponse response) {
@@ -436,6 +441,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             if (mStartPos == null) {
                 final Location location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                 if (location != null) {
+                    mStorage.setUserLat(location.getLatitude());
+                    mStorage.setUserLon(location.getLongitude());
                     final LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, START_ZOOM);
                     mMap.moveCamera(cameraUpdate);
@@ -559,6 +566,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     }
                     FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
                             getString(R.string.refresh_friends_message_ok));
+                    mAddFriendsBtn.setEnabled(true);
+                    mAddFriendsProgressBar.setVisibility(View.GONE);
                 } catch (JSONException e) {
                     onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
                 }
@@ -589,6 +598,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             case HTTPManager.REQUEST_CHECK_USERS:
                 FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
                         getString(R.string.refresh_friends_server_error_message));
+                mAddFriendsBtn.setEnabled(true);
+                mAddFriendsProgressBar.setVisibility(View.GONE);
                 break;
             default:
                 break;

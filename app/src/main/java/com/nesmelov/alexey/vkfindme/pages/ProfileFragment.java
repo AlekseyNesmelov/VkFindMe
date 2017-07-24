@@ -53,7 +53,7 @@ public class ProfileFragment extends Fragment implements OnUpdateListener {
             public void onClick(final View v) {
                 mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_VISIBILITY_FALSE,
                         HTTPManager.REQUEST_SET_VISIBILITY_TRUE,
-                        ProfileFragment.this, mStorage.getUserName());
+                        ProfileFragment.this, mStorage.getUserVkId().toString());
             }
         });
 
