@@ -23,14 +23,14 @@
 
             <SeekBar
                 android:id="@+id/radiusSeekBar"
-                android:layout_width="150dp"
+                android:layout_width="170dp"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_above="@+id/messageView"
                 android:layout_marginBottom="10dp"
                 android:progressDrawable="@drawable/radius_progress"
                 android:thumb="@drawable/radius_thumb"
-                android:max="1300"
+                android:max="1500"
                 android:visibility="invisible"/>
 
             <TextView
@@ -150,6 +150,8 @@
         android:id="@+id/verticalScrollLayout"
         android:layout_width="50dp"
         android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="70dp"
         android:orientation="vertical">
 
         <ScrollView

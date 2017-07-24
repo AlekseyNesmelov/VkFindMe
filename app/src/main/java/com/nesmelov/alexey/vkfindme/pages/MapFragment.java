@@ -69,7 +69,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
-    private static final int ALARM_PREVIEW_SIZE_DP = 40;
+    private static final int ALARM_PREVIEW_SIZE_DP = 42;
     private static final int USER_PREVIEW_SIZE_DP = 65;
     private static final int USER_MARKER_SIZE_DP = 50;
 
@@ -769,7 +769,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     @Override
     public void onUserUpdated(Integer userId, double lat, double lon) {
         final UserMarker userMarker = mUserMarkers.get(userId);
-        if (userMarker != null) {
+        if (userMarker != null && lat != Const.BAD_LAT && lon != Const.BAD_LON) {
             userMarker.setVisible(true);
             userMarker.setLatLon(lat, lon);
 
@@ -787,7 +787,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         if (userMarker != null) {
             userMarker.setVisible(false);
 
-            final ImageView previewIcon = (ImageView) getActivity().findViewById(userMarker.getMarkerId());
+            final ImageView previewIcon = (ImageView) mPictureLayout.findViewById(userMarker.getMarkerId());
             if (previewIcon != null) {
                 previewIcon.setBackgroundColor(Color.parseColor(COLOR_INVISIBLE));
             }
