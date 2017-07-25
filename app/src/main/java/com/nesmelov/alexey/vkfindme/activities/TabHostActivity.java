@@ -19,6 +19,7 @@ import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.pages.MapFragment;
 import com.nesmelov.alexey.vkfindme.pages.ProfileFragment;
 import com.nesmelov.alexey.vkfindme.pages.SettingsFragment;
+import com.nesmelov.alexey.vkfindme.ui.CustomViewPager;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKAccessTokenTracker;
 
@@ -34,7 +35,7 @@ public class TabHostActivity extends Activity {
     private static final int PAGE_COUNT = 3;
 
     private ProgressBar mProgressBar;
-    private ViewPager mViewPager;
+    private CustomViewPager mViewPager;
     private PagerAdapter mPagerAdapter;
     private TabHost mTabHost;
 
@@ -56,7 +57,7 @@ public class TabHostActivity extends Activity {
         setContentView(R.layout.main);
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mViewPager = (ViewPager) findViewById(R.id.main_pager);
+        mViewPager = (CustomViewPager) findViewById(R.id.main_pager);
         mPagerAdapter = new FragmentPagerAdapter(getFragmentManager()) {
             @Override
             public int getCount() {
@@ -84,12 +85,15 @@ public class TabHostActivity extends Activity {
                 switch (position) {
                     case PAGE_NUMBER_PROFILE:
                         mTabHost.setCurrentTabByTag(TAG_PROFILE);
+                        mViewPager.setPagingEnabled(true);
                         break;
                     case PAGE_NUMBER_MAP:
                         mTabHost.setCurrentTabByTag(TAG_MAP);
+                        mViewPager.setPagingEnabled(false);
                         break;
                     case PAGE_NUMBER_SETTINGS:
                         mTabHost.setCurrentTabByTag(TAG_SETTINGS);
+                        mViewPager.setPagingEnabled(true);
                         break;
                     default:
                         break;
@@ -118,12 +122,15 @@ public class TabHostActivity extends Activity {
                 switch (tabTag) {
                     case TAG_PROFILE:
                         mViewPager.setCurrentItem(PAGE_NUMBER_PROFILE);
+                        mViewPager.setPagingEnabled(true);
                         break;
                     case TAG_MAP:
                         mViewPager.setCurrentItem(PAGE_NUMBER_MAP);
+                        mViewPager.setPagingEnabled(false);
                         break;
                     case TAG_SETTINGS:
                         mViewPager.setCurrentItem(PAGE_NUMBER_SETTINGS);
+                        mViewPager.setPagingEnabled(true);
                         break;
                 }
             }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="false" android:state_pressed="false" android:drawable="@drawable/open_drawer" />
+    <item android:state_checked="false" android:state_pressed="true" android:drawable="@drawable/open_drawer_pressed" />
+    <item android:state_checked="true" android:state_pressed="false" android:drawable="@drawable/close_drawer" />
+    <item android:state_checked="true" android:state_pressed="true" android:drawable="@drawable/close_drawer_pressed" />
+    <item android:drawable="@drawable/open_drawer" />
+</selector>

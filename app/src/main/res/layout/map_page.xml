@@ -1,197 +1,221 @@
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <LinearLayout
+    <!-- The main content view -->
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/alarm_target"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:alpha="0"
-                android:layout_centerInParent="true"
-                android:background="@drawable/alarm_target"/>
-
-            <SeekBar
-                android:id="@+id/radiusSeekBar"
-                android:layout_width="170dp"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_above="@+id/messageView"
-                android:layout_marginBottom="10dp"
-                android:progressDrawable="@drawable/radius_progress"
-                android:thumb="@drawable/radius_thumb"
-                android:max="1500"
-                android:visibility="invisible"/>
-
-            <TextView
-                android:id="@+id/messageView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="#000"
-                android:layout_alignParentBottom="true"
-                android:textSize="14sp"/>
-
-            <com.google.android.gms.maps.MapView
-                android:id="@+id/map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-        </RelativeLayout>
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/horizontalScrollLayout"
             android:layout_width="match_parent"
-            android:layout_height="75dp"
-            android:background="#000">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <RelativeLayout
-                android:layout_width="65dp"
-                android:layout_height="65dp"
-                android:layout_gravity="center"
-                android:gravity="center">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
 
-                <ImageButton
-                    android:id="@+id/addFriendsBtn"
+                <ImageView
+                    android:id="@+id/alarm_target"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:alpha="0"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/alarm_target"/>
+
+                <SeekBar
+                    android:id="@+id/radiusSeekBar"
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_above="@+id/messageView"
+                    android:layout_marginBottom="10dp"
+                    android:progressDrawable="@drawable/radius_progress"
+                    android:thumb="@drawable/radius_thumb"
+                    android:max="1500"
+                    android:visibility="invisible"/>
+
+                <TextView
+                    android:id="@+id/messageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textColor="#000"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="14sp"/>
+
+                <android.support.v4.widget.DrawerLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:id="@+id/drawer_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.google.android.gms.maps.MapView
+                            android:id="@+id/map"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"/>
+
+                        <ToggleButton
+                            android:id="@+id/show_drawer"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_marginLeft="5dp"
+                            android:textOff=""
+                            android:textOn=""
+                            android:layout_gravity="center"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/show_drawer_selector" />
+
+                    </RelativeLayout>
+
+                    <!-- The navigation drawer -->
+                    <LinearLayout
+                        android:id="@+id/verticalScrollLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="left"
+                        android:paddingLeft="5dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal"
+                        android:orientation="horizontal">
+
+                        <ScrollView
+                            android:id="@+id/pictureScroll"
+                            android:layout_width="50dp"
+                            android:layout_height="match_parent"
+                            android:background="#18000000"
+                            android:layout_margin="3dp">
+
+                            <LinearLayout
+                                android:id="@+id/pictureVerticalLinear"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="vertical" >
+                            </LinearLayout>
+
+                        </ScrollView>
+
+                    </LinearLayout>
+
+                </android.support.v4.widget.DrawerLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/horizontalScrollLayout"
+                android:layout_width="match_parent"
+                android:layout_height="75dp"
+                android:background="#000">
+
+                <RelativeLayout
                     android:layout_width="65dp"
                     android:layout_height="65dp"
                     android:layout_gravity="center"
-                    android:background="@drawable/add_friends_selector" />
+                    android:gravity="center">
 
-                <ProgressBar
-                    android:id="@+id/addFriendsProgress"
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_centerInParent="true"
-                    android:layout_margin="5dp"
-                    android:visibility="gone"/>
+                    <ImageButton
+                        android:id="@+id/addFriendsBtn"
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/add_friends_selector" />
 
-            </RelativeLayout>
+                    <ProgressBar
+                        android:id="@+id/addFriendsProgress"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_margin="5dp"
+                        android:visibility="gone"/>
 
-            <HorizontalScrollView
-                android:id="@+id/pictureHorizontalScroll"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/friends_list_bg"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="3dp">
+                </RelativeLayout>
 
-                <LinearLayout
-                    android:id="@+id/pictureLinear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <HorizontalScrollView
+                    android:id="@+id/pictureHorizontalScroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/friends_list_bg"
                     android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" >
-                </LinearLayout>
+                    android:layout_margin="3dp">
 
-            </HorizontalScrollView>
+                    <LinearLayout
+                        android:id="@+id/pictureLinear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/buttonsPanel"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="2dp"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal">
+
+            <ToggleButton
+                android:id="@+id/refreshBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_gravity="center"
+                android:background="@drawable/refresh_selector" />
+
+            <ToggleButton
+                android:id="@+id/visibleBtn"
+                android:layout_width="53dp"
+                android:layout_height="53dp"
+                android:cursorVisible="false"
+                android:textOff=""
+                android:textOn=""
+                android:background="@drawable/visible_selector"
+                android:layout_margin="5dp"/>
+
+            <ImageButton
+                android:id="@+id/alarmBtn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:textOff=""
+                android:textOn=""
+                android:layout_gravity="center"
+                android:background="@drawable/alarm_selector"/>
+        </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/buttonsPanel"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="2dp"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonsPanel"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal">
 
-        <ToggleButton
-            android:id="@+id/refreshBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textOff=""
-            android:textOn=""
-            android:layout_gravity="center"
-            android:background="@drawable/refresh_selector" />
+            <ImageButton
+                android:id="@+id/okBtn"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/ok_selector"
+                android:layout_margin="5dp"
+                android:alpha="0"/>
 
-        <ToggleButton
-            android:id="@+id/visibleBtn"
-            android:layout_width="53dp"
-            android:layout_height="53dp"
-            android:cursorVisible="false"
-            android:textOff=""
-            android:textOn=""
-            android:background="@drawable/visible_selector"
-            android:layout_margin="5dp"/>
+            <ImageButton
+                android:id="@+id/nokBtn"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:background="@drawable/nok_selector"
+                android:layout_margin="5dp"
+                android:alpha="0"/>
+        </LinearLayout>
 
-        <ImageButton
-            android:id="@+id/alarmBtn"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:textOff=""
-            android:textOn=""
-            android:layout_gravity="center"
-            android:background="@drawable/alarm_selector"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonsPanel"
-        android:layout_centerHorizontal="true"
-        android:gravity="center_horizontal">
-
-        <ImageButton
-            android:id="@+id/okBtn"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:background="@drawable/ok_selector"
-            android:layout_margin="5dp"
-            android:alpha="0"/>
-
-        <ImageButton
-            android:id="@+id/nokBtn"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:background="@drawable/nok_selector"
-            android:layout_margin="5dp"
-            android:alpha="0"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/verticalScrollLayout"
-        android:layout_width="50dp"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="70dp"
-        android:orientation="vertical">
-
-        <ScrollView
-            android:id="@+id/pictureScroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#18000000"
-            android:layout_margin="3dp"
-            android:layout_weight="1">
-
-            <LinearLayout
-                android:id="@+id/pictureVerticalLinear"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical" >
-            </LinearLayout>
-
-        </ScrollView>
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-</RelativeLayout>
+    </RelativeLayout>

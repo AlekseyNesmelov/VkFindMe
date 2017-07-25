@@ -12,6 +12,9 @@ import android.location.LocationManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,6 +121,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private LatLng mStartPos = null;
 
+    private DrawerLayout mDrawerLayout;
+    private ToggleButton mShowDrawerBtn;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -146,6 +152,43 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMapView = (MapView) view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
+
+        mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+
+        mShowDrawerBtn = (ToggleButton) view.findViewById(R.id.show_drawer);
+        mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    mDrawerLayout.openDrawer(Gravity.LEFT, true);
+                } else {
+                    mDrawerLayout.closeDrawer(Gravity.LEFT, true);
+                }
+            }
+        });
+
+        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(final View drawerView, final float slideOffset) {
+                mShowDrawerBtn.setX(drawerView.getX() + drawerView.getWidth() + Utils.dpToPx(getActivity(), 5));
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                mShowDrawerBtn.setChecked(true);
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                mShowDrawerBtn.setChecked(false);
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
         mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
