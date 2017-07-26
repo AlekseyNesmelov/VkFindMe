@@ -16,8 +16,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,6 +41,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.nesmelov.alexey.vkfindme.activities.AlarmUsersActivity;
+import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
@@ -52,9 +55,11 @@ import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
+import com.nesmelov.alexey.vkfindme.ui.CircleImageView;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 import com.nesmelov.alexey.vkfindme.ui.marker.UserMarker;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
+import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -171,21 +176,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
             public void onDrawerSlide(final View drawerView, final float slideOffset) {
-                mShowDrawerBtn.setX(drawerView.getX() + drawerView.getWidth() + Utils.dpToPx(getActivity(), 5));
+                mShowDrawerBtn.setX(drawerView.getX() + drawerView.getWidth());
             }
 
             @Override
-            public void onDrawerOpened(View drawerView) {
+            public void onDrawerOpened(final View drawerView) {
                 mShowDrawerBtn.setChecked(true);
             }
 
             @Override
-            public void onDrawerClosed(View drawerView) {
+            public void onDrawerClosed(final View drawerView) {
                 mShowDrawerBtn.setChecked(false);
             }
 
             @Override
-            public void onDrawerStateChanged(int newState) {
+            public void onDrawerStateChanged(final int newState) {
 
             }
         });
@@ -580,9 +585,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
-                FindMeApp.showToast(getActivity(), getString(R.string.visibility_false_message));
                 mStorage.setVisibility(false);
                 getActivity().startService(new Intent(getActivity(), GpsService.class));
+                FindMeApp.showToast(getActivity(), getString(R.string.visibility_false_message));
                 break;
             case HTTPManager.REQUEST_CHECK_USERS:
                 try {

@@ -4,54 +4,53 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#222222">
+    android:background="@drawable/tabhost_background">
 
-    <TabHost
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@android:id/tabhost"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_gravity="center">
-
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="50dp">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#000"/>
-
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <View android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#000"/>
-
-            <View android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#000"/>
-
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-        </LinearLayout>
-    </TabHost>
-
-    <com.nesmelov.alexey.vkfindme.ui.CustomViewPager
-        android:id="@+id/main_pager"
-        android:layout_below="@android:id/tabhost"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/tabhost_background">
-    </com.nesmelov.alexey.vkfindme.ui.CustomViewPager>
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.nesmelov.alexey.vkfindme.ui.CircleImageView
+                android:id="@+id/avatar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="10dp"
+                android:layout_centerInParent="true"/>
+
+            <Button
+                android:id="@+id/logoutBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/logout_selector"
+                android:text="@string/logout"
+                android:textColor="#FFF"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/avatar"/>
+
+        </RelativeLayout>
+
+        <com.nesmelov.alexey.vkfindme.ui.CustomViewPager
+            android:id="@+id/main_pager"
+            android:layout_below="@android:id/tabhost"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/tabhost_background">
+            <android.support.v4.view.PagerTabStrip
+                android:id="@+id/pagerTitleStrip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top">
+            </android.support.v4.view.PagerTabStrip>
+        </com.nesmelov.alexey.vkfindme.ui.CustomViewPager>
+
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progressBar"
