@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -26,8 +27,8 @@ public class AlarmUsersActivity extends FragmentActivity {
 
     private ProgressBar mProgressBar;
     private ListView mUsersListView;
-    private ImageButton mOkBtn;
-    private ImageButton mNokBtn;
+    private Button mOkBtn;
+    private Button mNokBtn;
 
     private User mUser = new User();
 
@@ -44,7 +45,7 @@ public class AlarmUsersActivity extends FragmentActivity {
         mUserListAdapter = new UserListAdapter(this, mUsers);
         mUsersListView.setAdapter(mUserListAdapter);
 
-        mOkBtn = (ImageButton) findViewById(R.id.okBtn);
+        mOkBtn = (Button) findViewById(R.id.okBtn);
         mOkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,7 +76,7 @@ public class AlarmUsersActivity extends FragmentActivity {
                 }
             }
         });
-        mNokBtn = (ImageButton) findViewById(R.id.nokBtn);
+        mNokBtn = (Button) findViewById(R.id.nokBtn);
         mNokBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

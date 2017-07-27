@@ -86,6 +86,9 @@
     </string-array>
     <string name="send_pos_default_delay">3000</string>
 
+    <string name="apply">Принять</string>
+    <string name="remove">Удалить</string>
+
     <string name="min_gps_distance_title">Минимальное расстояние для обновления координат</string>
     <string name="min_gps_distance_summary">Минимальное расстояние, которое должно пройти между обновлениями координат</string>
     <string-array name="min_gps_distance_titles" >

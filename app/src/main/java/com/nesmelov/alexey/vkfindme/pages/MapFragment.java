@@ -101,9 +101,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private int mCurrentMode = MODE_USUAL;
 
-    private ToggleButton mVisibilityBtn;
-    private CompoundButton.OnCheckedChangeListener mVisibilityBtnListener;
-
     private Circle mAlarmRadius;
     private ImageView mAlarmTarget;
     private SeekBar mRadiusSeekBar;
@@ -111,7 +108,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private ImageButton mOkBtn;
     private ImageButton mNokBtn;
 
-    private ToggleButton mRefreshFriendsBtn;
     private ImageButton mAddFriendsBtn;
 
     private LinearLayout mAlarmPictureLayout;
@@ -199,19 +195,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
         mAddFriendsProgressBar = (ProgressBar) view.findViewById(R.id.addFriendsProgress);
 
-        mRefreshFriendsBtn = (ToggleButton) view.findViewById(R.id.refreshBtn);
-        mRefreshFriendsBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    FindMeApp.showToast(getActivity(), getString(R.string.refresh_friends_is_on));
-                }
-                mStorage.setRefreshFriends(isChecked);
-                getActivity().startService(new Intent(getActivity(), UpdateFriendsService.class));
-            }
-        });
-        mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
-
         mAddFriendsBtn = (ImageButton) view.findViewById(R.id.addFriendsBtn);
         mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -254,27 +237,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             }
         });
 
-        mVisibilityBtn = (ToggleButton) view.findViewById(R.id.visibleBtn);
-        mVisibilityBtnListener = new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                final Integer user = mStorage.getUserVkId();
-                if (isChecked) {
-                    mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_VISIBILITY_TRUE,
-                            HTTPManager.REQUEST_SET_VISIBILITY_FALSE,
-                            MapFragment.this, user.toString(),
-                            String.valueOf(mStorage.getUserLat()),
-                            String.valueOf(mStorage.getUserLon()));
-                } else {
-                    mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_VISIBILITY_FALSE,
-                            HTTPManager.REQUEST_SET_VISIBILITY_TRUE,
-                            MapFragment.this, user.toString());
-                }
-            }
-        };
-        mVisibilityBtn.setChecked(mStorage.getVisibility());
-        mVisibilityBtn.setOnCheckedChangeListener(mVisibilityBtnListener);
-
         mAlarmTarget = (ImageView) view.findViewById(R.id.alarm_target);
         mAlarmTarget.bringToFront();
 
@@ -282,6 +244,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mAlarmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mDrawerLayout.closeDrawer(Gravity.LEFT, true);
                 switch (mCurrentMode) {
                     case MODE_USUAL:
                         setMode(MODE_SELECT_ALARM_POS);
@@ -579,16 +542,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         switch (request) {
             case HTTPManager.REQUEST_ADD_USER:
                 break;
-            case HTTPManager.REQUEST_SET_VISIBILITY_TRUE:
-                FindMeApp.showToast(getActivity(), getString(R.string.visibility_true_message));
-                mStorage.setVisibility(true);
-                getActivity().startService(new Intent(getActivity(), GpsService.class));
-                break;
-            case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
-                mStorage.setVisibility(false);
-                getActivity().startService(new Intent(getActivity(), GpsService.class));
-                FindMeApp.showToast(getActivity(), getString(R.string.visibility_false_message));
-                break;
             case HTTPManager.REQUEST_CHECK_USERS:
                 try {
                     final JSONArray users = update.getJSONArray("users");
@@ -629,19 +582,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     public void onError(final int request, final int errorCode) {
         switch (request) {
             case HTTPManager.REQUEST_ADD_USER:
-                break;
-            case HTTPManager.REQUEST_SET_VISIBILITY_TRUE:
-                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                        getString(R.string.on_visibility_server_error_message));
-                mVisibilityBtn.setOnCheckedChangeListener(null);
-                mVisibilityBtn.setChecked(mStorage.getVisibility());
-                mVisibilityBtn.setOnCheckedChangeListener(mVisibilityBtnListener);
-                break;
-            case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
-                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                        getString(R.string.off_visibility_server_error_message));
-                mStorage.setVisibility(false);
-                getActivity().startService(new Intent(getActivity(), GpsService.class));
                 break;
             case HTTPManager.REQUEST_CHECK_USERS:
                 FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),

@@ -87,6 +87,9 @@
     </string-array>
     <string name="send_pos_default_delay">3000</string>
 
+    <string name="apply">Apply</string>
+    <string name="remove">Remove</string>
+
     <string name="min_gps_distance_title">Minimum distance between location updates</string>
     <string name="min_gps_distance_summary">Minimum distance between location updates if you are visible</string>
     <string-array name="min_gps_distance_titles" >

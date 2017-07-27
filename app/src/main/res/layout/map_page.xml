@@ -61,7 +61,7 @@
 
                         <ToggleButton
                             android:id="@+id/show_drawer"
-                            android:layout_width="50dp"
+                            android:layout_width="25dp"
                             android:layout_height="50dp"
                             android:textOff=""
                             android:textOn=""
@@ -80,7 +80,17 @@
                         android:layout_height="match_parent"
                         android:gravity="center_horizontal"
                         android:clickable="true"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
+
+                        <ImageButton
+                            android:id="@+id/alarmBtn"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:textOff=""
+                            android:textOn=""
+                            android:layout_marginLeft="3dp"
+                            android:layout_gravity="center"
+                            android:background="@drawable/alarm_selector"/>
 
                         <ScrollView
                             android:id="@+id/pictureScroll"
@@ -154,44 +164,6 @@
 
             </LinearLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/buttonsPanel"
-            android:layout_width="180dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="2dp"
-            android:layout_centerHorizontal="true"
-            android:gravity="center_horizontal">
-
-            <ToggleButton
-                android:id="@+id/refreshBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:textOff=""
-                android:textOn=""
-                android:layout_gravity="center"
-                android:background="@drawable/refresh_selector" />
-
-            <ToggleButton
-                android:id="@+id/visibleBtn"
-                android:layout_width="53dp"
-                android:layout_height="53dp"
-                android:cursorVisible="false"
-                android:textOff=""
-                android:textOn=""
-                android:background="@drawable/visible_selector"
-                android:layout_margin="5dp"/>
-
-            <ImageButton
-                android:id="@+id/alarmBtn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:textOff=""
-                android:textOn=""
-                android:layout_gravity="center"
-                android:background="@drawable/alarm_selector"/>
         </LinearLayout>
 
     <LinearLayout

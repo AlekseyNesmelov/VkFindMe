@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/tabhost_background">
 
     <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,7 +12,7 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:gravity="center"
-        android:background="#222222">
+        android:background="@drawable/tabhost_background">
 
         <TextView
             android:layout_width="wrap_content"
@@ -22,41 +23,36 @@
 
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#000" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#444444"
+        android:background="@drawable/tabhost_background"
         android:gravity="center">
 
-        <LinearLayout
+        <Button
+            android:id="@+id/okBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_margin="3dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="@string/apply"
+            android:background="@drawable/logout_selector" />
 
-            <ImageButton
-                android:id="@+id/okBtn"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:layout_gravity="center"
-                android:background="@drawable/ok_selector" />
-
-        </LinearLayout>
-
-        <LinearLayout
+        <Button
+            android:id="@+id/nokBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_weight="1">
-
-            <ImageButton
-                android:id="@+id/nokBtn"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:background="@drawable/nok_selector" />
-
-            </LinearLayout>
+            android:layout_margin="3dp"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:text="@string/remove"
+            android:background="@drawable/logout_selector" />
     </LinearLayout>
 
     <RelativeLayout
