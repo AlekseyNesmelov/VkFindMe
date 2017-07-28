@@ -74,6 +74,7 @@
                 android:background="@drawable/logout_selector"
                 android:text="@string/logout"
                 android:textColor="#FFF"
+                android:layout_margin="5dp"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/avatar"/>
 

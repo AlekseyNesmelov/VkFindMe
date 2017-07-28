@@ -48,21 +48,23 @@
                     xmlns:android="http://schemas.android.com/apk/res/android"
                     android:id="@+id/drawer_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:clickable="true">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="match_parent"
+                        android:clickable="true">
 
                         <com.google.android.gms.maps.MapView
                             android:id="@+id/map"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
-                        <ToggleButton
+                        <ImageView
                             android:id="@+id/show_drawer"
                             android:layout_width="25dp"
-                            android:layout_height="50dp"
+                            android:layout_height="100dp"
                             android:textOff=""
                             android:textOn=""
                             android:layout_gravity="center"
@@ -76,10 +78,11 @@
                         android:id="@+id/verticalScrollLayout"
                         android:layout_width="wrap_content"
                         android:layout_gravity="start"
-                        android:paddingLeft="5dp"
+                        android:layout_marginLeft="5dp"
                         android:layout_height="match_parent"
                         android:gravity="center_horizontal"
                         android:clickable="true"
+                        android:background="#58607D8B"
                         android:orientation="vertical">
 
                         <ImageButton
@@ -88,16 +91,13 @@
                             android:layout_height="50dp"
                             android:textOff=""
                             android:textOn=""
-                            android:layout_marginLeft="3dp"
-                            android:layout_gravity="center"
-                            android:background="@drawable/alarm_selector"/>
+                            android:background="@drawable/alarm_selector"
+                            android:layout_gravity="center" />
 
                         <ScrollView
                             android:id="@+id/pictureScroll"
                             android:layout_width="50dp"
-                            android:layout_height="match_parent"
-                            android:background="#18000000"
-                            android:layout_marginLeft="3dp">
+                            android:layout_height="match_parent">
 
                             <LinearLayout
                                 android:id="@+id/pictureVerticalLinear"
@@ -118,18 +118,18 @@
                 android:id="@+id/horizontalScrollLayout"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
-                android:background="#000">
+                android:background="#607D8B">
 
                 <RelativeLayout
-                    android:layout_width="65dp"
-                    android:layout_height="65dp"
+                    android:layout_width="75dp"
+                    android:layout_height="75dp"
                     android:layout_gravity="center"
                     android:gravity="center">
 
                     <ImageButton
                         android:id="@+id/addFriendsBtn"
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_gravity="center"
                         android:background="@drawable/add_friends_selector" />
 
@@ -147,9 +147,7 @@
                     android:id="@+id/pictureHorizontalScroll"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/friends_list_bg"
-                    android:layout_gravity="center_vertical"
-                    android:layout_margin="3dp">
+                    android:layout_gravity="center_vertical">
 
                     <LinearLayout
                         android:id="@+id/pictureLinear"

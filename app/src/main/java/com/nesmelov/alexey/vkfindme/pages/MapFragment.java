@@ -123,7 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private LatLng mStartPos = null;
 
     private DrawerLayout mDrawerLayout;
-    private ToggleButton mShowDrawerBtn;
+    private ImageView mShowDrawerBtn;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -156,17 +156,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
         mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
 
-        mShowDrawerBtn = (ToggleButton) view.findViewById(R.id.show_drawer);
-        mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    mDrawerLayout.openDrawer(Gravity.LEFT, true);
-                } else {
-                    mDrawerLayout.closeDrawer(Gravity.LEFT, true);
-                }
-            }
-        });
+        mShowDrawerBtn = (ImageView) view.findViewById(R.id.show_drawer);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
@@ -177,12 +167,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
             @Override
             public void onDrawerOpened(final View drawerView) {
-                mShowDrawerBtn.setChecked(true);
             }
 
             @Override
             public void onDrawerClosed(final View drawerView) {
-                mShowDrawerBtn.setChecked(false);
             }
 
             @Override
@@ -741,7 +729,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 }
             }
         });
-        mPictureLayout.addView(imageView);
+        final LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(size, size);
+        final int margin = Utils.dpToPx(getActivity(), 2);
+        layoutParams.setMargins(margin, margin, margin, margin);
+
+        mPictureLayout.addView(imageView, layoutParams);
 
         mUserMarkers.put(user.getVkId(), userMarker);
     }
