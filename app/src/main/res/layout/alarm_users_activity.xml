@@ -44,6 +44,14 @@
             android:text="@string/apply"
             android:background="@drawable/logout_selector" />
 
+
+        <View
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:layout_margin="5dp"
+            android:layout_gravity="center_vertical"
+            android:background="#455A64" />
+
         <Button
             android:id="@+id/nokBtn"
             android:layout_width="match_parent"

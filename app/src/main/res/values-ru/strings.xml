@@ -27,6 +27,7 @@
     <string name="set_alarm_radius">Установите радиус будильника</string>
     <string name="me_in_alarm">Вы участвуете в одном из будильников</string>
     <string name="alarm">Будильник (нажмите для редактирования)</string>
+    <string name="alarms">Будильники</string>
     <string name="location_not_granted">Вы должны дать разрешение</string>
     <string name="reach_alarm">Будильник достигнут</string>
     <string name="friend_in_alarm">Ваш друг достиг будильник</string>

@@ -6,4 +6,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BlackCheck">
+        <item name="colorAccent">#000</item>
+    </style>
+
 </resources>

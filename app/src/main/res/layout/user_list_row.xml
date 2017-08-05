@@ -4,10 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:background="#455A64"
+    android:background="#546E7A"
     android:layout_margin="2dp">
 
     <LinearLayout
+        android:id="@+id/layout"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -80,23 +80,43 @@
 
         </RelativeLayout>
 
-<View
-    android:layout_width="match_parent"
-    android:layout_height="2dp"
-    android:background="#000"/>
-        <com.nesmelov.alexey.vkfindme.ui.CustomViewPager
-            android:id="@+id/main_pager"
-            android:layout_below="@android:id/tabhost"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#455A64"/>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/tabhost_background">
-            <android.support.v4.view.PagerTabStrip
-                android:id="@+id/pagerTitleStrip"
+            android:layout_gravity="center"
+            android:gravity="center">
+
+            <com.nesmelov.alexey.vkfindme.ui.CustomViewPager
+                android:id="@+id/main_pager"
+                android:layout_below="@android:id/tabhost"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top">
-            </android.support.v4.view.PagerTabStrip>
-        </com.nesmelov.alexey.vkfindme.ui.CustomViewPager>
+                android:layout_height="match_parent"
+                android:background="@drawable/tabhost_background">
+                <android.support.v4.view.PagerTabStrip
+                    android:id="@+id/pagerTitleStrip"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_gravity="top">
+                </android.support.v4.view.PagerTabStrip>
+            </com.nesmelov.alexey.vkfindme.ui.CustomViewPager>
+
+            <ToggleButton
+                android:id="@+id/show_drawer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:textColor="#FFF"
+                android:textOn=""
+                android:textOff=""
+                android:background="@drawable/alarms_selector"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"/>
+
+        </RelativeLayout>
 
     </LinearLayout>
 

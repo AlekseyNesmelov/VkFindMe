@@ -44,45 +44,33 @@
                     android:layout_alignParentBottom="true"
                     android:textSize="14sp"/>
 
-                <android.support.v4.widget.DrawerLayout
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/drawer_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clickable="true">
-
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:clickable="true">
+                        android:layout_height="match_parent">
 
                         <com.google.android.gms.maps.MapView
                             android:id="@+id/map"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"/>
 
-                        <ImageView
-                            android:id="@+id/show_drawer"
-                            android:layout_width="25dp"
-                            android:layout_height="100dp"
-                            android:textOff=""
-                            android:textOn=""
-                            android:layout_gravity="center"
-                            android:layout_centerVertical="true"
-                            android:background="@drawable/alarm_ticket" />
-
                     </RelativeLayout>
 
                     <!-- The navigation drawer -->
+
+                <LinearLayout
+                    android:layout_width="50dp"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="50dp">
+
                     <LinearLayout
                         android:id="@+id/verticalScrollLayout"
                         android:layout_width="wrap_content"
-                        android:layout_gravity="start"
-                        android:layout_marginLeft="5dp"
                         android:layout_height="match_parent"
+                        android:layout_centerVertical="true"
                         android:gravity="center_horizontal"
-                        android:clickable="true"
                         android:background="#58607D8B"
+                        android:animateLayoutChanges="true"
                         android:orientation="vertical">
 
                         <ImageButton
@@ -96,8 +84,9 @@
 
                         <ScrollView
                             android:id="@+id/pictureScroll"
-                            android:layout_width="50dp"
-                            android:layout_height="match_parent">
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center">
 
                             <LinearLayout
                                 android:id="@+id/pictureVerticalLinear"
@@ -111,13 +100,20 @@
 
                     </LinearLayout>
 
-                </android.support.v4.widget.DrawerLayout>
+                </LinearLayout>
+
             </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="#455A64"/>
 
             <LinearLayout
                 android:id="@+id/horizontalScrollLayout"
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
+                android:gravity="center"
                 android:background="#607D8B">
 
                 <RelativeLayout
@@ -143,6 +139,13 @@
 
                 </RelativeLayout>
 
+                <View
+                    android:layout_width="2dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:layout_gravity="center_vertical"
+                    android:background="#455A64" />
+
                 <HorizontalScrollView
                     android:id="@+id/pictureHorizontalScroll"
                     android:layout_width="match_parent"
@@ -161,6 +164,11 @@
                 </HorizontalScrollView>
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:background="#455A64"/>
 
         </LinearLayout>
 

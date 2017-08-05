@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
@@ -29,6 +30,7 @@ public class UserListAdapter extends ArrayAdapter<User> {
     }
 
     static class ViewHolder {
+        protected LinearLayout layout;
         protected ImageView iconView;
         protected TextView nameView;
         protected CheckBox checkBox;
@@ -36,11 +38,12 @@ public class UserListAdapter extends ArrayAdapter<User> {
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
-        ViewHolder viewHolder;
+        final ViewHolder viewHolder;
         if (convertView == null) {
             final LayoutInflater inflater = mContext.getLayoutInflater();
             convertView = inflater.inflate(R.layout.user_list_row, null);
             viewHolder = new ViewHolder();
+            viewHolder.layout = (LinearLayout) convertView.findViewById(R.id.layout);
             viewHolder.iconView = (ImageView) convertView.findViewById(R.id.icon);
             mHTTPManager.asyncLoadBitmap(mUsers.get(position).getIconUrl(), viewHolder.iconView);
             viewHolder.nameView = (TextView) convertView.findViewById(R.id.name);
@@ -50,6 +53,12 @@ public class UserListAdapter extends ArrayAdapter<User> {
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     int getPosition = (Integer) buttonView.getTag();
                     mUsers.get(getPosition).setChecked(buttonView.isChecked());
+                }
+            });
+            viewHolder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    viewHolder.checkBox.setChecked(!viewHolder.checkBox.isChecked());
                 }
             });
             convertView.setTag(viewHolder);

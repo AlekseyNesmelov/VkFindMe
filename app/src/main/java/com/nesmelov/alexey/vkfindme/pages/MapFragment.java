@@ -1,6 +1,7 @@
 package com.nesmelov.alexey.vkfindme.pages;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -122,8 +123,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private LatLng mStartPos = null;
 
-    private DrawerLayout mDrawerLayout;
-    private ImageView mShowDrawerBtn;
+    private LinearLayout mAlarmScrollLayout;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -154,30 +154,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
 
-        mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
-
-        mShowDrawerBtn = (ImageView) view.findViewById(R.id.show_drawer);
-
-        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
-        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+        mAlarmScrollLayout = (LinearLayout) view.findViewById(R.id.verticalScrollLayout);
+        /*mShowDrawerBtn = (ToggleButton) view.findViewById(R.id.show_drawer);
+        mShowDrawerBtn.setChecked(true);
+        mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onDrawerSlide(final View drawerView, final float slideOffset) {
-                mShowDrawerBtn.setX(drawerView.getX() + drawerView.getWidth());
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    mAlarmScrollLayout.setPivotY(0);
+                    mAlarmScrollLayout.animate().scaleY(1f).setDuration(500);
+                    mAlarmScrollLayout.animate().alpha(1f).setDuration(500);
+                } else {
+                    mAlarmScrollLayout.setPivotY(0);
+                    mAlarmScrollLayout.animate().scaleY(0.01f).setDuration(500);
+                    mAlarmScrollLayout.animate().alpha(0).setDuration(500);
+                }
             }
-
-            @Override
-            public void onDrawerOpened(final View drawerView) {
-            }
-
-            @Override
-            public void onDrawerClosed(final View drawerView) {
-            }
-
-            @Override
-            public void onDrawerStateChanged(final int newState) {
-
-            }
-        });
+        });*/
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
         mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
@@ -232,7 +225,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mAlarmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDrawerLayout.closeDrawer(Gravity.LEFT, true);
                 switch (mCurrentMode) {
                     case MODE_USUAL:
                         setMode(MODE_SELECT_ALARM_POS);
@@ -433,6 +425,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     public void onMapReady(final GoogleMap googleMap) {
         mMap = googleMap;
         mMap.getUiSettings().setZoomControlsEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(false);
         if (ActivityCompat.checkSelfPermission(
                 getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
@@ -619,6 +612,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     mAlarmRadius.setVisible(false);
                 }
                 break;
+        }
+    }
+
+    public void showAlarms(final boolean b) {
+        if (b) {
+            mAlarmScrollLayout.setPivotY(0);
+            mAlarmScrollLayout.animate().scaleY(1f).setDuration(500);
+            mAlarmScrollLayout.animate().alpha(1f).setDuration(500);
+        } else {
+            mAlarmScrollLayout.setPivotY(0);
+            mAlarmScrollLayout.animate().scaleY(0.01f).setDuration(500);
+            mAlarmScrollLayout.animate().alpha(0).setDuration(500);
         }
     }
 

@@ -54,6 +54,10 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
 
     private boolean mIsLogout = false;
 
+    private ToggleButton mShowDrawerBtn;
+
+    private MapFragment mMapFragment;
+
     final VKAccessTokenTracker mVkAccessTokenTracker = new VKAccessTokenTracker() {
         @Override
         public void onVKAccessTokenChanged(final VKAccessToken oldToken, final VKAccessToken newToken) {
@@ -86,6 +90,17 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
             }
         });
         mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
+
+        mShowDrawerBtn = (ToggleButton) findViewById(R.id.show_drawer);
+        mShowDrawerBtn.setChecked(true);
+        mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+            if (mMapFragment != null) {
+                mMapFragment.showAlarms(b);
+            }
+            }
+        });
 
         mVisibilityBtn = (ToggleButton) findViewById(R.id.visibleBtn);
         mVisibilityBtnListener = new CompoundButton.OnCheckedChangeListener() {
@@ -131,7 +146,8 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
             public Fragment getItem(final int position) {
                 switch (position) {
                     case PAGE_NUMBER_MAP:
-                        return new MapFragment();
+                        mMapFragment = new MapFragment();
+                        return mMapFragment;
                     case PAGE_NUMBER_SETTINGS:
                         return new SettingsFragment();
                 }
@@ -146,9 +162,13 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
                 switch (position) {
                     case PAGE_NUMBER_MAP:
                         mViewPager.setPagingEnabled(false);
+                        mShowDrawerBtn.setVisibility(View.VISIBLE);
+                        mShowDrawerBtn.animate().setDuration(500).alpha(1);
                         break;
                     case PAGE_NUMBER_SETTINGS:
                         mViewPager.setPagingEnabled(true);
+                        mShowDrawerBtn.setVisibility(View.GONE);
+                        mShowDrawerBtn.setAlpha(0);
                         break;
                     default:
                         break;
