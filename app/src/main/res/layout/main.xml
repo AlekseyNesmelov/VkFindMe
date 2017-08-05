@@ -116,6 +116,18 @@
                 android:layout_margin="5dp"
                 android:layout_gravity="center"/>
 
+            <ToggleButton
+                android:id="@+id/show_searcher"
+                android:layout_toRightOf="@+id/show_drawer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:textColor="#FFF"
+                android:textOn=""
+                android:textOff=""
+                android:background="@drawable/search_selector"
+                android:layout_margin="5dp"
+                android:layout_gravity="center"/>
+
         </RelativeLayout>
 
     </LinearLayout>

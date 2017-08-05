@@ -1,34 +1,33 @@
 package com.nesmelov.alexey.vkfindme.pages;
 
 import android.Manifest;
-import android.animation.Animator;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.google.android.gms.maps.CameraUpdate;
@@ -42,7 +41,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.nesmelov.alexey.vkfindme.activities.AlarmUsersActivity;
-import com.nesmelov.alexey.vkfindme.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
@@ -56,11 +54,11 @@ import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
-import com.nesmelov.alexey.vkfindme.ui.CircleImageView;
+import com.nesmelov.alexey.vkfindme.ui.AddressListAdapter;
+import com.nesmelov.alexey.vkfindme.ui.UserListAdapter;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 import com.nesmelov.alexey.vkfindme.ui.marker.UserMarker;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
-import com.vk.sdk.VKSdk;
 import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
@@ -71,8 +69,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
+import static com.vk.sdk.VKUIHelper.getApplicationContext;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener,
         OnAlarmUpdatedListener, OnUserUpdatedListener {
@@ -123,11 +124,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private LatLng mStartPos = null;
 
+    private LinearLayout mSearchLayout;
     private LinearLayout mAlarmScrollLayout;
+    private SearchView mSearchView;
+
+    private GeocoderTask mGeocoderTask = null;
+
+    private ListView mAddressList;
+    private List<Address> mAddresses = new CopyOnWriteArrayList<>();
+    private AddressListAdapter mAddressListAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         mHTTPManager = FindMeApp.getHTTPManager();
         mVKManager = FindMeApp.getVKManager();
         mStorage = FindMeApp.getStorage();
@@ -154,23 +164,39 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
 
-        mAlarmScrollLayout = (LinearLayout) view.findViewById(R.id.verticalScrollLayout);
-        /*mShowDrawerBtn = (ToggleButton) view.findViewById(R.id.show_drawer);
-        mShowDrawerBtn.setChecked(true);
-        mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mAddressList = (ListView) view.findViewById(R.id.address_list);
+        mAddressListAdapter = new AddressListAdapter(getActivity(), mAddresses);
+        mAddressList.setAdapter(mAddressListAdapter);
+
+        mAddressList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    mAlarmScrollLayout.setPivotY(0);
-                    mAlarmScrollLayout.animate().scaleY(1f).setDuration(500);
-                    mAlarmScrollLayout.animate().alpha(1f).setDuration(500);
-                } else {
-                    mAlarmScrollLayout.setPivotY(0);
-                    mAlarmScrollLayout.animate().scaleY(0.01f).setDuration(500);
-                    mAlarmScrollLayout.animate().alpha(0).setDuration(500);
-                }
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                final Address address = mAddresses.get(i);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(address.getLatitude(), address.getLongitude()), START_ZOOM));
             }
-        });*/
+        });
+
+        mSearchLayout = (LinearLayout) view.findViewById(R.id.search_layout);
+        mAlarmScrollLayout = (LinearLayout) view.findViewById(R.id.verticalScrollLayout);
+        mSearchView = (SearchView) view.findViewById(R.id.search_view);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(final String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(final String s) {
+                if (mGeocoderTask != null) {
+                    mGeocoderTask.cancel(true);
+                }
+                mGeocoderTask = new GeocoderTask(s);
+                mGeocoderTask.execute();
+
+                return true;
+            }
+        });
 
         mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
         mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
@@ -617,6 +643,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     public void showAlarms(final boolean b) {
         if (b) {
+            ((TabHostActivity)getActivity()).setCheckedShowSearchBtn(false);
+            mSearchLayout.setPivotY(0);
+            mSearchLayout.animate().scaleY(0.01f).setDuration(500);
+            mSearchLayout.animate().alpha(0).setDuration(500);
+        }
+        if (b) {
             mAlarmScrollLayout.setPivotY(0);
             mAlarmScrollLayout.animate().scaleY(1f).setDuration(500);
             mAlarmScrollLayout.animate().alpha(1f).setDuration(500);
@@ -624,6 +656,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             mAlarmScrollLayout.setPivotY(0);
             mAlarmScrollLayout.animate().scaleY(0.01f).setDuration(500);
             mAlarmScrollLayout.animate().alpha(0).setDuration(500);
+        }
+    }
+
+    public void showSearchView(final boolean b) {
+        if (b) {
+            ((TabHostActivity)getActivity()).setCheckedShowDrawerBtn(false);
+            mAlarmScrollLayout.setPivotY(0);
+            mAlarmScrollLayout.animate().scaleY(0.01f).setDuration(500);
+            mAlarmScrollLayout.animate().alpha(0).setDuration(500);
+        }
+        if (b) {
+            mSearchLayout.setPivotY(0);
+            mSearchLayout.animate().scaleY(1f).setDuration(500);
+            mSearchLayout.animate().alpha(1f).setDuration(500);
+        } else {
+            mSearchLayout.setPivotY(0);
+            mSearchLayout.animate().scaleY(0.01f).setDuration(500);
+            mSearchLayout.animate().alpha(0).setDuration(500);
         }
     }
 
@@ -786,6 +836,43 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             final ImageView previewIcon = (ImageView) mPictureLayout.findViewById(userMarker.getMarkerId());
             if (previewIcon != null) {
                 previewIcon.setBackgroundColor(Color.parseColor(COLOR_INVISIBLE));
+            }
+        }
+    }
+
+    private class GeocoderTask extends AsyncTask<String, Void, List<Address>> {
+        private static final int MAX_RESULTS = 3;
+        private String mPlace;
+
+        public GeocoderTask(final String place) {
+            mPlace = place;
+        }
+
+        @Override
+        protected List<Address> doInBackground(final String... strings) {
+            final Geocoder geocoder = new Geocoder(getApplicationContext());
+            try {
+                final List<Address> addresses = geocoder.getFromLocationName(mPlace, MAX_RESULTS);
+                if (addresses != null && !addresses.isEmpty()) {
+                    return addresses;
+                }
+            } catch(Exception e) {
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(final List<Address> addresses) {
+            super.onPostExecute(addresses);
+            if (addresses == null) {
+                Log.d("ANESMELOV", "no address");
+            } else {
+                mAddresses.clear();
+                for (final Address address : addresses) {
+                    mAddresses.add(address);
+                }
+                mAddressListAdapter.notifyDataSetChanged();
             }
         }
     }

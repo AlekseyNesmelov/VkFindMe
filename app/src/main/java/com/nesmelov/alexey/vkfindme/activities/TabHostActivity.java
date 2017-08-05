@@ -55,6 +55,7 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
     private boolean mIsLogout = false;
 
     private ToggleButton mShowDrawerBtn;
+    private ToggleButton mShowSearchBtn;
 
     private MapFragment mMapFragment;
 
@@ -92,13 +93,22 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
         mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
 
         mShowDrawerBtn = (ToggleButton) findViewById(R.id.show_drawer);
-        mShowDrawerBtn.setChecked(true);
         mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
             if (mMapFragment != null) {
                 mMapFragment.showAlarms(b);
             }
+            }
+        });
+
+        mShowSearchBtn = (ToggleButton) findViewById(R.id.show_searcher);
+        mShowSearchBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (mMapFragment != null) {
+                    mMapFragment.showSearchView(b);
+                }
             }
         });
 
@@ -164,11 +174,15 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
                         mViewPager.setPagingEnabled(false);
                         mShowDrawerBtn.setVisibility(View.VISIBLE);
                         mShowDrawerBtn.animate().setDuration(500).alpha(1);
+                        mShowSearchBtn.setVisibility(View.VISIBLE);
+                        mShowSearchBtn.animate().setDuration(500).alpha(1);
                         break;
                     case PAGE_NUMBER_SETTINGS:
                         mViewPager.setPagingEnabled(true);
                         mShowDrawerBtn.setVisibility(View.GONE);
                         mShowDrawerBtn.setAlpha(0);
+                        mShowSearchBtn.setVisibility(View.GONE);
+                        mShowSearchBtn.setAlpha(0);
                         break;
                     default:
                         break;
@@ -207,6 +221,14 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
 
     public void hideProgressBar() {
         mProgressBar.setVisibility(View.GONE);
+    }
+
+    public void setCheckedShowDrawerBtn(final boolean checked){
+        mShowDrawerBtn.setChecked(checked);
+    }
+
+    public void setCheckedShowSearchBtn(final boolean checked){
+        mShowSearchBtn.setChecked(checked);
     }
 
     @Override

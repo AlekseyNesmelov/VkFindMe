@@ -48,6 +48,7 @@
         <activity android:name=".activities.TabHostActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"/>
 
         <activity android:name="com.vk.sdk.VKServiceActivity" android:label="ServiceActivity"
