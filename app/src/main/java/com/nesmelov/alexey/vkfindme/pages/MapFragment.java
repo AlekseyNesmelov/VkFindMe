@@ -55,7 +55,6 @@ import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.AddressListAdapter;
-import com.nesmelov.alexey.vkfindme.ui.UserListAdapter;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 import com.nesmelov.alexey.vkfindme.ui.marker.UserMarker;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
@@ -70,7 +69,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 import static com.vk.sdk.VKUIHelper.getApplicationContext;

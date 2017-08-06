@@ -130,8 +130,8 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
                 }
             }
         };
-        mVisibilityBtn.setChecked(mStorage.getVisibility());
         mVisibilityBtn.setOnCheckedChangeListener(mVisibilityBtnListener);
+        mVisibilityBtn.setChecked(mStorage.getVisibility());
 
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         mViewPager = (CustomViewPager) findViewById(R.id.main_pager);
@@ -241,6 +241,7 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
                 break;
             case HTTPManager.REQUEST_SET_VISIBILITY_FALSE:
                 if (mIsLogout) {
+
                     returnToMainActivity();
                 } else {
                     mStorage.setVisibility(false);
@@ -279,6 +280,8 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
     }
 
     private void returnToMainActivity() {
+        stopService(new Intent(TabHostActivity.this, GpsService.class));
+        stopService(new Intent(TabHostActivity.this, UpdateFriendsService.class));
         VKSdk.logout();
         final Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

@@ -57,7 +57,9 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
 
     public void onDestroy() {
         FindMeApp.cancelNotification(FRIENDS_REFRESH_NOTIFICATION_ID);
-        FindMeApp.showToast(this, getString(R.string.refresh_friends_is_off));
+        if (!mStorage.getRefreshFriends()) {
+            FindMeApp.showToast(this, getString(R.string.refresh_friends_is_off));
+        }
         super.onDestroy();
     }
 

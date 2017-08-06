@@ -10,9 +10,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.location.Location;
 import android.util.DisplayMetrics;
-
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
-
 import java.util.Random;
 
 public class Utils {
