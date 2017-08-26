@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 import android.widget.ImageView;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -17,6 +18,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class HTTPManager {
+    public static final int REQUEST_TIMEOUT = 10000;
+
     public static final int CACHE_SIZE = 10;
     public static final int PARSE_ERROR_CODE = 0;
     public static final int SERVER_ERROR_CODE = 1;
@@ -217,6 +220,10 @@ public class HTTPManager {
                     final JsonObjectRequest jsonRequest = new JsonObjectRequest(
                             method, SERVER_URL + ADD_USER_ACTION_URL, data, responseListener, errorListener);
                     mAddUserRequest = jsonRequest;
+                    mAddUserRequest.setRetryPolicy(new DefaultRetryPolicy(
+                            REQUEST_TIMEOUT,
+                            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                     mQueue.add(mAddUserRequest);
                     break;
                 }

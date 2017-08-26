@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -92,7 +93,7 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
         });
         mRefreshFriendsBtn.setChecked(mStorage.getRefreshFriends());
 
-        mShowDrawerBtn = (ToggleButton) findViewById(R.id.show_drawer);
+        mShowDrawerBtn = (  ToggleButton) findViewById(R.id.show_drawer);
         mShowDrawerBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -217,6 +218,10 @@ public class TabHostActivity extends Activity implements OnUpdateListener{
         mViewPager.setCurrentItem(PAGE_NUMBER_MAP);
 
         mVkAccessTokenTracker.startTracking();
+    }
+
+    public void clickSearchButton() {
+        mShowSearchBtn.toggle();
     }
 
     public void hideProgressBar() {

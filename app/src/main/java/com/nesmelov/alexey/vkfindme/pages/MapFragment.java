@@ -2,6 +2,7 @@ package com.nesmelov.alexey.vkfindme.pages;
 
 import android.Manifest;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -172,6 +174,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 final Address address = mAddresses.get(i);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(address.getLatitude(), address.getLongitude()), START_ZOOM));
+                ((TabHostActivity)getActivity()).clickSearchButton();
+                final InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
         });
 
@@ -863,9 +868,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         @Override
         protected void onPostExecute(final List<Address> addresses) {
             super.onPostExecute(addresses);
-            if (addresses == null) {
-                Log.d("ANESMELOV", "no address");
-            } else {
+            if (addresses != null) {
                 mAddresses.clear();
                 for (final Address address : addresses) {
                     mAddresses.add(address);
