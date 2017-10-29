@@ -8,6 +8,6 @@
 		</shape>
 	</item>
 	<item>
-		<bitmap android:src="@drawable/invisible"/>
+		<bitmap android:src="@drawable/eye_off"/>
 	</item>
 </layer-list>

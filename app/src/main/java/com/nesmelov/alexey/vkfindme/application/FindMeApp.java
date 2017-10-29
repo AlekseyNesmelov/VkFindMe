@@ -19,8 +19,6 @@ import com.nesmelov.alexey.vkfindme.storage.DataBaseHelper;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.vk.sdk.VKSdk;
 
-import java.util.Random;
-
 public class FindMeApp extends Application {
     public static final String USERS_DATABASE_NAME = "USERS_DATABASE";
 
@@ -33,7 +31,7 @@ public class FindMeApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        sHTTPManager = new HTTPManager(this);
+        sHTTPManager = new HTTPManager();
         sDataBaseHelper = new DataBaseHelper(this, USERS_DATABASE_NAME, null);
         sStorage = new Storage(this);
         sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -61,10 +59,7 @@ public class FindMeApp extends Application {
         final AlertDialog adb = new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
                 })
                 .create();
         adb.show();

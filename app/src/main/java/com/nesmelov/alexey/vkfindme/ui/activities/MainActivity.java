@@ -1,8 +1,7 @@
-package com.nesmelov.alexey.vkfindme.activities;
+package com.nesmelov.alexey.vkfindme.ui.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -10,13 +9,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
-import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
@@ -30,7 +27,11 @@ import com.vk.sdk.api.VKResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class MainActivity extends Activity implements OnUpdateListener{
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MainActivity extends Activity {
     private static final int LOCATION_REQUEST_CODE = 0;
 
     private Storage mStorage;
@@ -74,23 +75,37 @@ public class MainActivity extends Activity implements OnUpdateListener{
 
                     mStorage.addUser(user);
 
-                    mHTTPManager.executeRequest(HTTPManager.REQUEST_ADD_USER,
-                            HTTPManager.REQUEST_IDLE,
-                            MainActivity.this, mStorage.getUserVkId().toString());
+                    mHTTPManager.addUser(user.getVkId(), new Callback<StatusModel>() {
+                        @Override
+                        public void onResponse(Call<StatusModel> call, Response<StatusModel> response) {
+                            final StatusModel statusModel = response.body();
+                            if (response.isSuccessful() && statusModel != null
+                                    && (statusModel.getStatus().equals(StatusModel.OK)
+                                    || statusModel.getStatus().equals(StatusModel.ALREADY_EXISTS))) {
+                                MainActivity.this.onSuccess();
+                            } else {
+                                MainActivity.this.onError();
+                            }
+                        }
 
+                        @Override
+                        public void onFailure(Call<StatusModel> call, Throwable t) {
+                            MainActivity.this.onError();
+                        }
+                    });
                 } catch (Exception e) {
-                    MainActivity.this.onError(HTTPManager.REQUEST_ADD_USER, HTTPManager.SERVER_ERROR_CODE);
+                    MainActivity.this.onError();
                 }
             }
 
             @Override
             public void onError(final VKError error) {
-                MainActivity.this.onError(HTTPManager.REQUEST_ADD_USER, HTTPManager.SERVER_ERROR_CODE);
+                MainActivity.this.onError();
             }
 
             @Override
             public void attemptFailed(final VKRequest request, final int attemptNumber, final int totalAttempts) {
-                MainActivity.this.onError(HTTPManager.REQUEST_ADD_USER, HTTPManager.SERVER_ERROR_CODE);
+                MainActivity.this.onError();
             }
         };
 
@@ -138,26 +153,15 @@ public class MainActivity extends Activity implements OnUpdateListener{
         }
     }
 
-    @Override
-    public void onUpdate(final int request, final JSONObject update) {
-        start();
-    }
-
-    @Override
-    public void onError(final int request, final int errorCode) {
-        FindMeApp.showPopUp(this, getString(R.string.error_title), getString(R.string.server_is_not_accessible),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        finish();
-                    }
-                });
-    }
-
-    private void start() {
+    public void onSuccess() {
         final Intent intent = new Intent(this, TabHostActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    public void onError() {
+        FindMeApp.showPopUp(this, getString(R.string.error_title), getString(R.string.server_is_not_accessible),
+                (dialog, which) -> finish());
     }
 
     private void login() {

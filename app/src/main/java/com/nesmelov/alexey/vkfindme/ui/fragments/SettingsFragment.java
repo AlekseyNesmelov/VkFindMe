@@ -1,8 +1,9 @@
-package com.nesmelov.alexey.vkfindme.pages;
+package com.nesmelov.alexey.vkfindme.ui.fragments;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
+
 import com.nesmelov.alexey.vkfindme.R;
 
 public class SettingsFragment extends PreferenceFragment {

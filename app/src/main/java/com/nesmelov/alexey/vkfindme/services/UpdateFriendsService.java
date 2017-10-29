@@ -2,27 +2,29 @@ package com.nesmelov.alexey.vkfindme.services;
 
 import android.app.Service;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.activities.MainActivity;
+import com.nesmelov.alexey.vkfindme.ui.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.models.LatLonUserModel;
+import com.nesmelov.alexey.vkfindme.models.LatLonUsersModel;
+import com.nesmelov.alexey.vkfindme.models.UserModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
-import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-public class UpdateFriendsService extends Service implements OnUpdateListener{
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class UpdateFriendsService extends Service {
     public static final int FRIENDS_REFRESH_NOTIFICATION_ID = 444;
 
     private Storage mStorage;
@@ -63,19 +65,16 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
         super.onDestroy();
     }
 
-    @Override
-    public void onUpdate(int request, JSONObject update) {
+    public void onUpdate(Response<LatLonUsersModel> response) {
         try {
             final List<Integer> allUsers = mStorage.getUserIds();
 
             final Map<Integer, List<Alarm>> alarmUsers = mStorage.getAlarmUsers();
 
-            final JSONArray users = update.getJSONArray("users");
-            for (int i = 0; i < users.length(); i++) {
-                final JSONObject user = users.getJSONObject(i);
-                final Integer id = user.getInt("user");
-                final double lat = user.getDouble("lat");
-                final double lon  = user.getDouble("lon");
+            for (final LatLonUserModel latLonUserModel : response.body().getUsers()) {
+                final Integer id = latLonUserModel.getUser();
+                final double lat = latLonUserModel.getLat();
+                final double lon  = latLonUserModel.getLon();
                 allUsers.remove(id);
                 mStorage.setUserPos(id, lat, lon);
 
@@ -115,20 +114,28 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
             for (final Integer invisibleUser : allUsers) {
                 mStorage.makeUserInvisible(invisibleUser);
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
         }
-        refreshData();
-    }
-
-    @Override
-    public void onError(int request, int errorCode) {
         refreshData();
     }
 
     private void startRefreshing() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
-            mHTTPManager.executeRequest(HTTPManager.REQUEST_GET_USERS_POS,
-                    HTTPManager.REQUEST_GET_USERS_POS, UpdateFriendsService.this, mStorage.getUserIdsString());
+            final List<UserModel> userModels = mStorage.getUserModels();
+            mHTTPManager.getUserPositions(userModels,
+                    new Callback<LatLonUsersModel>() {
+                        @Override
+                        public void onResponse(Call<LatLonUsersModel> call, Response<LatLonUsersModel> response) {
+                            if (response.body() != null) {
+                                onUpdate(response);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<LatLonUsersModel> call, Throwable t) {
+                            refreshData();
+                        }
+                    });
         } else {
             stopSelf();
         }
@@ -136,13 +143,22 @@ public class UpdateFriendsService extends Service implements OnUpdateListener{
 
     private void refreshData() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mHTTPManager.executeRequest(HTTPManager.REQUEST_GET_USERS_POS,
-                            HTTPManager.REQUEST_GET_USERS_POS, UpdateFriendsService.this,
-                            mStorage.getUserIdsString());
-                }
+            mHandler.postDelayed(() -> {
+                final List<UserModel> userModels = mStorage.getUserModels();
+                mHTTPManager.getUserPositions(userModels,
+                        new Callback<LatLonUsersModel>() {
+                            @Override
+                            public void onResponse(Call<LatLonUsersModel> call, Response<LatLonUsersModel> response) {
+                                if (response.body() != null) {
+                                    onUpdate(response);
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<LatLonUsersModel> call, Throwable t) {
+                                refreshData();
+                            }
+                        });
             }, mStorage.getRefreshFriendsDelay());
         } else {
             stopSelf();

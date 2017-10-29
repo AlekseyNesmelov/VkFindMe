@@ -11,19 +11,24 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+
 import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.activities.MainActivity;
+import com.nesmelov.alexey.vkfindme.ui.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
-import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
-import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class GpsService extends Service implements LocationListener, OnUpdateListener{
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class GpsService extends Service implements LocationListener {
     public static final int VISIBLE_NOTIFICATION_ID = 111;
     public static final int ME_IN_ALARM_NOTIFICATION_ID = 222;
     public static final int RING_ALARM_NOTIFICATION_ID = 333;
@@ -56,10 +61,9 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
             }
 
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
-
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                         mStorage.getGPSMinDelay(), mStorage.getGPSMinDistance(), this);
                 mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
@@ -104,10 +108,16 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
             mStorage.setUserLon(location.getLongitude());
 
             if (mHTTPManager != null && isVisible()) {
-                mHTTPManager.executeRequest(HTTPManager.REQUEST_SET_POSITION, HTTPManager.REQUEST_IDLE, this,
-                        String.valueOf(mStorage.getUserVkId()),
-                        String.valueOf(location.getLatitude()),
-                        String.valueOf(location.getLongitude()));
+                mHTTPManager.sendPosition(mStorage.getUserVkId(), location.getLatitude(), location.getLongitude(),
+                        new Callback<StatusModel>() {
+                            @Override
+                            public void onResponse(Call<StatusModel> call, Response<StatusModel> response) {
+                            }
+
+                            @Override
+                            public void onFailure(Call<StatusModel> call, Throwable t) {
+                            }
+                        });
             }
 
             synchronized (mLock) {
@@ -144,14 +154,6 @@ public class GpsService extends Service implements LocationListener, OnUpdateLis
 
     @Override
     public void onProviderDisabled(final String provider) {
-    }
-
-    @Override
-    public void onUpdate(final int request, final JSONObject update) {
-    }
-
-    @Override
-    public void onError(final int request, final int errorCode) {
     }
 
     private boolean isVisible() {

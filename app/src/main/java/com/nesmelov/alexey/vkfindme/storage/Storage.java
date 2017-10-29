@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.models.UserModel;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
@@ -35,7 +36,7 @@ public class Storage {
     private OnAlarmUpdatedListener mAlarmUpdatedListener = null;
     private OnUserUpdatedListener mUserUpdatedListener = null;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private Context mContext;
 
     public Storage(final Context context) {
@@ -56,8 +57,8 @@ public class Storage {
         }
     }
 
-    public String getUserIdsString() {
-        return mDataBaseHelper.getUserIdsString(Const.FRIENDS_LIMIT);
+    public List<UserModel> getUserModels() {
+        return mDataBaseHelper.getUserModels(Const.FRIENDS_LIMIT);
     }
 
     public List<Integer> getUserIds() {

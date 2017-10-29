@@ -1,4 +1,4 @@
-package com.nesmelov.alexey.vkfindme.activities;
+package com.nesmelov.alexey.vkfindme.ui.activities;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import com.nesmelov.alexey.vkfindme.R;
@@ -26,9 +25,6 @@ public class AlarmUsersActivity extends FragmentActivity {
     private Storage mStorage;
 
     private ProgressBar mProgressBar;
-    private ListView mUsersListView;
-    private Button mOkBtn;
-    private Button mNokBtn;
 
     private User mUser = new User();
 
@@ -39,52 +35,46 @@ public class AlarmUsersActivity extends FragmentActivity {
 
         mStorage = FindMeApp.getStorage();
 
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar = findViewById(R.id.progressBar);
 
-        mUsersListView = (ListView) findViewById(R.id.usersList);
+        ListView mUsersListView = findViewById(R.id.usersList);
         mUserListAdapter = new UserListAdapter(this, mUsers);
         mUsersListView.setAdapter(mUserListAdapter);
 
-        mOkBtn = (Button) findViewById(R.id.okBtn);
-        mOkBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final ArrayList<Integer> checkedUsers = new ArrayList<>();
-                StringBuilder userNames = new StringBuilder();
-                for (final User user : mUsers) {
-                    if (user.getChecked()) {
-                        checkedUsers.add(user.getVkId());
-                        userNames.append(user.getName() + " " + user.getSurname()).append(", ");
-                    }
-                }
-                if (userNames.length() != 0) {
-                    userNames = userNames.delete(userNames.length() - 2, userNames.length());
-                }
-
-                if (checkedUsers.isEmpty()) {
-                    FindMeApp.showToast(AlarmUsersActivity.this, getString(R.string.alarm_must_select_users_message));
-                } else {
-                    final Intent intent = new Intent();
-                    intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
-                    intent.putExtra(Const.LAT, getIntent().getDoubleExtra(Const.LAT, Const.BAD_LAT));
-                    intent.putExtra(Const.LON, getIntent().getDoubleExtra(Const.LON, Const.BAD_LON));
-                    intent.putExtra(Const.RADIUS, getIntent().getFloatExtra(Const.RADIUS, Const.BAD_RADIUS));
-                    intent.putIntegerArrayListExtra(Const.USERS, checkedUsers);
-                    intent.putExtra(Const.NAMES, userNames.toString());
-                    setResult(RESULT_OK, intent);
-                    finish();
+        final Button okBtn = findViewById(R.id.okBtn);
+        okBtn.setOnClickListener(v -> {
+            final ArrayList<Integer> checkedUsers = new ArrayList<>();
+            StringBuilder userNames = new StringBuilder();
+            for (final User user : mUsers) {
+                if (user.getChecked()) {
+                    checkedUsers.add(user.getVkId());
+                    userNames.append(user.getName() + " " + user.getSurname()).append(", ");
                 }
             }
-        });
-        mNokBtn = (Button) findViewById(R.id.nokBtn);
-        mNokBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+            if (userNames.length() != 0) {
+                userNames = userNames.delete(userNames.length() - 2, userNames.length());
+            }
+
+            if (checkedUsers.isEmpty()) {
+                FindMeApp.showToast(AlarmUsersActivity.this, getString(R.string.alarm_must_select_users_message));
+            } else {
                 final Intent intent = new Intent();
                 intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
-                setResult(Const.RESULT_UPDATE, intent);
+                intent.putExtra(Const.LAT, getIntent().getDoubleExtra(Const.LAT, Const.BAD_LAT));
+                intent.putExtra(Const.LON, getIntent().getDoubleExtra(Const.LON, Const.BAD_LON));
+                intent.putExtra(Const.RADIUS, getIntent().getFloatExtra(Const.RADIUS, Const.BAD_RADIUS));
+                intent.putIntegerArrayListExtra(Const.USERS, checkedUsers);
+                intent.putExtra(Const.NAMES, userNames.toString());
+                setResult(RESULT_OK, intent);
                 finish();
             }
+        });
+        final Button nokBtn = findViewById(R.id.nokBtn);
+        nokBtn.setOnClickListener(v -> {
+            final Intent intent = new Intent();
+            intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
+            setResult(Const.RESULT_UPDATE, intent);
+            finish();
         });
 
         mUser.setName(mStorage.getUserName());
@@ -92,7 +82,7 @@ public class AlarmUsersActivity extends FragmentActivity {
         mUser.setIconUrl(mStorage.getUserIconUrl());
         mUser.setVkId(mStorage.getUserVkId());
 
-        final LoadUsersTsk loadUsersTsk = new LoadUsersTsk();
+        final LoadUsersTask loadUsersTsk = new LoadUsersTask();
         loadUsersTsk.execute();
     }
 
@@ -102,7 +92,7 @@ public class AlarmUsersActivity extends FragmentActivity {
         finish();
     }
 
-    private class LoadUsersTsk extends AsyncTask<Void, Void, List<User>> {
+    private class LoadUsersTask extends AsyncTask<Void, Void, List<User>> {
 
         @Override
         protected void onPreExecute() {

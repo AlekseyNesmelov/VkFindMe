@@ -1,4 +1,4 @@
-package com.nesmelov.alexey.vkfindme.pages;
+package com.nesmelov.alexey.vkfindme.ui.fragments;
 
 import android.Manifest;
 import android.app.Fragment;
@@ -16,12 +16,10 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,8 +28,6 @@ import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,12 +38,13 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.nesmelov.alexey.vkfindme.activities.AlarmUsersActivity;
-import com.nesmelov.alexey.vkfindme.activities.TabHostActivity;
+import com.nesmelov.alexey.vkfindme.ui.activities.AlarmUsersActivity;
+import com.nesmelov.alexey.vkfindme.ui.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
+import com.nesmelov.alexey.vkfindme.models.UserModel;
+import com.nesmelov.alexey.vkfindme.models.UsersModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
-import com.nesmelov.alexey.vkfindme.network.OnUpdateListener;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.services.GpsService;
 import com.nesmelov.alexey.vkfindme.services.UpdateFriendsService;
@@ -64,18 +61,24 @@ import com.vk.sdk.api.VKError;
 import com.vk.sdk.api.VKRequest;
 import com.vk.sdk.api.VKResponse;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 import static android.app.Activity.RESULT_OK;
 import static android.content.Context.LOCATION_SERVICE;
 import static com.vk.sdk.VKUIHelper.getApplicationContext;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdateListener,
+public class MapFragment extends Fragment implements OnMapReadyCallback,
         OnAlarmUpdatedListener, OnUserUpdatedListener {
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
@@ -95,7 +98,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private MapView mMapView;
     private GoogleMap mMap = null;
-    private LocationManager mLocationManager;
 
     private VKManager mVKManager;
     private HTTPManager mHTTPManager;
@@ -106,7 +108,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private Circle mAlarmRadius;
     private ImageView mAlarmTarget;
     private SeekBar mRadiusSeekBar;
-    private ImageButton mAlarmButton;
     private ImageButton mOkBtn;
     private ImageButton mNokBtn;
 
@@ -126,11 +127,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
 
     private LinearLayout mSearchLayout;
     private LinearLayout mAlarmScrollLayout;
-    private SearchView mSearchView;
 
     private GeocoderTask mGeocoderTask = null;
 
-    private ListView mAddressList;
     private List<Address> mAddresses = new CopyOnWriteArrayList<>();
     private AddressListAdapter mAddressListAdapter;
 
@@ -160,30 +159,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.map_page, container, false);
-        mMapView = (MapView) view.findViewById(R.id.map);
+        mMapView = view.findViewById(R.id.map);
         mMapView.onCreate(savedInstanceState);
         mMapView.onResume();
 
-        mAddressList = (ListView) view.findViewById(R.id.address_list);
+        final ListView addressList = view.findViewById(R.id.address_list);
         mAddressListAdapter = new AddressListAdapter(getActivity(), mAddresses);
-        mAddressList.setAdapter(mAddressListAdapter);
+        addressList.setAdapter(mAddressListAdapter);
 
-        mAddressList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final Address address = mAddresses.get(i);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(address.getLatitude(), address.getLongitude()), START_ZOOM));
-                ((TabHostActivity)getActivity()).clickSearchButton();
-                final InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        addressList.setOnItemClickListener((adapterView, view1, i, l) -> {
+            final Address address = mAddresses.get(i);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(address.getLatitude(), address.getLongitude()), START_ZOOM));
+            ((TabHostActivity)getActivity()).clickSearchButton();
+            final InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
         });
 
-        mSearchLayout = (LinearLayout) view.findViewById(R.id.search_layout);
-        mAlarmScrollLayout = (LinearLayout) view.findViewById(R.id.verticalScrollLayout);
-        mSearchView = (SearchView) view.findViewById(R.id.search_view);
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchLayout = view.findViewById(R.id.search_layout);
+        mAlarmScrollLayout = view.findViewById(R.id.verticalScrollLayout);
+        SearchView searchView = view.findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(final String s) {
                 return false;
@@ -201,11 +199,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             }
         });
 
-        mPictureLayout = (LinearLayout) view.findViewById(R.id.pictureLinear);
-        mAlarmPictureLayout = (LinearLayout) view.findViewById(R.id.pictureVerticalLinear);
-        mAddFriendsProgressBar = (ProgressBar) view.findViewById(R.id.addFriendsProgress);
+        mPictureLayout = view.findViewById(R.id.pictureLinear);
+        mAlarmPictureLayout = view.findViewById(R.id.pictureVerticalLinear);
+        mAddFriendsProgressBar = view.findViewById(R.id.addFriendsProgress);
 
-        mAddFriendsBtn = (ImageButton) view.findViewById(R.id.addFriendsBtn);
+        mAddFriendsBtn = view.findViewById(R.id.addFriendsBtn);
         mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -221,10 +219,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                             final int count = (int) jsonResponse.getLong("count");
 
                             final JSONArray usersArray = jsonResponse.getJSONArray("items");
-                            final StringBuilder idToCheck = new StringBuilder();
+                            final List<UserModel> userModels = new ArrayList<>();
                             for (int i = 0; i < count; i++) {
                                 final JSONObject userJson = usersArray.getJSONObject(i);
-                                idToCheck.append(userJson.getLong("id")).append(";");
+                                userModels.add(new UserModel(userJson.getInt("id")));
                                 final User user = new User();
                                 user.setVkId(userJson.getInt("id"));
                                 user.setName(userJson.getString("first_name"));
@@ -232,74 +230,114 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                                 user.setIconUrl(userJson.getString("photo_200"));
                                 mUsersBuffer.put(userJson.getInt("id"), user);
                             }
-                            mHTTPManager.executeRequest(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.REQUEST_CHECK_USERS,
-                                    MapFragment.this, idToCheck.toString());
+
+                            mHTTPManager.checkUsers(userModels, new Callback<UsersModel>() {
+                                @Override
+                                public void onResponse(Call<UsersModel> call, Response<UsersModel> response) {
+                                    try {
+                                        if (response.body() != null) {
+                                            for (final UserModel userModel : response.body().getUsers()) {
+                                                final Integer userId = userModel.getUser();
+                                                final User user = mUsersBuffer.get(userId);
+                                                if (user != null && !mUserMarkers.containsKey(userId)) {
+                                                    mHTTPManager.loadImage(user.getIconUrl(), new okhttp3.Callback() {
+                                                        @Override
+                                                        public void onFailure(okhttp3.Call call, IOException e) {
+                                                        }
+
+                                                        @Override
+                                                        public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                                                            if (response.body() != null) {
+                                                                final byte[] bytes = response.body().bytes();
+                                                                mStorage.addUser(user);
+                                                                MapFragment.this.getActivity().runOnUiThread(() -> addUserPreviewIcon(user,
+                                                                        BitmapFactory.decodeByteArray(
+                                                                                bytes, 0, bytes.length), mMap));
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                        FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
+                                                getString(R.string.refresh_friends_message_ok));
+                                        mAddFriendsBtn.setEnabled(true);
+                                        mAddFriendsProgressBar.setVisibility(View.GONE);
+
+                                    } catch (Exception e) {
+                                        FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
+                                                getString(R.string.refresh_friends_server_error_message));
+                                        mAddFriendsBtn.setEnabled(true);
+                                        mAddFriendsProgressBar.setVisibility(View.GONE);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<UsersModel> call, Throwable t) {
+                                    FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
+                                            getString(R.string.refresh_friends_server_error_message));
+                                    mAddFriendsBtn.setEnabled(true);
+                                    mAddFriendsProgressBar.setVisibility(View.GONE);
+                                }
+                            });
                         } catch (Exception e) {
                         }
                     }
 
                     @Override
                     public void onError(VKError error) {
-                        MapFragment.this.onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
+                        FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
+                                getString(R.string.refresh_friends_server_error_message));
+                        mAddFriendsBtn.setEnabled(true);
+                        mAddFriendsProgressBar.setVisibility(View.GONE);
                     }
                 };
                 mVKManager.executeRequest(VKManager.REQUEST_GET_FRIENDS, requestListener);
             }
         });
 
-        mAlarmTarget = (ImageView) view.findViewById(R.id.alarm_target);
+        mAlarmTarget = view.findViewById(R.id.alarm_target);
         mAlarmTarget.bringToFront();
 
-        mAlarmButton = (ImageButton) view.findViewById(R.id.alarmBtn);
-        mAlarmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (mCurrentMode) {
-                    case MODE_USUAL:
-                        setMode(MODE_SELECT_ALARM_POS);
-                        break;
-                    case MODE_SELECT_ALARM_POS:
-                    case MODE_SELECT_ALARM_RADIUS:
-                        setMode(MODE_USUAL);
-                        break;
-                }
+        final ImageButton alarmButton = view.findViewById(R.id.alarmBtn);
+        alarmButton.setOnClickListener(v -> {
+            switch (mCurrentMode) {
+                case MODE_USUAL:
+                    setMode(MODE_SELECT_ALARM_POS);
+                    break;
+                case MODE_SELECT_ALARM_POS:
+                case MODE_SELECT_ALARM_RADIUS:
+                    setMode(MODE_USUAL);
+                    break;
             }
         });
-        mOkBtn = (ImageButton) view.findViewById(R.id.okBtn);
-        mOkBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (mCurrentMode) {
-                    case MODE_SELECT_ALARM_POS:
-                        setMode(MODE_SELECT_ALARM_RADIUS);
-                        break;
-                    case MODE_SELECT_ALARM_RADIUS:
-                        final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
-                        final LatLng latLng = mAlarmRadius.getCenter();
-                        intent.putExtra(Const.LAT,latLng.latitude);
-                        intent.putExtra(Const.LON,latLng.longitude);
-                        intent.putExtra(Const.RADIUS, (float)mAlarmRadius.getRadius());
-                        intent.putExtra(Const.COLOR, Utils.getRandomColor());
-                        startActivityForResult(intent, GET_ALARM_USERS_REQUEST_CODE);
-                        break;
-                    default:
-                        setMode(MODE_USUAL);
-                        break;
-                }
+        mOkBtn = view.findViewById(R.id.okBtn);
+        mOkBtn.setOnClickListener(v -> {
+            switch (mCurrentMode) {
+                case MODE_SELECT_ALARM_POS:
+                    setMode(MODE_SELECT_ALARM_RADIUS);
+                    break;
+                case MODE_SELECT_ALARM_RADIUS:
+                    final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
+                    final LatLng latLng = mAlarmRadius.getCenter();
+                    intent.putExtra(Const.LAT,latLng.latitude);
+                    intent.putExtra(Const.LON,latLng.longitude);
+                    intent.putExtra(Const.RADIUS, (float)mAlarmRadius.getRadius());
+                    intent.putExtra(Const.COLOR, Utils.getRandomColor());
+                    startActivityForResult(intent, GET_ALARM_USERS_REQUEST_CODE);
+                    break;
+                default:
+                    setMode(MODE_USUAL);
+                    break;
             }
         });
-        mNokBtn = (ImageButton) view.findViewById(R.id.nokBtn);
-        mNokBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setMode(MODE_USUAL);
-            }
-        });
+        mNokBtn = view.findViewById(R.id.nokBtn);
+        mNokBtn.setOnClickListener(v -> setMode(MODE_USUAL));
 
-        mMessageView = (TextView) view.findViewById(R.id.messageView);
+        mMessageView = view.findViewById(R.id.messageView);
         mMessageView.bringToFront();
 
-        mRadiusSeekBar = (SeekBar) view.findViewById(R.id.radiusSeekBar);
+        mRadiusSeekBar = view.findViewById(R.id.radiusSeekBar);
         mRadiusSeekBar.setProgress(Math.max(0, (int)(mStorage.getAlarmRadius() - Storage.MIN_ALARM_RADIUS)));
         mRadiusSeekBar.bringToFront();
         mRadiusSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -367,23 +405,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                     imageView.setBackgroundColor(color);
                     imageView.setScaleType(ImageView.ScaleType.FIT_XY);
                     imageView.setClickable(true);
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            AlarmMarker alarmMarker = null;
-                            for (final Long id : mAlarmMarkers.keySet()) {
-                                final AlarmMarker marker = mAlarmMarkers.get(id);
-                                if (marker.getMarkerId() == v.getId()) {
-                                    alarmMarker = marker;
-                                    break;
-                                }
+                    imageView.setOnClickListener(v -> {
+                        AlarmMarker alarmMarker1 = null;
+                        for (final Long id : mAlarmMarkers.keySet()) {
+                            final AlarmMarker marker = mAlarmMarkers.get(id);
+                            if (marker.getMarkerId() == v.getId()) {
+                                alarmMarker1 = marker;
+                                break;
                             }
-                            if (alarmMarker != null) {
-                                final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(alarmMarker.getLat(), alarmMarker.getLon()), mMap.getCameraPosition().zoom);
-                                mMap.animateCamera(cameraUpdate);
-                                alarmMarker.getMarker().showInfoWindow();
-                            }
+                        }
+                        if (alarmMarker1 != null) {
+                            final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(alarmMarker1.getLat(), alarmMarker1.getLon()), mMap.getCameraPosition().zoom);
+                            mMap.animateCamera(cameraUpdate);
+                            alarmMarker1.getMarker().showInfoWindow();
                         }
                     });
                     mAlarmPictureLayout.addView(imageView);
@@ -458,9 +493,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         if (ActivityCompat.checkSelfPermission(
                 getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
-            mLocationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
+            final LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
             if (mStartPos == null) {
-                final Location location = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                final Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                 if (location != null) {
                     mStorage.setUserLat(location.getLatitude());
                     mStorage.setUserLon(location.getLongitude());
@@ -473,28 +508,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 mMap.moveCamera(cameraUpdate);
             }
         }
-        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(final Marker marker) {
-                if (marker.getTitle().equals(getString(R.string.alarm))) {
-                    final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
+        mMap.setOnInfoWindowClickListener(marker -> {
+            if (marker.getTitle().equals(getString(R.string.alarm))) {
+                final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
 
-                    AlarmMarker selectedMarker = null;
-                    for (final Long alarmMarkerId : mAlarmMarkers.keySet()) {
-                        final AlarmMarker alarmMarker = mAlarmMarkers.get(alarmMarkerId);
-                        if (alarmMarker.getMarker().equals(marker)) {
-                            selectedMarker = alarmMarker;
-                            break;
-                        }
+                AlarmMarker selectedMarker = null;
+                for (final Long alarmMarkerId : mAlarmMarkers.keySet()) {
+                    final AlarmMarker alarmMarker = mAlarmMarkers.get(alarmMarkerId);
+                    if (alarmMarker.getMarker().equals(marker)) {
+                        selectedMarker = alarmMarker;
+                        break;
                     }
-                    if (selectedMarker != null) {
-                        intent.putExtra(Const.ALARM_ID, selectedMarker.getAlarmId());
-                        intent.putExtra(Const.LAT, selectedMarker.getLat());
-                        intent.putExtra(Const.LON, selectedMarker.getLon());
-                        intent.putExtra(Const.RADIUS, selectedMarker.getRadius());
-                        intent.putIntegerArrayListExtra(Const.USERS, selectedMarker.getUsers());
-                        startActivityForResult(intent, CHANGE_ALARM_USERS_REQUEST_CODE);
-                    }
+                }
+                if (selectedMarker != null) {
+                    intent.putExtra(Const.ALARM_ID, selectedMarker.getAlarmId());
+                    intent.putExtra(Const.LAT, selectedMarker.getLat());
+                    intent.putExtra(Const.LON, selectedMarker.getLon());
+                    intent.putExtra(Const.RADIUS, selectedMarker.getRadius());
+                    intent.putIntegerArrayListExtra(Const.USERS, selectedMarker.getUsers());
+                    startActivityForResult(intent, CHANGE_ALARM_USERS_REQUEST_CODE);
                 }
             }
         });
@@ -520,23 +552,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             imageView.setBackgroundColor(alarmMarker.getColor());
             imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             imageView.setClickable(true);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    AlarmMarker alarmMarker = null;
-                    for (final Long id : mAlarmMarkers.keySet()) {
-                        final AlarmMarker marker = mAlarmMarkers.get(id);
-                        if (marker.getMarkerId() == v.getId()) {
-                            alarmMarker = marker;
-                            break;
-                        }
+            imageView.setOnClickListener(v -> {
+                AlarmMarker alarmMarker1 = null;
+                for (final Long id : mAlarmMarkers.keySet()) {
+                    final AlarmMarker marker = mAlarmMarkers.get(id);
+                    if (marker.getMarkerId() == v.getId()) {
+                        alarmMarker1 = marker;
+                        break;
                     }
-                    if (alarmMarker != null) {
-                        final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(alarmMarker.getLat(), alarmMarker.getLon()), mMap.getCameraPosition().zoom);
-                        mMap.animateCamera(cameraUpdate);
-                        alarmMarker.getMarker().showInfoWindow();
-                    }
+                }
+                if (alarmMarker1 != null) {
+                    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(alarmMarker1.getLat(), alarmMarker1.getLon()), mMap.getCameraPosition().zoom);
+                    mMap.animateCamera(cameraUpdate);
+                    alarmMarker1.getMarker().showInfoWindow();
                 }
             });
             mAlarmPictureLayout.addView(imageView);
@@ -545,63 +574,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         addFriendsFromDataBase();
 
         ((TabHostActivity)getActivity()).hideProgressBar();
-    }
-
-    @Override
-    public void onUpdate(final int request, final JSONObject update) {
-        switch (request) {
-            case HTTPManager.REQUEST_ADD_USER:
-                break;
-            case HTTPManager.REQUEST_CHECK_USERS:
-                try {
-                    final JSONArray users = update.getJSONArray("users");
-                    for (int i = 0; i < users.length(); i++) {
-                        final Integer userId = users.getInt(i);
-                        final User user = mUsersBuffer.get(userId);
-                        if(user != null && !mUserMarkers.containsKey(userId)) {
-                            final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
-                                @Override
-                                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                                    if (response.getBitmap() != null) {
-                                        mStorage.addUser(user);
-                                        addUserPreviewIcon(user, response.getBitmap(), mMap);
-                                    }
-                                }
-
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                }
-                            };
-                            mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
-                        }
-                    }
-                    FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
-                            getString(R.string.refresh_friends_message_ok));
-                    mAddFriendsBtn.setEnabled(true);
-                    mAddFriendsProgressBar.setVisibility(View.GONE);
-                } catch (JSONException e) {
-                    onError(HTTPManager.REQUEST_CHECK_USERS, HTTPManager.SERVER_ERROR_CODE);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onError(final int request, final int errorCode) {
-        switch (request) {
-            case HTTPManager.REQUEST_ADD_USER:
-                break;
-            case HTTPManager.REQUEST_CHECK_USERS:
-                FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                        getString(R.string.refresh_friends_server_error_message));
-                mAddFriendsBtn.setEnabled(true);
-                mAddFriendsProgressBar.setVisibility(View.GONE);
-                break;
-            default:
-                break;
-        }
     }
 
     private synchronized void setMode(final int mode) {
@@ -700,7 +672,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             markerToRemove.getCircle().remove();
             mAlarmMarkers.remove(alarmId);
 
-            final ImageView previewIcon = (ImageView) mAlarmPictureLayout.findViewById(markerToRemove.getMarkerId());
+            final ImageView previewIcon = mAlarmPictureLayout.findViewById(markerToRemove.getMarkerId());
             if (previewIcon != null) {
                 previewIcon.setVisibility(View.GONE);
                 mAlarmPictureLayout.removeView(previewIcon);
@@ -762,28 +734,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         }
         imageView.setScaleType(ImageView.ScaleType.FIT_XY);
         imageView.setClickable(true);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserMarker userMarker = null;
-                for (final Integer id : mUserMarkers.keySet()) {
-                    final UserMarker marker = mUserMarkers.get(id);
-                    if (marker.getMarkerId() == v.getId()) {
-                        userMarker = marker;
-                        break;
-                    }
+        imageView.setOnClickListener(v -> {
+            UserMarker userMarker1 = null;
+            for (final Integer id : mUserMarkers.keySet()) {
+                final UserMarker marker = mUserMarkers.get(id);
+                if (marker.getMarkerId() == v.getId()) {
+                    userMarker1 = marker;
+                    break;
                 }
-                if (userMarker != null) {
-                    if (userMarker.getVisible() && userMarker.getLat() != Const.BAD_LAT &&
-                            userMarker.getLon() != Const.BAD_LON) {
-                        final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
-                                new LatLng(userMarker.getLat(), userMarker.getLon()), mMap.getCameraPosition().zoom);
-                        mMap.animateCamera(cameraUpdate);
-                        userMarker.getMarker().showInfoWindow();
-                    } else {
-                        FindMeApp.showToast(getActivity(), userMarker.getName() + " " + userMarker.getSurname()
-                                + " " + getString(R.string.is_offline));
-                    }
+            }
+            if (userMarker1 != null) {
+                if (userMarker1.getVisible() && userMarker1.getLat() != Const.BAD_LAT &&
+                        userMarker1.getLon() != Const.BAD_LON) {
+                    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(userMarker1.getLat(), userMarker1.getLon()), mMap.getCameraPosition().zoom);
+                    mMap.animateCamera(cameraUpdate);
+                    userMarker1.getMarker().showInfoWindow();
+                } else {
+                    FindMeApp.showToast(getActivity(), userMarker1.getName() + " " + userMarker1.getSurname()
+                            + " " + getString(R.string.is_offline));
                 }
             }
         });
@@ -799,19 +768,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
     private void addFriendsFromDataBase() {
         final List<User> friends = mStorage.getFriends();
         for (final User user : friends) {
-            final ImageLoader.ImageListener listener = new ImageLoader.ImageListener() {
+            mHTTPManager.loadImage(user.getIconUrl(), new okhttp3.Callback() {
                 @Override
-                public void onResponse(final ImageLoader.ImageContainer response, final boolean isImmediate) {
-                    if (response.getBitmap() != null) {
-                        addUserPreviewIcon(user, response.getBitmap(), mMap);
-                    }
+                public void onFailure(okhttp3.Call call, IOException e) {
+
                 }
 
                 @Override
-                public void onErrorResponse(final VolleyError error) {
+                public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                    final okhttp3.ResponseBody body = response.body();
+                    if (body != null) {
+                        final byte[] bytes = body.bytes();
+                        MapFragment.this.getActivity().runOnUiThread(() -> {
+                                    addUserPreviewIcon(user,
+                                            BitmapFactory.decodeByteArray(bytes, 0,
+                                                    bytes.length), mMap);
+                                }
+                        );
+                    }
                 }
-            };
-            mHTTPManager.asyncLoadBitmap(user.getIconUrl(), listener);
+            });
         }
     }
 
@@ -823,7 +799,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             userMarker.setLatLon(lat, lon);
 
             final int markerId = userMarker.getMarkerId();
-            final ImageView previewIcon = (ImageView) mPictureLayout.findViewById(markerId);
+            final ImageView previewIcon = mPictureLayout.findViewById(markerId);
             if (previewIcon != null) {
                 previewIcon.setBackgroundColor(Color.parseColor(COLOR_VISIBLE));
             }
@@ -836,7 +812,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
         if (userMarker != null) {
             userMarker.setVisible(false);
 
-            final ImageView previewIcon = (ImageView) mPictureLayout.findViewById(userMarker.getMarkerId());
+            final ImageView previewIcon = mPictureLayout.findViewById(userMarker.getMarkerId());
             if (previewIcon != null) {
                 previewIcon.setBackgroundColor(Color.parseColor(COLOR_INVISIBLE));
             }
@@ -859,7 +835,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
                 if (addresses != null && !addresses.isEmpty()) {
                     return addresses;
                 }
-            } catch(Exception e) {
+            } catch(Exception ignored) {
             }
 
             return null;
@@ -870,9 +846,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, OnUpdat
             super.onPostExecute(addresses);
             if (addresses != null) {
                 mAddresses.clear();
-                for (final Address address : addresses) {
-                    mAddresses.add(address);
-                }
+                mAddresses.addAll(addresses);
                 mAddressListAdapter.notifyDataSetChanged();
             }
         }

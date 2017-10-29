@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
+import com.nesmelov.alexey.vkfindme.models.UserModel;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
@@ -266,28 +267,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return database.delete(usersTable, VK_ID + "=" + vkId, null);
     }
 
-    public String getUserIdsString(final long limit) {
-        final Integer user = FindMeApp.getStorage().getUserVkId();
-        final String usersTable = USERS_TABLE + "_" + user;
-
-        final StringBuilder selectQuery = new StringBuilder();
-        selectQuery.append("SELECT * FROM ").append(usersTable)
-                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
-                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
-
-        final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
-
-        final StringBuilder sb = new StringBuilder();
-        if (cursor.moveToFirst()) {
-            do {
-                sb.append(cursor.getInt(1)).append(";");
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        return sb.toString();
-    }
-
     public String getUserName(final int id) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
@@ -356,6 +335,30 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 friend.setLon(cursor.getDouble(5));
                 friend.setIconUrl(cursor.getString(6));
                 friend.setVisible(cursor.getInt(7) == 1);
+                users.add(friend);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return users;
+    }
+
+    public List<UserModel> getUserModels(final long limit) {
+        final List<UserModel> users = new CopyOnWriteArrayList<>();
+
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        final String usersTable = USERS_TABLE + "_" + user;
+
+        final StringBuilder selectQuery = new StringBuilder();
+        selectQuery.append("SELECT * FROM ").append(usersTable)
+                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
+                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
+
+        final SQLiteDatabase database = this.getWritableDatabase();
+        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                final UserModel friend = new UserModel(cursor.getInt(1));
                 users.add(friend);
             } while (cursor.moveToNext());
         }
