@@ -44,7 +44,6 @@ import com.nesmelov.alexey.vkfindme.ui.activities.AlarmUsersActivity;
 import com.nesmelov.alexey.vkfindme.ui.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.network.models.UserModel;
 import com.nesmelov.alexey.vkfindme.network.models.UsersModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
@@ -84,7 +83,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private static final String COLOR_INVISIBLE = "#900000";
     private static final String COLOR_VISIBLE = "#5a924d";
 
-    private static final int ALARM_PREVIEW_SIZE_DP = 42;
+    private static final int ALARM_PREVIEW_SIZE_DP = 50;
     private static final int USER_PREVIEW_SIZE_DP = 65;
     private static final int USER_MARKER_SIZE_DP = 50;
 
@@ -385,7 +384,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     final ImageView imageView = new ImageView(getActivity());
                     final String alarmMarkerId = mapMarker.getId().replace("m", "");
                     imageView.setId(Integer.parseInt(alarmMarkerId));
-                    imageView.setPadding(4, 4, 4, 4);
                     imageView.setMinimumHeight(size);
                     imageView.setMinimumWidth(size);
                     imageView.setMaxHeight(size);
@@ -532,7 +530,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             final ImageView imageView = new ImageView(getActivity());
             final String alarmMarkerId = mapMarker.getId().replace("m", "");
             imageView.setId(Integer.parseInt(alarmMarkerId));
-            imageView.setPadding(4, 4, 4, 4);
             imageView.setMinimumHeight(size);
             imageView.setMinimumWidth(size);
             imageView.setMaxHeight(size);
