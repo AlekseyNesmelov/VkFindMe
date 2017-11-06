@@ -6,13 +6,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.StatusModel;
+import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
@@ -31,6 +32,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Main activity that needs to login user.
+ */
 public class MainActivity extends Activity {
     private static final int LOCATION_REQUEST_CODE = 0;
 
@@ -125,7 +129,7 @@ public class MainActivity extends Activity {
         if (!VKSdk.onActivityResult(requestCode, resultCode, data, new VKCallback<VKAccessToken>() {
             @Override
             public void onResult(final VKAccessToken res) {
-                mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+                mVKManager.getUserInfo(mUserInfoRequestListener);
             }
             @Override
             public void onError(final VKError error) {
@@ -139,7 +143,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(final int requestCode,
-                                           final String permissions[], final int[] grantResults) {
+                                           @NonNull final String permissions[], @NonNull final int[] grantResults) {
         switch (requestCode) {
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -153,20 +157,29 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Success authorization event.
+     */
     public void onSuccess() {
         final Intent intent = new Intent(this, TabHostActivity.class);
         startActivity(intent);
         finish();
     }
 
+    /**
+     * Failure authorization event.
+     */
     public void onError() {
         FindMeApp.showPopUp(this, getString(R.string.error_title), getString(R.string.server_is_not_accessible),
                 (dialog, which) -> finish());
     }
 
+    /**
+     * VK login.
+     */
     private void login() {
         if (VKSdk.wakeUpSession(this)) {
-            mVKManager.executeRequest(VKManager.REQUEST_GET_USER_INFO, mUserInfoRequestListener);
+            mVKManager.getUserInfo(mUserInfoRequestListener);
         } else {
             VKSdk.login(this, VKScope.FRIENDS, VKScope.PHOTOS);
         }

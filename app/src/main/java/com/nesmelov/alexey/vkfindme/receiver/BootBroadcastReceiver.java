@@ -6,6 +6,9 @@ import android.content.Intent;
 import com.nesmelov.alexey.vkfindme.services.GpsService;
 import com.nesmelov.alexey.vkfindme.services.UpdateFriendsService;
 
+/**
+ * Boot broadcast receiver.
+ */
 public class BootBroadcastReceiver extends BroadcastReceiver {
 
     @Override

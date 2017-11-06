@@ -5,11 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.UserModel;
+import com.nesmelov.alexey.vkfindme.network.models.UserModel;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
@@ -20,28 +18,38 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Data base helper class.
+ */
 public class DataBaseHelper extends SQLiteOpenHelper {
-    public static final int VERSION = 1;
-    public static final String ID = "ID";
-    public static final String USERS_TABLE = "USERS";
-    public static final String PHOTO_URL = "URL";
-    public static final String LATITUDE = "LATITUDE";
-    public static final String LONGITUDE = "LONGITUDE";
-    public static final String NAME = "NAME";
-    public static final String SURNAME = "SURNAME";
-    public static final String VK_ID = "VKID";
-    public static final String VISIBLE = "VISIBLE";
-    public static final String RADIUS = "RADIUS";
-    public static final String CHECKED = "CHECKED";
-    public static final String ALARM_TABLE = "ALARM";
-    public static final String COLOR = "COLOR";
+    private static final int VERSION = 1;
+    private static final String ID = "ID";
+    private static final String USERS_TABLE = "USERS";
+    static final String PHOTO_URL = "URL";
+    static final String LATITUDE = "LATITUDE";
+    static final String LONGITUDE = "LONGITUDE";
+    static final String NAME = "NAME";
+    static final String SURNAME = "SURNAME";
+    static final String VK_ID = "VKID";
+    static final String VISIBLE = "VISIBLE";
+    static final String RADIUS = "RADIUS";
+    static final String CHECKED = "CHECKED";
+    private static final String ALARM_TABLE = "ALARM";
+    static final String COLOR = "COLOR";
 
-    public static final String ALARM_USERS_TABLE = "AUSER";
-    public static final String ALARM_ID = "AID";
-    public static final String USER_ID = "UID";
+    private static final String ALARM_USERS_TABLE = "AUSER";
+    static final String ALARM_ID = "AID";
+    static final String USER_ID = "UID";
 
-    public DataBaseHelper(final Context context, final String name,
-                          final SQLiteDatabase.CursorFactory factory) {
+    /**
+     * Constructs database helper instance.
+     *
+     * @param context context to use.
+     * @param name database name.
+     * @param factory cursor factory.
+     */
+    DataBaseHelper(final Context context, final String name,
+                   final SQLiteDatabase.CursorFactory factory) {
         super(context, name, factory, VERSION);
     }
 
@@ -64,49 +72,67 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertUser(final ContentValues values) {
+    /**
+     * Inserts user.
+     *
+     * @param values user values.
+     * @return id of inserted row.
+     */
+    long insertUser(final ContentValues values) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
 
         final int vkId = values.getAsInteger(VK_ID);
 
-        final StringBuilder selectQuery = new StringBuilder();
-        selectQuery.append("SELECT COUNT(*) FROM ").append(usersTable)
-                .append(" WHERE ").append(VK_ID).append(" = ").append(vkId).append(";");
+        String selectQuery = "SELECT COUNT(*) FROM " + usersTable +
+                " WHERE " + VK_ID + " = " + vkId + ";";
 
         final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+        final Cursor cursor = database.rawQuery(selectQuery, null);
 
         boolean shouldInsert = true;
         if (cursor.moveToFirst()) {
             final int count = cursor.getInt(0);
             shouldInsert = count == 0;
         }
+        cursor.close();
 
-        if (shouldInsert) {
-            return database.insert(usersTable, null, values);
-        }/* else {
-            final ContentValues contentValues = new ContentValues();
-            contentValues.put(PHOTO_URL, values.getAsString(PHOTO_URL));
-            return updateUser(vkId, contentValues);
-        }*/return -1;
+        return shouldInsert ? database.insert(usersTable, null, values) : -1;
     }
 
-    public long insertAlarm(final ContentValues values) {
+    /**
+     * Inserts alarm.
+     *
+     * @param values alarm values.
+     * @return id of inserted alarm.
+     */
+    long insertAlarm(final ContentValues values) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmTable = ALARM_TABLE + "_" + user;
         final SQLiteDatabase database = this.getWritableDatabase();
         return database.insert(alarmTable, null, values);
     }
 
-    public long insertAlarmUsers(final ContentValues values) {
+    /**
+     * Inserts alarm users.
+     *
+     * @param values values to insert.
+     * @return id of inserted row.
+     */
+    long insertAlarmUsers(final ContentValues values) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final SQLiteDatabase database = this.getWritableDatabase();
         return database.insert(alarmUsersTable, null, values);
     }
 
-    public long removeAlarm(final long alarmId) {
+    /**
+     * Removes alarm.
+     *
+     * @param alarmId alarm id to remove.
+     * @return number of affected rows.
+     */
+    long removeAlarm(final long alarmId) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final String alarmTable = ALARM_TABLE + "_" + user;
@@ -115,7 +141,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return database.delete(alarmTable, ID + "=" + alarmId, null);
     }
 
-    public long removeAlarmUser(final long alarmId, final long alarmUser) {
+    /**
+     * Removes alarm user.
+     *
+     * @param alarmId alarm id.
+     * @param alarmUser user id.
+     * @return number of affected rows.
+     */
+    long removeAlarmUser(final long alarmId, final long alarmUser) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final SQLiteDatabase database = this.getWritableDatabase();
@@ -123,14 +156,25 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + USER_ID + "=" + alarmUser, null);
     }
 
-    public long removeAlarmUsers(final long alarmId) {
+    /**
+     * Removes alarm users.
+     *
+     * @param alarmId alarm id.
+     * @return number of affected rows.
+     */
+    long removeAlarmUsers(final long alarmId) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final SQLiteDatabase database = this.getWritableDatabase();
         return database.delete(alarmUsersTable, ALARM_ID + "=" + alarmId, null);
     }
 
-    public boolean isMeInAlarm() {
+    /**
+     * Returns <tt>true</tt> if current user is in alarm.
+     *
+     * @return <tt>true</tt> if current user is in alarm.
+     */
+    boolean isMeInAlarm() {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final String alarmTable = ALARM_TABLE + "_" + user;
@@ -139,26 +183,36 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 ALARM_ID + " AND " + CHECKED + "=1 AND " + USER_ID + "=" + user + ";";
         final SQLiteDatabase database = this.getWritableDatabase();
         final Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            return cursor.getLong(0) != 0;
-        }
-        return false;
+
+        final boolean result = cursor.moveToFirst() && cursor.getLong(0) != 0;
+        cursor.close();
+        return result;
     }
 
-    public boolean isAlarmExist() {
+    /**
+     * Returns <tt>true</tt> friends alarm exists.
+     *
+     * @return <tt>true</tt> friends alarm exists.
+     */
+    boolean isAlarmExist() {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
         final String selectQuery = "SELECT COUNT(*) FROM " + alarmUsersTable +
                 " WHERE NOT " + USER_ID + "=" + user + ";";
         final SQLiteDatabase database = this.getWritableDatabase();
         final Cursor cursor = database.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-            return cursor.getLong(0) != 0;
-        }
-        return false;
+
+        final boolean result = cursor.moveToFirst() && cursor.getLong(0) != 0;
+        cursor.close();
+        return result;
     }
 
-    public List<Alarm> getAlarmsForMe() {
+    /**
+     * Returns list of alarms, where user takes part in.
+     *
+     * @return list of alarms, where user takes part in.
+     */
+    List<Alarm> getAlarmsForMe() {
         final List<Alarm> alarms = new ArrayList<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
@@ -186,7 +240,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return alarms;
     }
 
-    public Map<Integer, List<Alarm>> getAlarmUsers() {
+    /**
+     * Returns alarm users.
+     *
+     * @return alarm users.
+     */
+    Map<Integer, List<Alarm>> getAlarmUsers() {
         final Map<Integer, List<Alarm>> alarmUsers = new ConcurrentHashMap<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
@@ -236,7 +295,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return alarmUsers;
     }
 
-    public boolean isAlarmCompleted(final long alarmId) {
+    /**
+     * Returns <tt>true</tt> if alarm is completed.
+     *
+     * @param alarmId alarm id to check.
+     * @return <tt>true</tt> if alarm is completed.
+     */
+    boolean isAlarmCompleted(final long alarmId) {
         boolean isCompleted = true;
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
@@ -253,13 +318,26 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return isCompleted;
     }
 
-    public long updateUser(final Integer vkId, final ContentValues values) {
+    /**
+     * Updates user.
+     *
+     * @param vkId user id.
+     * @param values user values.
+     * @return number of affected rows.
+     */
+    long updateUser(final Integer vkId, final ContentValues values) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
         final SQLiteDatabase database = this.getWritableDatabase();
         return database.update(usersTable, values, VK_ID + "=" + vkId, null);
     }
 
+    /**
+     * Deletes user.
+     *
+     * @param vkId user id.
+     * @return number of affected rows.
+     */
     public long deleteUser(final String vkId) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
@@ -267,7 +345,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return database.delete(usersTable, VK_ID + "=" + vkId, null);
     }
 
-    public String getUserName(final int id) {
+    /**
+     * Gets user name.
+     *
+     * @param id user id to get name.
+     * @return user name.
+     */
+    String getUserName(final int id) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
 
@@ -288,7 +372,13 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return "";
     }
 
-    public List<Integer> getUserIds(final long limit) {
+    /**
+     * Gets list of users ids.
+     *
+     * @param limit limit of users.
+     * @return list of users ids.
+     */
+    List<Integer> getUserIds(final long limit) {
         final List<Integer> users = new ArrayList<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
@@ -311,19 +401,24 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return users;
     }
 
-    public List<User> getUsers(final long limit) {
+    /**
+     * Gets list of users.
+     *
+     * @param limit limit of users.
+     * @return list of users.
+     */
+    List<User> getUsers(final long limit) {
         final List<User> users = new CopyOnWriteArrayList<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
 
-        final StringBuilder selectQuery = new StringBuilder();
-        selectQuery.append("SELECT * FROM ").append(usersTable)
-                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
-                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
+        final String selectQuery = "SELECT * FROM " + usersTable +
+                " WHERE NOT (" + VK_ID + " = " + user +
+                ") ORDER BY " + VISIBLE + " DESC LIMIT " + limit + ";";
 
         final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+        final Cursor cursor = database.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -342,19 +437,24 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return users;
     }
 
-    public List<UserModel> getUserModels(final long limit) {
+    /**
+     * Gets users models.
+     *
+     * @param limit limit of users.
+     * @return users models.
+     */
+    List<UserModel> getUserModels(final long limit) {
         final List<UserModel> users = new CopyOnWriteArrayList<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
 
-        final StringBuilder selectQuery = new StringBuilder();
-        selectQuery.append("SELECT * FROM ").append(usersTable)
-                .append(" WHERE NOT (").append(VK_ID).append(" = ").append(user)
-                .append(") ORDER BY ").append(VISIBLE).append(" DESC LIMIT ").append(limit).append(";");
+        String selectQuery = "SELECT * FROM " + usersTable +
+                " WHERE NOT (" + VK_ID + " = " + user +
+                ") ORDER BY " + VISIBLE + " DESC LIMIT " + limit + ";";
 
         final SQLiteDatabase database = this.getWritableDatabase();
-        final Cursor cursor = database.rawQuery(selectQuery.toString(), null);
+        final Cursor cursor = database.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
             do {
@@ -366,7 +466,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return users;
     }
 
-    public Map<Long, AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
+    /**
+     * Returns alarm markers.
+     *
+     * @return alarm markers.
+     */
+    Map<Long, AlarmMarker> getAlarmMarkers() {
         final Map<Long, AlarmMarker> alarms = new ConcurrentHashMap<>();
 
         final Integer user = FindMeApp.getStorage().getUserVkId();
@@ -406,7 +511,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                         final String surname =  usersCursor.getString(2);
 
                         alarmUsers.add(vkId);
-                        names.append(name + " " + surname).append(", ");
+                        names.append(name).append(" ").append(surname).append(", ");
                     } while (usersCursor.moveToNext());
                 }
                 usersCursor.close();
@@ -417,7 +522,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
                 final AlarmMarker alarmMarker = new AlarmMarker(id, lat, lon,
                         radius, color, alarmUsers, names.toString());
-                //alarmMarker.addToMap(context, map);
                 alarms.put(id, alarmMarker);
             } while (cursor.moveToNext());
         }
@@ -425,7 +529,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return alarms;
     }
 
-    public AlarmMarker getAlarmMarker(final long alarmId) {
+    /**
+     * Gets alarm marker.
+     * @param alarmId alarm id.
+     * @return alarm marker.
+     */
+    AlarmMarker getAlarmMarker(final long alarmId) {
         final Integer user = FindMeApp.getStorage().getUserVkId();
         final String usersTable = USERS_TABLE + "_" + user;
         final String alarmTable = ALARM_TABLE + "_" + user;
@@ -465,7 +574,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                         final String surname =  usersCursor.getString(2);
 
                         alarmUsers.add(vkId);
-                        names.append(name + " " + surname).append(", ");
+                        names.append(name).append(" ").append(surname).append(", ");
                     } while (usersCursor.moveToNext());
                 }
                 usersCursor.close();
@@ -483,6 +592,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return alarmMarker;
     }
 
+    /**
+     * Creates users table.
+     *
+     * @param db database.
+     * @param user user id.
+     */
     private void createUsersTable(final SQLiteDatabase db, final Integer user) {
         final String usersTable = USERS_TABLE + "_" + user;
         db.execSQL("CREATE TABLE " + usersTable + "("
@@ -496,6 +611,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + VISIBLE + " INTEGER);");
     }
 
+    /**
+     * Creates alarm table.
+     *
+     * @param db database.
+     * @param user user id.
+     */
     private void createAlarmTables(final SQLiteDatabase db, final Integer user) {
         final String alarmTable = ALARM_TABLE + "_" + user;
         db.execSQL("CREATE TABLE " + alarmTable + "("

@@ -42,13 +42,12 @@ import com.nesmelov.alexey.vkfindme.ui.activities.AlarmUsersActivity;
 import com.nesmelov.alexey.vkfindme.ui.activities.TabHostActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.models.UserModel;
-import com.nesmelov.alexey.vkfindme.models.UsersModel;
+import com.nesmelov.alexey.vkfindme.network.models.UserModel;
+import com.nesmelov.alexey.vkfindme.network.models.UsersModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.services.GpsService;
 import com.nesmelov.alexey.vkfindme.services.UpdateFriendsService;
-import com.nesmelov.alexey.vkfindme.storage.Const;
 import com.nesmelov.alexey.vkfindme.storage.OnAlarmUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.OnUserUpdatedListener;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
@@ -145,8 +144,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
         final Intent intent = getActivity().getIntent();
         if (intent != null) {
-            final String lat = intent.getStringExtra(Const.LAT);
-            final String lon = intent.getStringExtra(Const.LON);
+            final String lat = intent.getStringExtra(Storage.LAT);
+            final String lon = intent.getStringExtra(Storage.LON);
             if (lat != null && lon != null) {
                 mStartPos = new LatLng(
                         Double.parseDouble(lat),
@@ -292,7 +291,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         mAddFriendsProgressBar.setVisibility(View.GONE);
                     }
                 };
-                mVKManager.executeRequest(VKManager.REQUEST_GET_FRIENDS, requestListener);
+                mVKManager.getFriends(requestListener);
             }
         });
 
@@ -320,10 +319,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 case MODE_SELECT_ALARM_RADIUS:
                     final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
                     final LatLng latLng = mAlarmRadius.getCenter();
-                    intent.putExtra(Const.LAT,latLng.latitude);
-                    intent.putExtra(Const.LON,latLng.longitude);
-                    intent.putExtra(Const.RADIUS, (float)mAlarmRadius.getRadius());
-                    intent.putExtra(Const.COLOR, Utils.getRandomColor());
+                    intent.putExtra(Storage.LAT,latLng.latitude);
+                    intent.putExtra(Storage.LON,latLng.longitude);
+                    intent.putExtra(Storage.RADIUS, (float)mAlarmRadius.getRadius());
+                    intent.putExtra(Storage.COLOR, Utils.getRandomColor());
                     startActivityForResult(intent, GET_ALARM_USERS_REQUEST_CODE);
                     break;
                 default:
@@ -377,12 +376,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             case GET_ALARM_USERS_REQUEST_CODE:
                 setMode(MODE_USUAL);
                 if (resultCode == RESULT_OK) {
-                    final ArrayList<Integer> users = data.getIntegerArrayListExtra(Const.USERS);
-                    final String names = data.getStringExtra(Const.NAMES);
-                    final double lat = data.getDoubleExtra(Const.LAT, Const.BAD_LAT);
-                    final double lon = data.getDoubleExtra(Const.LON, Const.BAD_LON);
-                    final float radius = data.getFloatExtra(Const.RADIUS, Const.BAD_RADIUS);
-                    final int color = data.getIntExtra(Const.COLOR, Utils.getRandomColor());
+                    final ArrayList<Integer> users = data.getIntegerArrayListExtra(Storage.USERS);
+                    final String names = data.getStringExtra(Storage.NAMES);
+                    final double lat = data.getDoubleExtra(Storage.LAT, Storage.BAD_LAT);
+                    final double lon = data.getDoubleExtra(Storage.LON, Storage.BAD_LON);
+                    final float radius = data.getFloatExtra(Storage.RADIUS, Storage.BAD_RADIUS);
+                    final int color = data.getIntExtra(Storage.COLOR, Utils.getRandomColor());
 
                     final long alarmId = mStorage.addAlarm(lat, lon, radius, color, users);
                     final AlarmMarker alarmMarker = new AlarmMarker(alarmId, lat, lon, radius, color, users, names);
@@ -431,19 +430,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 break;
             case CHANGE_ALARM_USERS_REQUEST_CODE:
                 setMode(MODE_USUAL);
-                final long alarmId = data.getLongExtra(Const.ALARM_ID, Const.BAD_ID);
+                final long alarmId = data.getLongExtra(Storage.ALARM_ID, Storage.BAD_ID);
                 if (resultCode == RESULT_OK) {
-                    final ArrayList<Integer> users = data.getIntegerArrayListExtra(Const.USERS);
+                    final ArrayList<Integer> users = data.getIntegerArrayListExtra(Storage.USERS);
                     mStorage.updateAlarm(alarmId, users);
                     final AlarmMarker markerToUpdate = mAlarmMarkers.get(alarmId);
                     if (markerToUpdate != null) {
-                        final String names = data.getStringExtra(Const.NAMES);
+                        final String names = data.getStringExtra(Storage.NAMES);
                         markerToUpdate.getMarker().setSnippet(names);
                         markerToUpdate.setUsers(users);
                         markerToUpdate.getMarker().hideInfoWindow();
                         FindMeApp.showToast(getActivity(), getString(R.string.alarm_updated));
                     }
-                } else if (resultCode == Const.RESULT_UPDATE) {
+                } else if (resultCode == Storage.RESULT_UPDATE) {
                     final AlarmMarker markerToRemove = mAlarmMarkers.get(alarmId);
                     if (markerToRemove != null) {
                         markerToRemove.getMarker().setVisible(false);
@@ -521,11 +520,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                     }
                 }
                 if (selectedMarker != null) {
-                    intent.putExtra(Const.ALARM_ID, selectedMarker.getAlarmId());
-                    intent.putExtra(Const.LAT, selectedMarker.getLat());
-                    intent.putExtra(Const.LON, selectedMarker.getLon());
-                    intent.putExtra(Const.RADIUS, selectedMarker.getRadius());
-                    intent.putIntegerArrayListExtra(Const.USERS, selectedMarker.getUsers());
+                    intent.putExtra(Storage.ALARM_ID, selectedMarker.getAlarmId());
+                    intent.putExtra(Storage.LAT, selectedMarker.getLat());
+                    intent.putExtra(Storage.LON, selectedMarker.getLon());
+                    intent.putExtra(Storage.RADIUS, selectedMarker.getRadius());
+                    intent.putIntegerArrayListExtra(Storage.USERS, selectedMarker.getUsers());
                     startActivityForResult(intent, CHANGE_ALARM_USERS_REQUEST_CODE);
                 }
             }
@@ -535,7 +534,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         final Bitmap squareBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(),
                 R.drawable.alarm_miniature), size, size, false);
 
-        final Map<Long, AlarmMarker> markers = mStorage.getAlarmMarkers(getActivity(), mMap);
+        final Map<Long, AlarmMarker> markers = mStorage.getAlarmMarkers();
         for (final Long markerId : markers.keySet()) {
             final AlarmMarker alarmMarker = markers.get(markerId);
             final Marker mapMarker = alarmMarker.addToMap(getActivity(), mMap);
@@ -744,8 +743,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 }
             }
             if (userMarker1 != null) {
-                if (userMarker1.getVisible() && userMarker1.getLat() != Const.BAD_LAT &&
-                        userMarker1.getLon() != Const.BAD_LON) {
+                if (userMarker1.getVisible() && userMarker1.getLat() != Storage.BAD_LAT &&
+                        userMarker1.getLon() != Storage.BAD_LON) {
                     final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(
                             new LatLng(userMarker1.getLat(), userMarker1.getLon()), mMap.getCameraPosition().zoom);
                     mMap.animateCamera(cameraUpdate);
@@ -794,7 +793,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onUserUpdated(Integer userId, double lat, double lon) {
         final UserMarker userMarker = mUserMarkers.get(userId);
-        if (userMarker != null && lat != Const.BAD_LAT && lon != Const.BAD_LON) {
+        if (userMarker != null && lat != Storage.BAD_LAT && lon != Storage.BAD_LON) {
             userMarker.setVisible(true);
             userMarker.setLatLon(lat, lon);
 

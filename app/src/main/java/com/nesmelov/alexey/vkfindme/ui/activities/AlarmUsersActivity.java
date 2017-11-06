@@ -1,5 +1,6 @@
 package com.nesmelov.alexey.vkfindme.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,7 +11,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.storage.Const;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.UserListAdapter;
@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Activity to manage alarm users.
+ */
 public class AlarmUsersActivity extends FragmentActivity {
     private List<User> mUsers = new CopyOnWriteArrayList<>();
     private UserListAdapter mUserListAdapter;
@@ -37,7 +40,7 @@ public class AlarmUsersActivity extends FragmentActivity {
 
         mProgressBar = findViewById(R.id.progressBar);
 
-        ListView mUsersListView = findViewById(R.id.usersList);
+        final ListView mUsersListView = findViewById(R.id.usersList);
         mUserListAdapter = new UserListAdapter(this, mUsers);
         mUsersListView.setAdapter(mUserListAdapter);
 
@@ -48,7 +51,7 @@ public class AlarmUsersActivity extends FragmentActivity {
             for (final User user : mUsers) {
                 if (user.getChecked()) {
                     checkedUsers.add(user.getVkId());
-                    userNames.append(user.getName() + " " + user.getSurname()).append(", ");
+                    userNames.append(user.getName()).append(" ").append(user.getSurname()).append(", ");
                 }
             }
             if (userNames.length() != 0) {
@@ -59,12 +62,12 @@ public class AlarmUsersActivity extends FragmentActivity {
                 FindMeApp.showToast(AlarmUsersActivity.this, getString(R.string.alarm_must_select_users_message));
             } else {
                 final Intent intent = new Intent();
-                intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
-                intent.putExtra(Const.LAT, getIntent().getDoubleExtra(Const.LAT, Const.BAD_LAT));
-                intent.putExtra(Const.LON, getIntent().getDoubleExtra(Const.LON, Const.BAD_LON));
-                intent.putExtra(Const.RADIUS, getIntent().getFloatExtra(Const.RADIUS, Const.BAD_RADIUS));
-                intent.putIntegerArrayListExtra(Const.USERS, checkedUsers);
-                intent.putExtra(Const.NAMES, userNames.toString());
+                intent.putExtra(Storage.ALARM_ID, getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID));
+                intent.putExtra(Storage.LAT, getIntent().getDoubleExtra(Storage.LAT, Storage.BAD_LAT));
+                intent.putExtra(Storage.LON, getIntent().getDoubleExtra(Storage.LON, Storage.BAD_LON));
+                intent.putExtra(Storage.RADIUS, getIntent().getFloatExtra(Storage.RADIUS, Storage.BAD_RADIUS));
+                intent.putIntegerArrayListExtra(Storage.USERS, checkedUsers);
+                intent.putExtra(Storage.NAMES, userNames.toString());
                 setResult(RESULT_OK, intent);
                 finish();
             }
@@ -72,8 +75,8 @@ public class AlarmUsersActivity extends FragmentActivity {
         final Button nokBtn = findViewById(R.id.nokBtn);
         nokBtn.setOnClickListener(v -> {
             final Intent intent = new Intent();
-            intent.putExtra(Const.ALARM_ID, getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID));
-            setResult(Const.RESULT_UPDATE, intent);
+            intent.putExtra(Storage.ALARM_ID, getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID));
+            setResult(Storage.RESULT_UPDATE, intent);
             finish();
         });
 
@@ -92,7 +95,8 @@ public class AlarmUsersActivity extends FragmentActivity {
         finish();
     }
 
-    private class LoadUsersTask extends AsyncTask<Void, Void, List<User>> {
+    @SuppressLint("StaticFieldLeak")
+    private class LoadUsersTask extends AsyncTask<Void, User, Void> {
 
         @Override
         protected void onPreExecute() {
@@ -101,30 +105,33 @@ public class AlarmUsersActivity extends FragmentActivity {
         }
 
         @Override
-        protected List<User> doInBackground(Void... params) {
-            final List<User> users = mStorage.getFriends(Const.FRIENDS_LIMIT);
+        protected Void doInBackground(Void... params) {
+            final List<User> users = mStorage.getFriends(Storage.FRIENDS_LIMIT);
 
-            if (getIntent().getLongExtra(Const.ALARM_ID, Const.BAD_ID) != Const.BAD_ID) {
-                final ArrayList<Integer> checkedUsers = getIntent().getIntegerArrayListExtra(Const.USERS);
+            if (getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID) != Storage.BAD_ID) {
+                final ArrayList<Integer> checkedUsers = getIntent().getIntegerArrayListExtra(Storage.USERS);
+                mUser.setChecked(checkedUsers.contains(mUser.getVkId()));
+                publishProgress(mUser);
 
                 for (final User user : users) {
                     if (checkedUsers.contains(user.getVkId())) {
                         user.setChecked(true);
                     }
+                    publishProgress(user);
                 }
-
-                mUser.setChecked(checkedUsers.contains(mUser.getVkId()));
             }
-
-            return users;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(final List<User> users) {
-            super.onPostExecute(users);
-            mUsers.add(mUser);
-            mUsers.addAll(users);
+        protected void onProgressUpdate(User... values) {
+            mUsers.add(values[0]);
             mUserListAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected void onPostExecute(final Void users) {
+            super.onPostExecute(users);
             mProgressBar.setVisibility(View.GONE);
         }
     }

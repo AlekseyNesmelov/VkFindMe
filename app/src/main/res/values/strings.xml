@@ -114,4 +114,5 @@
         <item>3000</item>
     </string-array>
     <string name="min_gps_distance_default">2</string>
+    <string name="user_name_format">%s %s</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.nesmelov.alexey.vkfindme.models;
+package com.nesmelov.alexey.vkfindme.network.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

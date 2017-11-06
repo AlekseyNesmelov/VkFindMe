@@ -13,10 +13,19 @@ import android.util.DisplayMetrics;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import java.util.Random;
 
+/**
+ * Utilities class.
+ */
 public class Utils {
 
     private static Random sRandom = new Random();
 
+    /**
+     * Gets circle cropped bitmap.
+     *
+     * @param bitmap original bitmap.
+     * @return circle cropped bitmap.
+     */
     public static Bitmap getCroppedBitmap(final Bitmap bitmap) {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
@@ -33,17 +42,37 @@ public class Utils {
         return output;
     }
 
+    /**
+     * Converts dp to pixels.
+     *
+     * @param context context to use.
+     * @param dp input dp.
+     * @return pixels.
+     */
     public static int dpToPx(final Context context, final int dp) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    /**
+     * Returns <tt>true</tt> if alarm is completed by distance.
+     *
+     * @param alarm alarm to check.
+     * @param lat latitude.
+     * @param lon longitude.
+     * @return <tt>true</tt> if alarm is completed.
+     */
     public static boolean checkAlarm(final Alarm alarm, final double lat, final double lon) {
         float results[] = new float[1];
         Location.distanceBetween(alarm.getLat(), alarm.getLon(), lat, lon, results);
         return results[0] < alarm.getRadius();
     }
 
+    /**
+     * Returns random color.
+     *
+     * @return
+     */
     public static int getRandomColor() {
         return Color.argb(96,
                 sRandom.nextInt(255),

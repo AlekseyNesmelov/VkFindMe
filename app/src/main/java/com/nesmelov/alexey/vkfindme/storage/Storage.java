@@ -6,15 +6,39 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import com.google.android.gms.maps.GoogleMap;
 import com.nesmelov.alexey.vkfindme.R;
-import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.UserModel;
+import com.nesmelov.alexey.vkfindme.network.models.UserModel;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
 import com.nesmelov.alexey.vkfindme.structures.User;
 import com.nesmelov.alexey.vkfindme.ui.marker.AlarmMarker;
 import java.util.List;
 import java.util.Map;
 
+import static com.nesmelov.alexey.vkfindme.application.FindMeApp.USERS_DATABASE_NAME;
+
 public class Storage {
+    public static final String USER = "user";
+    public static final String USERS = "users";
+    public static final String VISIBLE = "visible";
+    public static final String LAT = "lat";
+    public static final String LON = "lon";
+    public static final String RADIUS = "radius";
+    public static final String ALARM_ID = "alarm_id";
+    public static final String NAMES = "names";
+    public static final String COLOR = "color";
+
+    public static final double BAD_LAT = -999;
+    public static final double BAD_LON = -999;
+    public static final long BAD_ID = -1;
+    public static final int BAD_USER_ID = 0;
+    public static final float BAD_RADIUS = 0;
+
+    public static final int FRIENDS_LIMIT = 100;
+
+    public static final int INVISIBLE_STATE = 0;
+    public static final int VISIBLE_STATE = 1;
+
+    public static final int RESULT_UPDATE = 2;
+
     public static final float MIN_ALARM_RADIUS = 100;
 
     public static final String USER_VK_ID = "user_vk_id";
@@ -41,7 +65,7 @@ public class Storage {
 
     public Storage(final Context context) {
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
-        mDataBaseHelper = FindMeApp.getDataBaseHelper();
+        mDataBaseHelper = new DataBaseHelper(context, USERS_DATABASE_NAME, null);
         mContext = context;
     }
 
@@ -58,11 +82,11 @@ public class Storage {
     }
 
     public List<UserModel> getUserModels() {
-        return mDataBaseHelper.getUserModels(Const.FRIENDS_LIMIT);
+        return mDataBaseHelper.getUserModels(FRIENDS_LIMIT);
     }
 
     public List<Integer> getUserIds() {
-        return mDataBaseHelper.getUserIds(Const.FRIENDS_LIMIT);
+        return mDataBaseHelper.getUserIds(FRIENDS_LIMIT);
     }
 
     public void removeAlarmUpdatedListener() {
@@ -98,11 +122,11 @@ public class Storage {
     }
 
     public double getUserLat() {
-        return mSharedPrefs.getFloat(USER_LAT, (float) Const.BAD_LAT);
+        return mSharedPrefs.getFloat(USER_LAT, (float) BAD_LAT);
     }
 
     public double getUserLon() {
-        return mSharedPrefs.getFloat(USER_LON, (float)Const.BAD_LON);
+        return mSharedPrefs.getFloat(USER_LON, (float)BAD_LON);
     }
 
     public String getUserName() {
@@ -118,7 +142,7 @@ public class Storage {
     }
 
     public Integer getUserVkId() {
-        return mSharedPrefs.getInt(USER_VK_ID, Const.BAD_USER_ID);
+        return mSharedPrefs.getInt(USER_VK_ID, BAD_USER_ID);
     }
 
     public Boolean getVisibility() {
@@ -247,15 +271,15 @@ public class Storage {
         userValues.put(DataBaseHelper.VK_ID, user.getVkId());
         userValues.put(DataBaseHelper.NAME, user.getName());
         userValues.put(DataBaseHelper.SURNAME, user.getSurname());
-        userValues.put(DataBaseHelper.LATITUDE, Const.BAD_LAT);
-        userValues.put(DataBaseHelper.LONGITUDE, Const.BAD_LON);
+        userValues.put(DataBaseHelper.LATITUDE, BAD_LAT);
+        userValues.put(DataBaseHelper.LONGITUDE, BAD_LON);
         userValues.put(DataBaseHelper.PHOTO_URL, user.getIconUrl());
-        userValues.put(DataBaseHelper.VISIBLE, Const.INVISIBLE_STATE);
+        userValues.put(DataBaseHelper.VISIBLE, INVISIBLE_STATE);
         return mDataBaseHelper.insertUser(userValues);
     }
 
     public List<User> getFriends() {
-        return mDataBaseHelper.getUsers(Const.FRIENDS_LIMIT);
+        return mDataBaseHelper.getUsers(FRIENDS_LIMIT);
     }
 
     public List<Alarm> getAlarmsForMe() {
@@ -325,8 +349,8 @@ public class Storage {
         return mDataBaseHelper.getUsers(limit);
     }
 
-    public Map<Long, AlarmMarker> getAlarmMarkers(final Context context, final GoogleMap map) {
-        return mDataBaseHelper.getAlarmMarkers(context, map);
+    public Map<Long, AlarmMarker> getAlarmMarkers() {
+        return mDataBaseHelper.getAlarmMarkers();
     }
 
     public AlarmMarker getAlarmMarker(final long alarmId) {

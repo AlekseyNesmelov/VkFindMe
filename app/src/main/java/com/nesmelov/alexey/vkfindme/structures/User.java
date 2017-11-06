@@ -1,6 +1,6 @@
 package com.nesmelov.alexey.vkfindme.structures;
 
-import com.nesmelov.alexey.vkfindme.storage.Const;
+import com.nesmelov.alexey.vkfindme.storage.Storage;
 
 public class User {
     protected Integer mVkId;
@@ -8,8 +8,8 @@ public class User {
     protected String mSurname = "";
     protected Boolean mChecked = false;
     protected String mIconUrl = "";
-    protected double mLat = Const.BAD_LAT;
-    protected double mLon = Const.BAD_LON;
+    protected double mLat = Storage.BAD_LAT;
+    protected double mLon = Storage.BAD_LON;
     private boolean mVisible = false;
 
     public User() {

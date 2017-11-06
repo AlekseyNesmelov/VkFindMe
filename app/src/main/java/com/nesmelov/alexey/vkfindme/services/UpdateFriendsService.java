@@ -8,9 +8,9 @@ import android.support.annotation.Nullable;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.ui.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.LatLonUserModel;
-import com.nesmelov.alexey.vkfindme.models.LatLonUsersModel;
-import com.nesmelov.alexey.vkfindme.models.UserModel;
+import com.nesmelov.alexey.vkfindme.network.models.LatLonUserModel;
+import com.nesmelov.alexey.vkfindme.network.models.LatLonUsersModel;
+import com.nesmelov.alexey.vkfindme.network.models.UserModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
@@ -24,6 +24,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Service that updates friends coordinates.
+ */
 public class UpdateFriendsService extends Service {
     public static final int FRIENDS_REFRESH_NOTIFICATION_ID = 444;
 
@@ -45,6 +48,7 @@ public class UpdateFriendsService extends Service {
         mHTTPManager = FindMeApp.getHTTPManager();
     }
 
+    @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
             FindMeApp.displayActiveNotification(FRIENDS_REFRESH_NOTIFICATION_ID, this, getString(R.string.app_name),
@@ -57,14 +61,17 @@ public class UpdateFriendsService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
     public void onDestroy() {
         FindMeApp.cancelNotification(FRIENDS_REFRESH_NOTIFICATION_ID);
-        if (!mStorage.getRefreshFriends()) {
-            FindMeApp.showToast(this, getString(R.string.refresh_friends_is_off));
-        }
         super.onDestroy();
     }
 
+    /**
+     * Friends update event.
+     *
+     * @param response response to handle update,
+     */
     public void onUpdate(Response<LatLonUsersModel> response) {
         try {
             final List<Integer> allUsers = mStorage.getUserIds();
@@ -114,11 +121,14 @@ public class UpdateFriendsService extends Service {
             for (final Integer invisibleUser : allUsers) {
                 mStorage.makeUserInvisible(invisibleUser);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         refreshData();
     }
 
+    /**
+     * Starts refreshing of friends positions.
+     */
     private void startRefreshing() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
             final List<UserModel> userModels = mStorage.getUserModels();
@@ -141,6 +151,9 @@ public class UpdateFriendsService extends Service {
         }
     }
 
+    /**
+     * Refreshes friends data.
+     */
     private void refreshData() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
             mHandler.postDelayed(() -> {

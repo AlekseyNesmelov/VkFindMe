@@ -1,8 +1,11 @@
-package com.nesmelov.alexey.vkfindme.models;
+package com.nesmelov.alexey.vkfindme.network.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Status model.
+ */
 public class StatusModel {
     public static final String OK = "ok";
     public static final String NOK = "nok";
@@ -12,7 +15,11 @@ public class StatusModel {
     @Expose
     private String status;
 
+    /**
+     * Gets status.
+     * @return status
+     */
     public String getStatus() {
-        return status == null ? "" : status;
+        return status == null ? NOK : status;
     }
 }

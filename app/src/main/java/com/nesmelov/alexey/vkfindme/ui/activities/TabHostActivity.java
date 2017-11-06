@@ -17,7 +17,7 @@ import android.widget.ToggleButton;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.StatusModel;
+import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.ui.fragments.MapFragment;
 import com.nesmelov.alexey.vkfindme.ui.fragments.SettingsFragment;

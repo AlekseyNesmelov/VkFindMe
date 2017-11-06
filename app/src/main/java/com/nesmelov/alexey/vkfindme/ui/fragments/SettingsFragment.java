@@ -6,6 +6,9 @@ import android.support.annotation.Nullable;
 
 import com.nesmelov.alexey.vkfindme.R;
 
+/**
+ * Settings fragment.
+ */
 public class SettingsFragment extends PreferenceFragment {
 
     @Override

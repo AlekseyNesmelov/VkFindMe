@@ -1,16 +1,19 @@
 package com.nesmelov.alexey.vkfindme.network;
 
-import com.nesmelov.alexey.vkfindme.models.FullUserInfoModel;
-import com.nesmelov.alexey.vkfindme.models.LatLonUserModel;
-import com.nesmelov.alexey.vkfindme.models.LatLonUsersModel;
-import com.nesmelov.alexey.vkfindme.models.StatusModel;
-import com.nesmelov.alexey.vkfindme.models.UserModel;
-import com.nesmelov.alexey.vkfindme.models.UsersModel;
-import com.nesmelov.alexey.vkfindme.models.VisibilityUserModel;
+import com.nesmelov.alexey.vkfindme.network.models.FullUserInfoModel;
+import com.nesmelov.alexey.vkfindme.network.models.LatLonUserModel;
+import com.nesmelov.alexey.vkfindme.network.models.LatLonUsersModel;
+import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
+import com.nesmelov.alexey.vkfindme.network.models.UserModel;
+import com.nesmelov.alexey.vkfindme.network.models.UsersModel;
+import com.nesmelov.alexey.vkfindme.network.models.VisibilityUserModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
+/**
+ * Find Me application REST API.
+ */
 public interface FindMeApi {
 
     @POST("Server?action=add")

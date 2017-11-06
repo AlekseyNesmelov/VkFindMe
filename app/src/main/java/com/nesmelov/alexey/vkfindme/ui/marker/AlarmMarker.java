@@ -18,26 +18,40 @@ import com.nesmelov.alexey.vkfindme.utils.Utils;
 
 import java.util.ArrayList;
 
+/**
+ * Alarm marker.
+ */
 public class AlarmMarker extends Alarm {
     private static final int ALARM_SIZE_DP = 40;
 
     private Marker mMarker;
     private Circle mCircle;
     private int mColor;
-    private int mMarkerId;
 
-    public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius,
-                       final int color) {
-        super(alarmId, lat, lon, radius);
-        mColor = color;
-    }
-
+    /**
+     * Constructs alarm marker.
+     *
+     * @param alarmId alarm id.
+     * @param lat alarm latitude.
+     * @param lon alarm longitude.
+     * @param radius alarm radius.
+     * @param color alarm color.
+     * @param users alarm users.
+     * @param names alarm names.
+     */
     public AlarmMarker(final long alarmId, final double lat, final double lon, final float radius,
                  final int color, final ArrayList<Integer> users, final String names) {
         super(alarmId, lat, lon, radius, users, names);
         mColor = color;
     }
 
+    /**
+     * Adds alarm marker to the map.
+     *
+     * @param context context to use.
+     * @param map map to add marker.
+     * @return added marker.
+     */
     public Marker addToMap(final Context context, final GoogleMap map) {
         final int size = Utils.dpToPx(context, ALARM_SIZE_DP);
         final Bitmap bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(context.getResources(),
@@ -62,19 +76,39 @@ public class AlarmMarker extends Alarm {
         return mMarker;
     }
 
+    /**
+     * Gets alarm circle.
+     *
+     * @return alarm circle.
+     */
     public Circle getCircle() {
         return mCircle;
     }
 
+    /**
+     * Gets google marker.
+     *
+     * @return google marker.
+     */
     public Marker getMarker() {
         return mMarker;
     }
 
+    /**
+     * Gets marker id.
+     *
+     * @return marker id.
+     */
     public int getMarkerId() {
         final String alarmMarkerId = mMarker.getId().replace("m", "");
         return Integer.parseInt(alarmMarkerId);
     }
 
+    /**
+     * Gets alarm color.
+     *
+     * @return alarm color.
+     */
     public int getColor() {
         return mColor;
     }

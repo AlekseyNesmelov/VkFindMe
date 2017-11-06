@@ -9,13 +9,14 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.ui.activities.MainActivity;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
-import com.nesmelov.alexey.vkfindme.models.StatusModel;
+import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.nesmelov.alexey.vkfindme.structures.Alarm;
@@ -28,6 +29,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * GPS service that checks the user in alarms and sends position if
+ * visibility is turned on.
+ */
 public class GpsService extends Service implements LocationListener {
     public static final int VISIBLE_NOTIFICATION_ID = 111;
     public static final int ME_IN_ALARM_NOTIFICATION_ID = 222;
@@ -37,7 +42,7 @@ public class GpsService extends Service implements LocationListener {
     private Storage mStorage;
     private HTTPManager mHTTPManager;
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
     private List<Alarm> mAlarmsForMe = new ArrayList<>();
 
     @Nullable
@@ -51,8 +56,10 @@ public class GpsService extends Service implements LocationListener {
         super.onCreate();
         mStorage = FindMeApp.getStorage();
         mHTTPManager = FindMeApp.getHTTPManager();
+        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
 
+    @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (isVisible() || isMeInAlarm()) {
 
@@ -60,7 +67,6 @@ public class GpsService extends Service implements LocationListener {
                 mAlarmsForMe = mStorage.getAlarmsForMe();
             }
 
-            mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 onLocationChanged(mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
@@ -88,6 +94,7 @@ public class GpsService extends Service implements LocationListener {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
     public void onDestroy() {
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
@@ -111,11 +118,11 @@ public class GpsService extends Service implements LocationListener {
                 mHTTPManager.sendPosition(mStorage.getUserVkId(), location.getLatitude(), location.getLongitude(),
                         new Callback<StatusModel>() {
                             @Override
-                            public void onResponse(Call<StatusModel> call, Response<StatusModel> response) {
+                            public void onResponse(@NonNull Call<StatusModel> call, @NonNull Response<StatusModel> response) {
                             }
 
                             @Override
-                            public void onFailure(Call<StatusModel> call, Throwable t) {
+                            public void onFailure(@NonNull Call<StatusModel> call, @NonNull Throwable t) {
                             }
                         });
             }
@@ -156,10 +163,20 @@ public class GpsService extends Service implements LocationListener {
     public void onProviderDisabled(final String provider) {
     }
 
+    /**
+     * Returns <tt>true</tt> if user is visible.
+     *
+     * @return <tt>true</tt> if user is visible.
+     */
     private boolean isVisible() {
         return mStorage.getVisibility();
     }
 
+    /**
+     * Returns <tt>true</tt> if user is in alarm.
+     *
+     * @return <tt>true</tt> if user is in alarm.
+     */
     private boolean isMeInAlarm() {
         return mStorage.isMeInAlarm();
     }

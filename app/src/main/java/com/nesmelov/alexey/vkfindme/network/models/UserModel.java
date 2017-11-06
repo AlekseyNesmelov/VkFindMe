@@ -1,4 +1,4 @@
-package com.nesmelov.alexey.vkfindme.models;
+package com.nesmelov.alexey.vkfindme.network.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 public class UserModel {
     @SerializedName("user")
     @Expose
-    private Integer user;
+    protected Integer user;
 
     public UserModel(Integer user) {
         this.user = user;
