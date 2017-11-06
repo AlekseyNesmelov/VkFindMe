@@ -12,13 +12,13 @@ import java.util.List;
 public class UsersModel {
     @SerializedName("users")
     @Expose
-    private List<UserModel> users;
+    private List<Integer> users;
 
     /**
      * Constructs users model.
      * @param users list of users.
      */
-    public UsersModel(final List<UserModel> users) {
+    public UsersModel(final List<Integer> users) {
         this.users = users;
     }
 
@@ -26,7 +26,7 @@ public class UsersModel {
      * Gets users list.
      * @return users list.
      */
-    public  List<UserModel> getUsers() {
+    public  List<Integer> getUsers() {
         return users == null ? new ArrayList<>() : users;
     }
 }

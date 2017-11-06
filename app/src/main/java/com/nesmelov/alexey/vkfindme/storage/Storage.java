@@ -171,73 +171,74 @@ public class Storage {
     public void setUserVkId(final Integer userVkId) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putInt(USER_VK_ID, userVkId);
-        ed.commit();
+        ed.apply();
+        mDataBaseHelper.recreateTables();
     }
 
     public void setUserName(final String userName) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(USER_NAME, userName);
-        ed.commit();
+        ed.apply();
     }
 
     public void setRefreshFriendsDelay(final long refreshFriendsDelay) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(REFRESH_FRIENDS_DELAY, String.valueOf(refreshFriendsDelay));
-        ed.commit();
+        ed.apply();
     }
 
     public void setRefreshFriends(final boolean refreshFriends) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putBoolean(REFRESH_FRIENDS, refreshFriends);
-        ed.commit();
+        ed.apply();
     }
 
     public void setUserLat(final double lat) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putFloat(USER_LAT, (float)lat);
-        ed.commit();
+        ed.apply();
     }
 
     public void setUserLon(final double lon) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putFloat(USER_LON, (float)lon);
-        ed.commit();
+        ed.apply();
     }
 
     public void setUserSurname(final String userSurname) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(USER_SURNAME, userSurname);
-        ed.commit();
+        ed.apply();
     }
 
     public void setUserIconUrl(final String userIconUrl) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(USER_ICON_URL, userIconUrl);
-        ed.commit();
+        ed.apply();
     }
 
     public void setVisibility(final Boolean visibility) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putBoolean(VISIBILITY, visibility);
-        ed.commit();
+        ed.apply();
     }
 
     public void setGPSMinDelay(final Long delay) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putString(GPS_MIN_DELAY, String.valueOf(delay));
-        ed.commit();
+        ed.apply();
     }
 
     public void setGPSMinDistance(final Float distance) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putFloat(GPS_MIN_DISTANCE, distance);
-        ed.commit();
+        ed.apply();
     }
 
     public void setAlarmRadius(final Float radius) {
         final SharedPreferences.Editor ed = mSharedPrefs.edit();
         ed.putFloat(ALARM_RADIUS, radius);
-        ed.commit();
+        ed.apply();
     }
 
     public void setUserPos(final Integer userId, final double lat, final double lon) {

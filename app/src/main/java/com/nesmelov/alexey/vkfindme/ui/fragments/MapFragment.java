@@ -13,9 +13,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -203,96 +205,85 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         mAddFriendsProgressBar = view.findViewById(R.id.addFriendsProgress);
 
         mAddFriendsBtn = view.findViewById(R.id.addFriendsBtn);
-        mAddFriendsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                mAddFriendsBtn.setEnabled(false);
-                mAddFriendsProgressBar.setVisibility(View.VISIBLE);
-                final VKRequest.VKRequestListener requestListener = new VKRequest.VKRequestListener() {
-                    @Override
-                    public void onComplete(VKResponse response) {
-                        super.onComplete(response);
-                        try {
-                            mUsersBuffer.clear();
-                            final JSONObject jsonResponse = response.json.getJSONObject("response");
-                            final int count = (int) jsonResponse.getLong("count");
+        mAddFriendsBtn.setOnClickListener(v -> {
+            mAddFriendsBtn.setEnabled(false);
+            mAddFriendsProgressBar.setVisibility(View.VISIBLE);
+            final VKRequest.VKRequestListener requestListener = new VKRequest.VKRequestListener() {
+                @Override
+                public void onComplete(VKResponse response) {
+                    try {
+                        mUsersBuffer.clear();
+                        final JSONObject jsonResponse = response.json.getJSONObject("response");
+                        final int count = (int) jsonResponse.getLong("count");
 
-                            final JSONArray usersArray = jsonResponse.getJSONArray("items");
-                            final List<UserModel> userModels = new ArrayList<>();
-                            for (int i = 0; i < count; i++) {
-                                final JSONObject userJson = usersArray.getJSONObject(i);
-                                userModels.add(new UserModel(userJson.getInt("id")));
-                                final User user = new User();
-                                user.setVkId(userJson.getInt("id"));
-                                user.setName(userJson.getString("first_name"));
-                                user.setSurname(userJson.getString("last_name"));
-                                user.setIconUrl(userJson.getString("photo_200"));
-                                mUsersBuffer.put(userJson.getInt("id"), user);
-                            }
+                        final JSONArray usersArray = jsonResponse.getJSONArray("items");
+                        final List<Integer> userModels = new ArrayList<>();
+                        for (int i = 0; i < count; i++) {
+                            final JSONObject userJson = usersArray.getJSONObject(i);
+                            userModels.add(userJson.getInt("id"));
+                            final User user = new User();
+                            user.setVkId(userJson.getInt("id"));
+                            user.setName(userJson.getString("first_name"));
+                            user.setSurname(userJson.getString("last_name"));
+                            user.setIconUrl(userJson.getString("photo_200"));
+                            mUsersBuffer.put(userJson.getInt("id"), user);
+                        }
 
-                            mHTTPManager.checkUsers(userModels, new Callback<UsersModel>() {
-                                @Override
-                                public void onResponse(Call<UsersModel> call, Response<UsersModel> response) {
-                                    try {
-                                        if (response.body() != null) {
-                                            for (final UserModel userModel : response.body().getUsers()) {
-                                                final Integer userId = userModel.getUser();
-                                                final User user = mUsersBuffer.get(userId);
-                                                if (user != null && !mUserMarkers.containsKey(userId)) {
-                                                    mHTTPManager.loadImage(user.getIconUrl(), new okhttp3.Callback() {
-                                                        @Override
-                                                        public void onFailure(okhttp3.Call call, IOException e) {
+                        mHTTPManager.checkUsers(userModels, new Callback<UsersModel>() {
+                            @Override
+                            public void onResponse(@NonNull Call<UsersModel> call, @NonNull Response<UsersModel> response) {
+                                try {
+                                    final UsersModel body = response.body();
+                                    if (body != null) {
+                                        Log.d("ANESMELOV", body.getUsers().size() + "");
+                                        for (final Integer userId : body.getUsers()) {
+                                            final User user = mUsersBuffer.get(userId);
+                                            if (user != null && !mUserMarkers.containsKey(userId)) {
+                                                mHTTPManager.loadImage(user.getIconUrl(), new okhttp3.Callback() {
+                                                    @Override
+                                                    public void onFailure(okhttp3.Call call, IOException e) {
+                                                    }
+
+                                                    @Override
+                                                    public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
+                                                        if (response.body() != null) {
+                                                            final byte[] bytes = response.body().bytes();
+                                                            mStorage.addUser(user);
+                                                            MapFragment.this.getActivity().runOnUiThread(() -> addUserPreviewIcon(user,
+                                                                    BitmapFactory.decodeByteArray(
+                                                                            bytes, 0, bytes.length), mMap));
                                                         }
-
-                                                        @Override
-                                                        public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-                                                            if (response.body() != null) {
-                                                                final byte[] bytes = response.body().bytes();
-                                                                mStorage.addUser(user);
-                                                                MapFragment.this.getActivity().runOnUiThread(() -> addUserPreviewIcon(user,
-                                                                        BitmapFactory.decodeByteArray(
-                                                                                bytes, 0, bytes.length), mMap));
-                                                            }
-                                                        }
-                                                    });
-                                                }
+                                                    }
+                                                });
                                             }
                                         }
-                                        FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
-                                                getString(R.string.refresh_friends_message_ok));
-                                        mAddFriendsBtn.setEnabled(true);
-                                        mAddFriendsProgressBar.setVisibility(View.GONE);
-
-                                    } catch (Exception e) {
-                                        FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                                                getString(R.string.refresh_friends_server_error_message));
-                                        mAddFriendsBtn.setEnabled(true);
-                                        mAddFriendsProgressBar.setVisibility(View.GONE);
                                     }
-                                }
-
-                                @Override
-                                public void onFailure(Call<UsersModel> call, Throwable t) {
-                                    FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                                            getString(R.string.refresh_friends_server_error_message));
+                                    FindMeApp.showPopUp(getActivity(), getString(R.string.refresh_friends_title),
+                                            getString(R.string.refresh_friends_message_ok));
                                     mAddFriendsBtn.setEnabled(true);
                                     mAddFriendsProgressBar.setVisibility(View.GONE);
-                                }
-                            });
-                        } catch (Exception e) {
-                        }
-                    }
 
-                    @Override
-                    public void onError(VKError error) {
-                        FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
-                                getString(R.string.refresh_friends_server_error_message));
-                        mAddFriendsBtn.setEnabled(true);
-                        mAddFriendsProgressBar.setVisibility(View.GONE);
+                                } catch (Exception e) {
+                                    showErrorRefreshFriendsMessage();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<UsersModel> call, Throwable t) {
+                                showErrorRefreshFriendsMessage();
+                            }
+                        });
+                    } catch (Exception e) {
+                        showErrorRefreshFriendsMessage();
                     }
-                };
-                mVKManager.getFriends(requestListener);
-            }
+                }
+
+                @Override
+                public void onError(VKError error) {
+                    showErrorRefreshFriendsMessage();
+                }
+            };
+            mVKManager.getFriends(requestListener);
         });
 
         mAlarmTarget = view.findViewById(R.id.alarm_target);
@@ -319,8 +310,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 case MODE_SELECT_ALARM_RADIUS:
                     final Intent intent = new Intent(MapFragment.this.getActivity(), AlarmUsersActivity.class);
                     final LatLng latLng = mAlarmRadius.getCenter();
-                    intent.putExtra(Storage.LAT,latLng.latitude);
-                    intent.putExtra(Storage.LON,latLng.longitude);
+                    intent.putExtra(Storage.LAT, latLng.latitude);
+                    intent.putExtra(Storage.LON, latLng.longitude);
                     intent.putExtra(Storage.RADIUS, (float)mAlarmRadius.getRadius());
                     intent.putExtra(Storage.COLOR, Utils.getRandomColor());
                     startActivityForResult(intent, GET_ALARM_USERS_REQUEST_CODE);
@@ -371,7 +362,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case GET_ALARM_USERS_REQUEST_CODE:
                 setMode(MODE_USUAL);
@@ -493,7 +483,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             final LocationManager locationManager = (LocationManager) getActivity().getSystemService(LOCATION_SERVICE);
-            if (mStartPos == null) {
+            if (locationManager != null && mStartPos == null) {
                 final Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
                 if (location != null) {
                     mStorage.setUserLat(location.getLatitude());
@@ -573,6 +563,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         addFriendsFromDataBase();
 
         ((TabHostActivity)getActivity()).hideProgressBar();
+    }
+
+    private void showErrorRefreshFriendsMessage() {
+        FindMeApp.showPopUp(getActivity(), getString(R.string.error_title),
+                getString(R.string.refresh_friends_server_error_message));
+        mAddFriendsBtn.setEnabled(true);
+        mAddFriendsProgressBar.setVisibility(View.GONE);
     }
 
     private synchronized void setMode(final int mode) {

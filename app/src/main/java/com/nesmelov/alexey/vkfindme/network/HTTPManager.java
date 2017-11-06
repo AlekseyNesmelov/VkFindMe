@@ -108,7 +108,7 @@ public class HTTPManager {
      * @param users users to check.
      * @param callback response listener.
      */
-    public void checkUsers(final List<UserModel> users, final Callback<UsersModel> callback) {
+    public void checkUsers(final List<Integer> users, final Callback<UsersModel> callback) {
         final UsersModel usersModel = new UsersModel(users);
         mFindMeApi.postCheckUsers(usersModel).enqueue(callback);
     }
@@ -119,7 +119,7 @@ public class HTTPManager {
      * @param users users to get positions.
      * @param callback response listeners.
      */
-    public void getUserPositions(final List<UserModel> users, final Callback<LatLonUsersModel> callback) {
+    public void getUserPositions(final List<Integer> users, final Callback<LatLonUsersModel> callback) {
         final UsersModel usersModel = new UsersModel(users);
         mFindMeApi.postGetPositions(usersModel).enqueue(callback);
     }

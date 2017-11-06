@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
@@ -61,7 +62,7 @@ public class MainActivity extends Activity {
 
                     final User user = new User();
 
-                    final Integer id = jsonObjectRequest.getInt(VKManager.ID);
+                    final Integer id = jsonObjectRequest.getInt(VKManager.ID);//48327366;
                     mStorage.setUserVkId(id);
                     user.setVkId(id);
 
@@ -81,7 +82,7 @@ public class MainActivity extends Activity {
 
                     mHTTPManager.addUser(user.getVkId(), new Callback<StatusModel>() {
                         @Override
-                        public void onResponse(Call<StatusModel> call, Response<StatusModel> response) {
+                        public void onResponse(@NonNull Call<StatusModel> call, @NonNull Response<StatusModel> response) {
                             final StatusModel statusModel = response.body();
                             if (response.isSuccessful() && statusModel != null
                                     && (statusModel.getStatus().equals(StatusModel.OK)
@@ -93,11 +94,12 @@ public class MainActivity extends Activity {
                         }
 
                         @Override
-                        public void onFailure(Call<StatusModel> call, Throwable t) {
+                        public void onFailure(@NonNull Call<StatusModel> call, @NonNull Throwable t) {
                             MainActivity.this.onError();
                         }
                     });
                 } catch (Exception e) {
+                    Log.d("ANESMELOV", e.toString());
                     MainActivity.this.onError();
                 }
             }

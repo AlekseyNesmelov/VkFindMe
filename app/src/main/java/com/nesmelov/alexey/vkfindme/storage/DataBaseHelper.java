@@ -593,6 +593,27 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     }
 
     /**
+     * Recreates database tables.
+     *
+     * @param db database.
+     */
+    public void recreateTables(final SQLiteDatabase db) {
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        createUsersTable(db, user);
+        createAlarmTables(db, user);
+    }
+
+    /**
+     * Recreates database tables.
+     */
+    public void recreateTables() {
+        final SQLiteDatabase db = this.getWritableDatabase();
+        final Integer user = FindMeApp.getStorage().getUserVkId();
+        createUsersTable(db, user);
+        createAlarmTables(db, user);
+    }
+
+    /**
      * Creates users table.
      *
      * @param db database.
@@ -600,7 +621,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
      */
     private void createUsersTable(final SQLiteDatabase db, final Integer user) {
         final String usersTable = USERS_TABLE + "_" + user;
-        db.execSQL("CREATE TABLE " + usersTable + "("
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + usersTable + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + VK_ID + " INTEGER,"
                 + NAME + " TEXT,"
@@ -619,7 +640,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
      */
     private void createAlarmTables(final SQLiteDatabase db, final Integer user) {
         final String alarmTable = ALARM_TABLE + "_" + user;
-        db.execSQL("CREATE TABLE " + alarmTable + "("
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + alarmTable + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + LATITUDE + " REAL,"
                 + LONGITUDE + " REAL,"
@@ -627,7 +648,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + CHECKED + " INTEGER,"
                 + COLOR + " INTEGER);");
         final String alarmUsersTable = ALARM_USERS_TABLE + "_" + user;
-        db.execSQL("CREATE TABLE " + alarmUsersTable + "("
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + alarmUsersTable + "("
                 + ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + ALARM_ID + " INTEGER,"
                 + USER_ID + " INTEGER);");

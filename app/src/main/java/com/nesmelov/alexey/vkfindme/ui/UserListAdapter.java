@@ -3,6 +3,7 @@ package com.nesmelov.alexey.vkfindme.ui;
 import android.app.Activity;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -78,9 +79,10 @@ public class UserListAdapter extends ArrayAdapter<User> {
                             if (responseBody != null) {
                                 mContext.runOnUiThread(() -> {
                                     try {
+                                        final byte[] bytes = responseBody.bytes();
                                         viewHolder.iconView.setImageBitmap(
-                                                BitmapFactory.decodeByteArray(responseBody.bytes(),
-                                                0, responseBody.bytes().length));
+                                                BitmapFactory.decodeByteArray(bytes,
+                                                0, bytes.length));
                                     } catch (Exception ignored) {
                                     }
                                 });

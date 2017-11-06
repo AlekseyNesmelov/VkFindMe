@@ -64,6 +64,7 @@ public class UpdateFriendsService extends Service {
     @Override
     public void onDestroy() {
         FindMeApp.cancelNotification(FRIENDS_REFRESH_NOTIFICATION_ID);
+        FindMeApp.showToast(this, getString(R.string.refresh_friends_is_off));
         super.onDestroy();
     }
 
@@ -131,7 +132,7 @@ public class UpdateFriendsService extends Service {
      */
     private void startRefreshing() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
-            final List<UserModel> userModels = mStorage.getUserModels();
+            final List<Integer> userModels = mStorage.getUserIds();
             mHTTPManager.getUserPositions(userModels,
                     new Callback<LatLonUsersModel>() {
                         @Override
@@ -157,7 +158,7 @@ public class UpdateFriendsService extends Service {
     private void refreshData() {
         if (mStorage.getRefreshFriends() && (mStorage.isUserUpdateListenerExist() || mStorage.isAlarmExist())) {
             mHandler.postDelayed(() -> {
-                final List<UserModel> userModels = mStorage.getUserModels();
+                final List<Integer> userModels = mStorage.getUserIds();
                 mHTTPManager.getUserPositions(userModels,
                         new Callback<LatLonUsersModel>() {
                             @Override

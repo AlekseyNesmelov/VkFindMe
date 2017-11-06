@@ -111,15 +111,18 @@ public class AlarmUsersActivity extends FragmentActivity {
             if (getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID) != Storage.BAD_ID) {
                 final ArrayList<Integer> checkedUsers = getIntent().getIntegerArrayListExtra(Storage.USERS);
                 mUser.setChecked(checkedUsers.contains(mUser.getVkId()));
-                publishProgress(mUser);
-
                 for (final User user : users) {
                     if (checkedUsers.contains(user.getVkId())) {
                         user.setChecked(true);
                     }
-                    publishProgress(user);
                 }
             }
+
+            publishProgress(mUser);
+            for (final User user : users) {
+                publishProgress(user);
+            }
+
             return null;
         }
 
