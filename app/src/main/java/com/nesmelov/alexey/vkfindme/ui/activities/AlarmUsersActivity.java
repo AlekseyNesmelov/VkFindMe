@@ -1,72 +1,78 @@
 package com.nesmelov.alexey.vkfindme.ui.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import com.nesmelov.alexey.vkfindme.R;
 import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
-import com.nesmelov.alexey.vkfindme.structures.User;
-import com.nesmelov.alexey.vkfindme.ui.UserListAdapter;
+import com.nesmelov.alexey.vkfindme.tasks.LoadUsersListTask;
+import com.nesmelov.alexey.vkfindme.ui.adapters.UserListAdapter;
+import com.nesmelov.alexey.vkfindme.ui.markers.UserMarker;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Activity to manage alarm users.
  */
-public class AlarmUsersActivity extends FragmentActivity {
-    private List<User> mUsers = new CopyOnWriteArrayList<>();
-    private UserListAdapter mUserListAdapter;
+public class AlarmUsersActivity extends FragmentActivity implements LoadUsersListTask.OnLoadUsersListener {
 
-    private Storage mStorage;
+    private static final String BUNDLE_CHECKED_USERS = "checked_users";
+
+    private List<UserMarker> mUsers;
+    private List<UserMarker> mCheckedUsers;
+    private UserListAdapter mUserListAdapter;
 
     private ProgressBar mProgressBar;
 
-    private User mUser = new User();
+    private LoadUsersListTask mLoadUsersListTask;
+
+    private ArrayList<Integer> mIntentCheckedUsers;
+    private ArrayList<Integer> mBundleCheckedUsers;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.alarm_users_activity);
 
-        mStorage = FindMeApp.getStorage();
+        mUsers = new ArrayList<>();
+        mCheckedUsers = new ArrayList<>();
 
         mProgressBar = findViewById(R.id.progressBar);
 
-        final ListView mUsersListView = findViewById(R.id.usersList);
-        mUserListAdapter = new UserListAdapter(this, mUsers);
-        mUsersListView.setAdapter(mUserListAdapter);
+        final RecyclerView usersListView = findViewById(R.id.usersList);
+        usersListView.setLayoutManager(new LinearLayoutManager(this));
+        mUserListAdapter = new UserListAdapter(this, mUsers, mCheckedUsers);
+        usersListView.setAdapter(mUserListAdapter);
 
         final Button okBtn = findViewById(R.id.okBtn);
         okBtn.setOnClickListener(v -> {
-            final ArrayList<Integer> checkedUsers = new ArrayList<>();
-            StringBuilder userNames = new StringBuilder();
-            for (final User user : mUsers) {
-                if (user.getChecked()) {
-                    checkedUsers.add(user.getVkId());
-                    userNames.append(user.getName()).append(" ").append(user.getSurname()).append(", ");
-                }
-            }
-            if (userNames.length() != 0) {
-                userNames = userNames.delete(userNames.length() - 2, userNames.length());
-            }
-
-            if (checkedUsers.isEmpty()) {
+            if (mCheckedUsers.isEmpty()) {
                 FindMeApp.showToast(AlarmUsersActivity.this, getString(R.string.alarm_must_select_users_message));
             } else {
+                final StringBuilder userNames = new StringBuilder();
+                final ArrayList<Integer> checkedIds = new ArrayList<>();
+                for (int i = 0; i < mCheckedUsers.size() - 1; i++) {
+                    final UserMarker user = mCheckedUsers.get(i);
+                    checkedIds.add(user.getVkId());
+                    userNames.append(user.getName()).append(" ").append(user.getSurname()).append(", ");
+                }
+                final UserMarker lastUser = mCheckedUsers.get(mCheckedUsers.size() - 1);
+                checkedIds.add(lastUser.getVkId());
+                userNames.append(lastUser.getName()).append(" ").append(lastUser.getSurname());
+
                 final Intent intent = new Intent();
-                intent.putExtra(Storage.ALARM_ID, getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID));
+                intent.putExtra(Storage.ALARM_ID, getIntent().getIntExtra(Storage.ALARM_ID, Storage.BAD_ID));
                 intent.putExtra(Storage.LAT, getIntent().getDoubleExtra(Storage.LAT, Storage.BAD_LAT));
                 intent.putExtra(Storage.LON, getIntent().getDoubleExtra(Storage.LON, Storage.BAD_LON));
                 intent.putExtra(Storage.RADIUS, getIntent().getFloatExtra(Storage.RADIUS, Storage.BAD_RADIUS));
-                intent.putIntegerArrayListExtra(Storage.USERS, checkedUsers);
+                intent.putIntegerArrayListExtra(Storage.USERS, checkedIds);
                 intent.putExtra(Storage.NAMES, userNames.toString());
                 setResult(RESULT_OK, intent);
                 finish();
@@ -75,18 +81,42 @@ public class AlarmUsersActivity extends FragmentActivity {
         final Button nokBtn = findViewById(R.id.nokBtn);
         nokBtn.setOnClickListener(v -> {
             final Intent intent = new Intent();
-            intent.putExtra(Storage.ALARM_ID, getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID));
-            setResult(Storage.RESULT_UPDATE, intent);
+            intent.putExtra(Storage.ALARM_ID, getIntent().getIntExtra(Storage.ALARM_ID, Storage.BAD_ID));
+            setResult(Storage.RESULT_REMOVE, intent);
             finish();
         });
 
-        mUser.setName(mStorage.getUserName());
-        mUser.setSurname(mStorage.getUserSurname());
-        mUser.setIconUrl(mStorage.getUserIconUrl());
-        mUser.setVkId(mStorage.getUserVkId());
+        if (savedInstanceState != null) {
+            mBundleCheckedUsers = savedInstanceState.getIntegerArrayList(BUNDLE_CHECKED_USERS);
+        } else if (getIntent() != null) {
+            mIntentCheckedUsers = getIntent().getIntegerArrayListExtra(Storage.USERS);
+        }
 
-        final LoadUsersTask loadUsersTsk = new LoadUsersTask();
-        loadUsersTsk.execute();
+        if (mLoadUsersListTask != null) {
+            mLoadUsersListTask.cancel(true);
+        }
+        mLoadUsersListTask = new LoadUsersListTask();
+        mLoadUsersListTask.setListener(this);
+        mLoadUsersListTask.execute();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        final ArrayList<Integer> checkedIds = new ArrayList<>();
+        for (final UserMarker user : mCheckedUsers) {
+            checkedIds.add(user.getVkId());
+        }
+        outState.putIntegerArrayList(BUNDLE_CHECKED_USERS, checkedIds);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mLoadUsersListTask != null) {
+            mLoadUsersListTask.cancel(true);
+            mLoadUsersListTask.setListener(null);
+        }
     }
 
     @Override
@@ -95,48 +125,24 @@ public class AlarmUsersActivity extends FragmentActivity {
         finish();
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private class LoadUsersTask extends AsyncTask<Void, User, Void> {
+    @Override
+    public void onLoadStarted() {
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mProgressBar.setVisibility(View.VISIBLE);
+    @Override
+    public void onUserLoaded(final UserMarker user) {
+        if (mIntentCheckedUsers != null && mIntentCheckedUsers.contains(user.getVkId())
+                || mBundleCheckedUsers != null && mBundleCheckedUsers.contains(user.getVkId())) {
+           mCheckedUsers.add(user);
         }
+        mUsers.add(user);
+        mUserListAdapter.notifyItemInserted(mUsers.size() - 1);
+    }
 
-        @Override
-        protected Void doInBackground(Void... params) {
-            final List<User> users = mStorage.getFriends(Storage.FRIENDS_LIMIT);
-
-            if (getIntent().getLongExtra(Storage.ALARM_ID, Storage.BAD_ID) != Storage.BAD_ID) {
-                final ArrayList<Integer> checkedUsers = getIntent().getIntegerArrayListExtra(Storage.USERS);
-                mUser.setChecked(checkedUsers.contains(mUser.getVkId()));
-                for (final User user : users) {
-                    if (checkedUsers.contains(user.getVkId())) {
-                        user.setChecked(true);
-                    }
-                }
-            }
-
-            publishProgress(mUser);
-            for (final User user : users) {
-                publishProgress(user);
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(User... values) {
-            mUsers.add(values[0]);
-            mUserListAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        protected void onPostExecute(final Void users) {
-            super.onPostExecute(users);
-            mProgressBar.setVisibility(View.GONE);
-        }
+    @Override
+    public void onLoadCompleted() {
+        mProgressBar.setVisibility(View.GONE);
     }
 }
 

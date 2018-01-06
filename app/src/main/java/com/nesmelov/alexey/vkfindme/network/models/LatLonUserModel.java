@@ -18,6 +18,7 @@ public class LatLonUserModel extends UserModel{
 
     /**
      * Constructs user position model.
+     *
      * @param user user id.
      * @param lat latitude.
      * @param lon longitude.
@@ -30,6 +31,7 @@ public class LatLonUserModel extends UserModel{
 
     /**
      * Gets latitude.
+     *
      * @return latitude
      */
     public Double getLat() {
@@ -38,6 +40,7 @@ public class LatLonUserModel extends UserModel{
 
     /**
      * Gets longitude.
+     *
      * @return longitude
      */
     public Double getLon() {

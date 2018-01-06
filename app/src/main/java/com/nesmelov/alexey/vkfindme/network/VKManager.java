@@ -9,7 +9,7 @@ import com.vk.sdk.api.VKRequest;
 public class VKManager {
     public static final String RESPONSE = "response";
     public static final String ID = "id";
-    public static final String PHOTO_MAX = "photo_max";
+    public static final String PHOTO_200 = "photo_200";
     public static final String FIRST_NAME = "first_name";
     public static final String LAST_NAME = "last_name";
 
@@ -18,7 +18,7 @@ public class VKManager {
      * @param listener response listener.
      */
     public void getUserInfo(final VKRequest.VKRequestListener listener) {
-        final VKRequest myProfileRequest = new VKRequest("users.get", VKParameters.from("fields", "photo_max"));
+        final VKRequest myProfileRequest = new VKRequest("users.get", VKParameters.from("fields", "photo_200"));
         myProfileRequest.executeWithListener(listener);
     }
 

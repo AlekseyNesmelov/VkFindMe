@@ -9,12 +9,12 @@ public interface OnAlarmUpdatedListener {
      *
      * @param alarmId alarm id.
      */
-    void onAlarmRemoved(final long alarmId);
+    void onAlarmRemoved(final int alarmId);
 
     /**
      * This method is called when an alarm is updated.
      *
      * @param alarmId alarm id.
      */
-    void onAlarmUpdated(final long alarmId);
+    void onAlarmUpdated(final int alarmId);
 }

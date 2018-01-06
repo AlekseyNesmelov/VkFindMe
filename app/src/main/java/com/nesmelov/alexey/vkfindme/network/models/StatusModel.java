@@ -16,6 +16,15 @@ public class StatusModel {
     private String status;
 
     /**
+     * Constructs status model.
+     *
+     * @param status status to set.
+     */
+    public StatusModel(final String status) {
+        this.status = status;
+    }
+
+    /**
      * Gets status.
      * @return status
      */

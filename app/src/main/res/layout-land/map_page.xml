@@ -1,0 +1,195 @@
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageButton
+        android:id="@+id/okBtn"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        android:background="@drawable/ok_selector"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/map"
+        app:layout_constraintStart_toStartOf="@id/map"
+        app:layout_constraintEnd_toStartOf="@id/nokBtn"/>
+
+    <ImageButton
+        android:id="@+id/nokBtn"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        android:background="@drawable/nok_selector"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@id/map"
+        app:layout_constraintEnd_toEndOf="@id/map"
+        app:layout_constraintStart_toEndOf="@id/okBtn"/>
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/separate_line"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_view"/>
+
+     <ImageView
+         android:id="@+id/alarm_target"
+         android:layout_width="@dimen/step_x25"
+         android:layout_height="@dimen/step_x25"
+         android:visibility="gone"
+         android:background="@drawable/alarm_target"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintEnd_toEndOf="@id/separate_line"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent"/>
+
+    <SeekBar
+        android:id="@+id/radiusSeekBar"
+        android:layout_width="@dimen/step_x165"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/step_x2.5"
+        android:progressDrawable="@drawable/radius_progress"
+        android:thumb="@drawable/radius_thumb"
+        android:max="5000"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/messageView"
+        app:layout_constraintEnd_toEndOf="@id/map"
+        app:layout_constraintStart_toStartOf="@id/map"/>
+
+    <TextView
+        android:id="@+id/messageView"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:layout_marginBottom="@dimen/step_x1"
+        android:textColor="@color/colorAddressRowTextColor"
+        app:layout_constraintStart_toStartOf="@id/map"
+        app:layout_constraintEnd_toEndOf="@id/map"
+        app:layout_constraintBottom_toBottomOf="@id/map"
+        android:textSize="@dimen/text_x7"/>
+
+    <View
+        android:id="@+id/separate_line"
+        android:layout_width="@dimen/step_x1"
+        android:layout_height="@dimen/step_x0"
+        android:background="?attr/colorPrimaryDark"
+        app:layout_constraintEnd_toStartOf="@id/friends_view"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/friends_view"
+        android:layout_width="@dimen/step_x32.5"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
+        app:layout_constraintEnd_toStartOf="@id/bottom_separate_line"
+        android:background="@color/colorSpecial"
+        app:layout_constraintBottom_toBottomOf="parent">
+    </android.support.v7.widget.RecyclerView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/alarms_view"
+        android:layout_width="@dimen/step_x32.5"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
+        app:layout_constraintEnd_toStartOf="@id/bottom_separate_line"
+        android:background="@color/colorSpecialDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+    </android.support.v7.widget.RecyclerView>
+
+    <SearchView
+        android:id="@+id/search_view"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    </SearchView>
+
+    <View
+        android:id="@+id/top_separate_line"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x1"
+        android:background="?attr/colorPrimaryDark"
+        app:layout_constraintTop_toBottomOf="@id/search_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/search_list"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@id/map"
+        app:layout_constraintTop_toBottomOf="@id/top_separate_line"
+        app:layout_constraintEnd_toEndOf="@id/map">
+    </android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:id="@+id/addFriendsProgress"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/friends_view"
+        app:layout_constraintStart_toStartOf="@id/friends_view"
+        app:layout_constraintBottom_toBottomOf="@id/friends_view"
+        app:layout_constraintTop_toTopOf="@id/friends_view"/>
+
+    <View
+        android:id="@+id/bottom_separate_line"
+        android:layout_width="@dimen/step_x0.5"
+        android:layout_height="@dimen/step_x0"
+        android:background="?attr/colorPrimaryDark"
+        app:layout_constraintTop_toBottomOf="@id/top_separate_line"
+        app:layout_constraintEnd_toStartOf="@id/alarmBtn"/>
+
+    <ImageButton
+        android:id="@+id/addFriendsBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:layout_gravity="center"
+        android:background="@drawable/add_friends_selector"
+        app:layout_constraintStart_toEndOf="@id/bottom_separate_line"
+        app:layout_constraintTop_toBottomOf="@id/top_separate_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/alarmBtn"/>
+
+    <ImageButton
+        android:id="@+id/alarmBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:background="@drawable/add_alarm_selector"
+        app:layout_constraintTop_toBottomOf="@id/addFriendsBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/radio_group" />
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/bottom_separate_line"
+        app:layout_constraintTop_toBottomOf="@id/alarmBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/showFriendsBtn"
+            android:layout_width="@dimen/step_x20"
+            android:layout_height="@dimen/step_x20"
+            android:background="@drawable/friends_selector"
+            android:button="@null"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/showAlarmsBtn"
+            android:layout_width="@dimen/step_x20"
+            android:layout_height="@dimen/step_x20"
+            android:button="@null"
+            android:background="@drawable/alarms_selector"/>
+
+    </RadioGroup>
+
+ </android.support.constraint.ConstraintLayout>

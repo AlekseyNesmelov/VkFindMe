@@ -18,7 +18,7 @@ import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.network.VKManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
-import com.nesmelov.alexey.vkfindme.structures.User;
+import com.nesmelov.alexey.vkfindme.ui.markers.UserMarker;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKCallback;
 import com.vk.sdk.VKScope;
@@ -60,13 +60,14 @@ public class MainActivity extends Activity {
                     final JSONArray jsonResponse = response.json.getJSONArray(VKManager.RESPONSE);
                     final JSONObject jsonObjectRequest = jsonResponse.getJSONObject(0);
 
-                    final User user = new User();
+                    final UserMarker user = new UserMarker();
 
-                    final Integer id = jsonObjectRequest.getInt(VKManager.ID);//48327366;
+                    final Integer id = jsonObjectRequest.getInt(VKManager.ID);
+                            // 48327366; // vk id for debug
                     mStorage.setUserVkId(id);
                     user.setVkId(id);
 
-                    final String photoUrl = jsonObjectRequest.getString(VKManager.PHOTO_MAX);
+                    final String photoUrl = jsonObjectRequest.getString(VKManager.PHOTO_200);
                     mStorage.setUserIconUrl(photoUrl);
                     user.setIconUrl(photoUrl);
 
@@ -99,7 +100,7 @@ public class MainActivity extends Activity {
                         }
                     });
                 } catch (Exception e) {
-                    Log.d("ANESMELOV", e.toString());
+                    Log.d(FindMeApp.TAG, "MainActivity", e);
                     MainActivity.this.onError();
                 }
             }
@@ -144,8 +145,8 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    public void onRequestPermissionsResult(final int requestCode,
-                                           @NonNull final String permissions[], @NonNull final int[] grantResults) {
+    public void onRequestPermissionsResult(final int requestCode, @NonNull final String permissions[],
+                                           @NonNull final int[] grantResults) {
         switch (requestCode) {
             case LOCATION_REQUEST_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

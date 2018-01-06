@@ -19,7 +19,7 @@ import com.nesmelov.alexey.vkfindme.application.FindMeApp;
 import com.nesmelov.alexey.vkfindme.network.models.StatusModel;
 import com.nesmelov.alexey.vkfindme.network.HTTPManager;
 import com.nesmelov.alexey.vkfindme.storage.Storage;
-import com.nesmelov.alexey.vkfindme.structures.Alarm;
+import com.nesmelov.alexey.vkfindme.ui.markers.AlarmMarker;
 import com.nesmelov.alexey.vkfindme.utils.Utils;
 
 import java.util.ArrayList;
@@ -42,8 +42,7 @@ public class GpsService extends Service implements LocationListener {
     private Storage mStorage;
     private HTTPManager mHTTPManager;
 
-    private final Object mLock = new Object();
-    private List<Alarm> mAlarmsForMe = new ArrayList<>();
+    private List<AlarmMarker> mAlarmsForMe = new ArrayList<>();
 
     @Nullable
     @Override
@@ -62,10 +61,7 @@ public class GpsService extends Service implements LocationListener {
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
         if (isVisible() || isMeInAlarm()) {
-
-            synchronized (mLock) {
-                mAlarmsForMe = mStorage.getAlarmsForMe();
-            }
+            mAlarmsForMe = mStorage.getAlarmsForMe();
 
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -91,7 +87,7 @@ public class GpsService extends Service implements LocationListener {
         } else {
             stopSelf();
         }
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
@@ -127,25 +123,23 @@ public class GpsService extends Service implements LocationListener {
                         });
             }
 
-            synchronized (mLock) {
-                Alarm updatedAlarm = null;
-                for (final Alarm alarm : mAlarmsForMe) {
-                    if (Utils.checkAlarm(alarm, location.getLatitude(), location.getLongitude())) {
-                        mStorage.removeAlarmParticipant(alarm.getAlarmId(), mStorage.getUserVkId());
-                        updatedAlarm = alarm;
-                        break;
-                    }
+            AlarmMarker updatedAlarm = null;
+            for (final AlarmMarker alarm : mAlarmsForMe) {
+                if (Utils.checkAlarm(alarm, location.getLatitude(), location.getLongitude())) {
+                    mStorage.removeAlarmParticipant(alarm.getAlarmId(), mStorage.getUserVkId());
+                    updatedAlarm = alarm;
+                    break;
                 }
-                if (updatedAlarm != null) {
-                    FindMeApp.displayAlarmRingNotification(RING_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
-                            getString(R.string.reach_alarm), MainActivity.class, updatedAlarm.getLat(), updatedAlarm.getLon());
-                    mAlarmsForMe.remove(updatedAlarm);
-                    if (mStorage.isAlarmCompleted(updatedAlarm.getAlarmId())) {
-                        mStorage.removeAlarm(updatedAlarm.getAlarmId());
-                    }
-                    if (!isVisible() && !isMeInAlarm()) {
-                        stopSelf();
-                    }
+            }
+            if (updatedAlarm != null) {
+                FindMeApp.displayAlarmRingNotification(RING_ALARM_NOTIFICATION_ID, this, getString(R.string.app_name),
+                        getString(R.string.reach_alarm), MainActivity.class, updatedAlarm.getLat(), updatedAlarm.getLon());
+                mAlarmsForMe.remove(updatedAlarm);
+                if (mStorage.isAlarmCompleted(updatedAlarm.getAlarmId())) {
+                    mStorage.removeAlarm(updatedAlarm.getAlarmId());
+                }
+                if (!isVisible() && !isMeInAlarm()) {
+                    stopSelf();
                 }
             }
         }

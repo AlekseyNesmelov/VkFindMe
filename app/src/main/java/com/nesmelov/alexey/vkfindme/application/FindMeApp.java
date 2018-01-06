@@ -18,10 +18,10 @@ import com.nesmelov.alexey.vkfindme.storage.Storage;
 import com.vk.sdk.VKSdk;
 
 /**
- * Find Me application class.
+ * Find Me application class, contains managers, that can be taken by static methods.
  */
 public class FindMeApp extends Application {
-    public static final String USERS_DATABASE_NAME = "USERS_DATABASE";
+    public static final String TAG = "FindMeApp";
 
     private static HTTPManager sHTTPManager;
     private static Storage sStorage;
@@ -31,15 +31,15 @@ public class FindMeApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        VKSdk.initialize(this);
         sHTTPManager = new HTTPManager();
         sStorage = new Storage(this);
         sNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         sVKManager = new VKManager();
-        VKSdk.initialize(this);
     }
 
     /**
-     * Returns VK manager.
+     * Returns VK manager, that works with VK API methods.
      *
      * @return VK manager.
      */
@@ -48,7 +48,7 @@ public class FindMeApp extends Application {
     }
 
     /**
-     * Returns HTTP manager.
+     * Returns HTTP manager, that works with the server.
      *
      * @return HTTP manager.
      */
@@ -73,13 +73,12 @@ public class FindMeApp extends Application {
      * @param message pop up message.
      */
     public static void showPopUp(final Context context, final String title, final String message) {
-        final AlertDialog adb = new AlertDialog.Builder(context)
+        new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(R.string.ok, (dialog, which) -> {
-                })
-                .create();
-        adb.show();
+                .setPositiveButton(R.string.ok, (dialog, which) -> {})
+                .create()
+                .show();
     }
 
     /**
@@ -92,12 +91,12 @@ public class FindMeApp extends Application {
      */
     public static void showPopUp(final Context context, final String title, final String message,
                                  final DialogInterface.OnClickListener listener) {
-        final AlertDialog adb = new AlertDialog.Builder(context)
+        new AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
                 .setPositiveButton(R.string.ok, listener)
-                .create();
-        adb.show();
+                .create()
+                .show();
     }
 
     /**

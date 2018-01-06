@@ -13,6 +13,7 @@ public class FullUserInfoModel extends LatLonUserModel{
 
     /**
      * Constructs full user info model.
+     *
      * @param user user id.
      * @param lat latitude.
      * @param lon longitude.
@@ -25,6 +26,7 @@ public class FullUserInfoModel extends LatLonUserModel{
 
     /**
      * Returns user visibility.
+     *
      * @return user visibility.
      */
     public Boolean getVisible() {

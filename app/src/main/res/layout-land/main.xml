@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        android:layout_margin="@dimen/step_x2.5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:background="@drawable/logout_selector"
+        style="?android:attr/borderlessButtonStyle"
+        app:layout_constraintTop_toBottomOf="@id/avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/avatar" />
+
+    <ToggleButton
+        android:id="@+id/refreshBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:textOff=""
+        android:textOn=""
+        android:layout_gravity="center"
+        android:background="@drawable/refresh_selector"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/visibleBtn"
+        app:layout_constraintStart_toStartOf="@id/avatar"
+        app:layout_constraintEnd_toEndOf="@id/avatar"/>
+
+    <ToggleButton
+        android:id="@+id/visibleBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:textOff=""
+        android:textOn=""
+        android:background="@drawable/visible_selector"
+        app:layout_constraintTop_toBottomOf="@id/refreshBtn"
+        app:layout_constraintBottom_toTopOf="@id/avatar"
+        app:layout_constraintStart_toStartOf="@id/avatar"
+        app:layout_constraintEnd_toEndOf="@id/avatar"/>
+
+    <View
+        android:id="@+id/separate_line"
+        android:layout_width="@dimen/step_x1"
+        android:layout_height="@dimen/step_x0"
+        android:background="?attr/colorPrimaryDark"
+        android:layout_marginEnd="@dimen/step_x2.5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/avatar"
+        android:layout_marginRight="@dimen/step_x2.5" />
+
+    <com.nesmelov.alexey.vkfindme.ui.views.CustomViewPager
+        android:id="@+id/main_pager"
+        android:layout_below="@android:id/tabhost"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/separate_line"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <android.support.v4.view.PagerTabStrip
+            android:id="@+id/pagerTitleStrip"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/step_x20"
+            android:layout_gravity="top">
+        </android.support.v4.view.PagerTabStrip>
+
+    </com.nesmelov.alexey.vkfindme.ui.views.CustomViewPager>
+
+</android.support.constraint.ConstraintLayout>

@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/tabhost_background">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/step_x25"
+        android:text="@string/alarm_users_title"
         android:gravity="center"
-        android:background="@drawable/tabhost_background">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/alarm_users_title"
-            android:textColor="#FFFFFF"
-            android:textSize="25sp"/>
-
-    </LinearLayout>
+        android:textSize="@dimen/text_x9"
+        android:textColor="@color/textColorPrimary"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#000" />
+        android:id="@+id/separate_line"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_height="@dimen/step_x1"
+        android:layout_width="@dimen/step_x0"
+        android:background="@color/colorPrimaryDark" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/tabhost_background"
-        android:gravity="center">
+    <Button
+        android:id="@+id/okBtn"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        android:text="@string/apply"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/btn_selector"
+        app:layout_constraintTop_toTopOf="@id/vertical_separate_line"
+        app:layout_constraintBottom_toBottomOf="@id/vertical_separate_line"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/vertical_separate_line"/>
 
-        <Button
-            android:id="@+id/okBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="3dp"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:text="@string/apply"
-            android:background="@drawable/logout_selector" />
+    <View
+        android:id="@+id/vertical_separate_line"
+        android:layout_width="@dimen/step_x1"
+        android:layout_height="@dimen/step_x25"
+        android:layout_marginBottom="@dimen/step_x1"
+        android:layout_marginTop="@dimen/step_x1"
+        android:background="?attr/colorPrimaryDark"
+        app:layout_constraintTop_toBottomOf="@id/separate_line"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/usersList"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <Button
+        android:id="@+id/nokBtn"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        style="?android:attr/borderlessButtonStyle"
+        app:layout_constraintTop_toTopOf="@id/vertical_separate_line"
+        app:layout_constraintBottom_toBottomOf="@id/vertical_separate_line"
+        app:layout_constraintStart_toEndOf="@id/vertical_separate_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/remove"
+        android:background="@drawable/btn_selector" />
 
-        <View
-            android:layout_width="2dp"
-            android:layout_height="match_parent"
-            android:layout_margin="5dp"
-            android:layout_gravity="center_vertical"
-            android:background="#455A64" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/usersList"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintTop_toBottomOf="@id/vertical_separate_line"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+    </android.support.v7.widget.RecyclerView>
 
-        <Button
-            android:id="@+id/nokBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="3dp"
-            android:layout_weight="1"
-            android:layout_gravity="center"
-            android:text="@string/remove"
-            android:background="@drawable/logout_selector" />
-    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        app:layout_constraintTop_toTopOf="@id/usersList"
+        app:layout_constraintBottom_toBottomOf="@id/usersList"
+        app:layout_constraintStart_toStartOf="@id/usersList"
+        app:layout_constraintEnd_toEndOf="@id/usersList"
+        android:visibility="gone"/>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/tabhost_background">
-
-        <ListView
-            android:id="@+id/usersList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/tabhost_background">
-        </ListView>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"/>
-    </RelativeLayout>
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

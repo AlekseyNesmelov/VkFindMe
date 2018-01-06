@@ -1,142 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/tabhost_background">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/step_x25"
+        android:layout_height="@dimen/step_x25"
+        android:layout_margin="@dimen/step_x2.5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-        <RelativeLayout
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        android:background="@drawable/logout_selector"
+        android:text="@string/logout"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_marginStart="@dimen/step_x5"
+        android:layout_marginEnd="@dimen/step_x5"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/avatar"
+        app:layout_constraintBottom_toBottomOf="@id/avatar"
+        android:layout_marginLeft="@dimen/step_x5" />
+
+    <ToggleButton
+        android:id="@+id/refreshBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:textOff=""
+        android:textOn=""
+        android:layout_gravity="center"
+        android:background="@drawable/refresh_selector"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/visibleBtn"
+        app:layout_constraintTop_toTopOf="@id/avatar"
+        app:layout_constraintBottom_toBottomOf="@id/avatar"/>
+
+    <ToggleButton
+        android:id="@+id/visibleBtn"
+        android:layout_width="@dimen/step_x20"
+        android:layout_height="@dimen/step_x20"
+        android:textOff=""
+        android:textOn=""
+        android:background="@drawable/visible_selector"
+        app:layout_constraintEnd_toStartOf="@id/avatar"
+        app:layout_constraintTop_toTopOf="@id/avatar"
+        app:layout_constraintBottom_toBottomOf="@id/avatar"
+        app:layout_constraintStart_toEndOf="@+id/refreshBtn"/>
+
+    <View
+        android:id="@+id/separate_line"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x1"
+        android:background="?attr/colorPrimaryDark"
+        android:layout_marginTop="@dimen/step_x2.5"
+        app:layout_constraintTop_toBottomOf="@id/avatar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.nesmelov.alexey.vkfindme.ui.views.CustomViewPager
+        android:id="@+id/main_pager"
+        android:layout_below="@android:id/tabhost"
+        android:layout_width="@dimen/step_x0"
+        android:layout_height="@dimen/step_x0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/separate_line"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <android.support.v4.view.PagerTabStrip
+            android:id="@+id/pagerTitleStrip"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_height="@dimen/step_x20"
+            android:layout_gravity="top">
+        </android.support.v4.view.PagerTabStrip>
 
-            <LinearLayout
-                android:id="@+id/buttonsPanel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@+id/avatar">
+    </com.nesmelov.alexey.vkfindme.ui.views.CustomViewPager>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:gravity="center"
-                    android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/refreshBtn"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:textOff=""
-                        android:textOn=""
-                        android:layout_gravity="center"
-                        android:background="@drawable/refresh_selector" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/visibleBtn"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:cursorVisible="false"
-                        android:textOff=""
-                        android:textOn=""
-                        android:background="@drawable/visible_selector"
-                        android:layout_margin="5dp"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <com.nesmelov.alexey.vkfindme.ui.CircleImageView
-                android:id="@+id/avatar"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                android:layout_centerInParent="true"/>
-
-            <Button
-                android:id="@+id/logoutBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/logout_selector"
-                android:text="@string/logout"
-                android:textColor="#FFF"
-                android:layout_margin="5dp"
-                android:layout_centerVertical="true"
-                android:layout_toRightOf="@+id/avatar"/>
-
-        </RelativeLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="#455A64"/>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:gravity="center">
-
-            <com.nesmelov.alexey.vkfindme.ui.CustomViewPager
-                android:id="@+id/main_pager"
-                android:layout_below="@android:id/tabhost"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/tabhost_background">
-                <android.support.v4.view.PagerTabStrip
-                    android:id="@+id/pagerTitleStrip"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_gravity="top">
-                </android.support.v4.view.PagerTabStrip>
-            </com.nesmelov.alexey.vkfindme.ui.CustomViewPager>
-
-            <ToggleButton
-                android:id="@+id/show_drawer"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:textColor="#FFF"
-                android:textOn=""
-                android:textOff=""
-                android:background="@drawable/alarms_selector"
-                android:layout_margin="5dp"
-                android:layout_gravity="center"/>
-
-            <ToggleButton
-                android:id="@+id/show_searcher"
-                android:layout_toRightOf="@+id/show_drawer"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:textColor="#FFF"
-                android:textOn=""
-                android:textOff=""
-                android:background="@drawable/search_selector"
-                android:layout_margin="5dp"
-                android:layout_gravity="center"/>
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_centerInParent="true"
-        android:visibility="visible"/>
-
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>
