@@ -137,6 +137,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
 
     private List<Target> mTargets = new CopyOnWriteArrayList<>();
 
+    private AlarmMarker mCachedAlarm = null;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -363,8 +365,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
-        setMode(mCurrentMode);
-
         MapsInitializer.initialize(getActivity().getApplicationContext());
         mMapView.getMapAsync(this);
         return view;
@@ -492,6 +492,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
+        setMode(mCurrentMode);
+
         addAlarmsFromDataBase();
         addFriendsFromDataBase();
     }
@@ -522,6 +524,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 mNokBtn.setVisibility(View.VISIBLE);
                 break;
             case MODE_SELECT_ALARM_RADIUS:
+                mOkBtn.setVisibility(View.VISIBLE);
+                mNokBtn.setVisibility(View.VISIBLE);
                 mRadiusSeekBar.setVisibility(View.VISIBLE);
                 mMessageView.setText(getString(R.string.set_alarm_radius));
                 mAlarmTarget.setVisibility(View.GONE);
@@ -631,6 +635,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         if (mGeocoderTask != null) {
             mGeocoderTask.cancel(true);
             mGeocoderTask = null;
+        }
+        if (mUserMarkers != null) {
+            mUserMarkers.clear();
+            mUserMarkers = null;
+        }
+        if (mAlarmMarkers != null) {
+            mAlarmMarkers.clear();
+            mAlarmMarkers = null;
         }
         for (final Target target : mTargets) {
             Picasso.with(getActivity()).cancelRequest(target);
@@ -772,6 +784,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         showErrorRefreshFriendsMessage();
     }
 
+    /**
+     * Adds user to map and recycler view.
+     *
+     * @param userMarker user to add.
+     */
     private void addUserToInterfaces(final UserMarker userMarker) {
         if (mEmptyFriendsMsg != null) {
             mEmptyFriendsMsg.setVisibility(View.GONE);
@@ -805,13 +822,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 .into(target);
     }
 
+    /**
+     * Adds alarm to map and recycler view.
+     *
+     * @param alarm alarm to add.
+     */
     private void addAlarmToInterfaces(final AlarmMarker alarm) {
-        if (mEmptyAlarmsMsg != null) {
-            mEmptyAlarmsMsg.setVisibility(View.GONE);
+        if (mMap != null) {
+            if (mEmptyAlarmsMsg != null) {
+                mEmptyAlarmsMsg.setVisibility(View.GONE);
+            }
+            mAlarmMarkers.add(alarm);
+            alarm.addToMap(getActivity(), mMap);
+            mAlarmPreviewsAdapter.notifyItemInserted(mAlarmMarkers.size() - 1);
         }
-        mAlarmMarkers.add(alarm);
-        alarm.addToMap(getActivity(), mMap);
-        mAlarmPreviewsAdapter.notifyItemInserted(mAlarmMarkers.size() - 1);
     }
 
     @Override

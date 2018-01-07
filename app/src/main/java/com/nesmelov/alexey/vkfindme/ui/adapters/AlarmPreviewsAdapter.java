@@ -1,5 +1,6 @@
 package com.nesmelov.alexey.vkfindme.ui.adapters;
 
+import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -52,7 +53,11 @@ public class AlarmPreviewsAdapter extends RecyclerView.Adapter<AlarmPreviewsAdap
 
     @Override
     public void onBindViewHolder(final AlarmPreviewViewHolder holder, final int position) {
-        holder.mMainView.setBackgroundColor(mAlarms.get(holder.getAdapterPosition()).getColor());
+        final int oldColor = mAlarms.get(holder.getAdapterPosition()).getColor();
+        final int color = Color.argb(200, Color.red(oldColor), Color.green(oldColor), Color.blue(oldColor));
+
+
+        holder.mMainView.setBackgroundColor(color);
         holder.mMainView.setOnClickListener(
                 v -> mListener.onAlarmPreviewClicked(mAlarms.get(holder.getAdapterPosition())));
     }

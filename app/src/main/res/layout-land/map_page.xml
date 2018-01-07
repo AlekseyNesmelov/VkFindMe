@@ -10,6 +10,7 @@
         android:layout_height="@dimen/step_x25"
         android:background="@drawable/ok_selector"
         android:visibility="gone"
+        android:layout_marginTop="@dimen/step_x2"
         app:layout_constraintTop_toTopOf="@id/map"
         app:layout_constraintStart_toStartOf="@id/map"
         app:layout_constraintEnd_toStartOf="@id/nokBtn"/>
@@ -20,6 +21,7 @@
         android:layout_height="@dimen/step_x25"
         android:background="@drawable/nok_selector"
         android:visibility="gone"
+        android:layout_marginTop="@dimen/step_x2"
         app:layout_constraintTop_toTopOf="@id/map"
         app:layout_constraintEnd_toEndOf="@id/map"
         app:layout_constraintStart_toEndOf="@id/okBtn"/>

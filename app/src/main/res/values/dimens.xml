@@ -12,7 +12,9 @@
     <dimen name="step_x25">50dp</dimen>
     <dimen name="step_x27.5">55dp</dimen>
     <dimen name="step_x30">60dp</dimen>
+    <dimen name="step_x30.5">61dp</dimen>
     <dimen name="step_x32.5">65dp</dimen>
+    <dimen name="step_x38">76dp</dimen>
     <dimen name="step_x40">80dp</dimen>
     <dimen name="step_x100">200dp</dimen>
     <dimen name="step_x165">270dp</dimen>
