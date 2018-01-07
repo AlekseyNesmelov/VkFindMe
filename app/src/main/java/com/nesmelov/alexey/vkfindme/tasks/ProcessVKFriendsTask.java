@@ -1,6 +1,7 @@
 package com.nesmelov.alexey.vkfindme.tasks;
 
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 
 import com.nesmelov.alexey.vkfindme.R;
@@ -68,22 +69,52 @@ public class ProcessVKFriendsTask extends AsyncTask<VKResponse, UserMarker, Void
     protected Void doInBackground(VKResponse... params) {
         final VKResponse response = params[0];
         if (!isCancelled()) {
+            JSONArray usersArray = null;
+            int count = 0;
             try {
                 final JSONObject jsonResponse = response.json.getJSONObject("response");
-                final int count = (int) jsonResponse.getLong("count");
-
-                final JSONArray usersArray = jsonResponse.getJSONArray("items");
+                count = jsonResponse.getInt("count");
+                usersArray = jsonResponse.getJSONArray("items");
+            } catch (Exception e) {
+                Log.e(FindMeApp.TAG, "ProcessVKFriendsTask", e);
+                mIsSuccess = false;
+            }
+            if (mIsSuccess && usersArray != null) {
                 final List<Integer> userModels = new ArrayList<>();
                 for (int i = 0; i < count; i++) {
-                    final UserMarker user = new UserMarker();
-                    final JSONObject userJson = usersArray.getJSONObject(i);
-                    final int id = userJson.getInt("id");
-                    userModels.add(id);
-                    user.setVkId(id);
-                    user.setName(userJson.getString("first_name"));
-                    user.setSurname(userJson.getString("last_name"));
-                    user.setIconUrl(userJson.getString("photo_200"));
-                    mUsersBuffer.put(id, user);
+                    JSONObject userJson = null;
+                    Integer id = null;
+                    try {
+                        userJson = usersArray.getJSONObject(i);
+                        id = userJson.getInt("id");
+                    } catch (Exception e) {
+                        Log.e(FindMeApp.TAG, "ProcessVKFriendsTask", e);
+                    }
+                    if (userJson != null && id != null) {
+                        userModels.add(id);
+                        final UserMarker user = new UserMarker();
+                        user.setVkId(id);
+
+                        try {
+                            user.setName(userJson.getString("first_name"));
+                        } catch (Exception e) {
+                            Log.e(FindMeApp.TAG, "ProcessVKFriendsTask", e);
+                        }
+
+                        try {
+                            user.setSurname(userJson.getString("last_name"));
+                        } catch (Exception e) {
+                            Log.e(FindMeApp.TAG, "ProcessVKFriendsTask", e);
+                        }
+
+                        try {
+                            user.setIconUrl(userJson.getString("photo_200"));
+                        } catch (Exception e) {
+                            Log.e(FindMeApp.TAG, "ProcessVKFriendsTask", e);
+                        }
+
+                        mUsersBuffer.put(id, user);
+                    }
                 }
 
                 final Response<UsersModel> usersResponse = FindMeApp.getHTTPManager().checkUsersSync(userModels);
@@ -97,8 +128,6 @@ public class ProcessVKFriendsTask extends AsyncTask<VKResponse, UserMarker, Void
                         }
                     }
                 }
-            } catch (Exception e) {
-                mIsSuccess = false;
             }
         }
         return null;

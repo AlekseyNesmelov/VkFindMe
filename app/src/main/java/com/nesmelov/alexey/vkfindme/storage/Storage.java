@@ -206,7 +206,7 @@ public class Storage {
      * @return current user icon url.
      */
     public String getUserIconUrl() {
-        return mSharedPrefs.getString(USER_ICON_URL, "");
+        return mSharedPrefs.getString(USER_ICON_URL, "bad url");
     }
 
     /**

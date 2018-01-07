@@ -706,7 +706,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 break;
             }
         }
-        if (userMarker != null) {
+        if (userMarker != null && userMarker.getVisible()) {
             userMarker.setVisible(false);
             mUserPreviewsAdapter.notifyItemChanged(index);
         }

@@ -56,28 +56,43 @@ public class MainActivity extends Activity {
         mUserInfoRequestListener = new VKRequest.VKRequestListener() {
             @Override
             public void onComplete(final VKResponse response) {
+                JSONObject jsonObjectRequest = null;
+                Integer id = null;
                 try {
                     final JSONArray jsonResponse = response.json.getJSONArray(VKManager.RESPONSE);
-                    final JSONObject jsonObjectRequest = jsonResponse.getJSONObject(0);
-
+                    jsonObjectRequest = jsonResponse.getJSONObject(0);
+                    id = jsonObjectRequest.getInt(VKManager.ID); // 48327366; // vk id for debug
+                } catch (Exception e) {
+                    Log.e(FindMeApp.TAG, "MainActivity", e);
+                }
+                if (jsonObjectRequest !=  null && id != null) {
                     final UserMarker user = new UserMarker();
-
-                    final Integer id = jsonObjectRequest.getInt(VKManager.ID);
-                            // 48327366; // vk id for debug
                     mStorage.setUserVkId(id);
                     user.setVkId(id);
 
-                    final String photoUrl = jsonObjectRequest.getString(VKManager.PHOTO_200);
-                    mStorage.setUserIconUrl(photoUrl);
-                    user.setIconUrl(photoUrl);
+                    try {
+                        final String photoUrl = jsonObjectRequest.getString(VKManager.PHOTO_200);
+                        mStorage.setUserIconUrl(photoUrl);
+                        user.setIconUrl(photoUrl);
+                    } catch (Exception e) {
+                        Log.e(FindMeApp.TAG, "MainActivity", e);
+                    }
 
-                    final String firstName = jsonObjectRequest.getString(VKManager.FIRST_NAME);
-                    mStorage.setUserName(firstName);
-                    user.setName(firstName);
+                    try {
+                        final String firstName = jsonObjectRequest.getString(VKManager.FIRST_NAME);
+                        mStorage.setUserName(firstName);
+                        user.setName(firstName);
+                    } catch (Exception e) {
+                        Log.e(FindMeApp.TAG, "MainActivity", e);
+                    }
 
-                    final String lastName = jsonObjectRequest.getString(VKManager.LAST_NAME);
-                    mStorage.setUserSurname(lastName);
-                    user.setSurname(lastName);
+                    try {
+                        final String lastName = jsonObjectRequest.getString(VKManager.LAST_NAME);
+                        mStorage.setUserSurname(lastName);
+                        user.setSurname(lastName);
+                    } catch (Exception e) {
+                        Log.e(FindMeApp.TAG, "MainActivity", e);
+                    }
 
                     mStorage.addUser(user);
 
@@ -99,8 +114,7 @@ public class MainActivity extends Activity {
                             MainActivity.this.onError();
                         }
                     });
-                } catch (Exception e) {
-                    Log.d(FindMeApp.TAG, "MainActivity", e);
+                } else  {
                     MainActivity.this.onError();
                 }
             }
